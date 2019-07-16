@@ -1,0 +1,15 @@
+ext {
+    solr = [
+            version: [
+                    major: 1,
+                    minor: 3,
+                    rev: '0.1'
+            ],
+            flavor: 'solr6'
+    ]
+    alfrescoimage ='xeniteu/alfresco-community:6.1.2-ga'
+    tests = true
+}
+dependencies {
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '1.3.0.1', ext: 'zip'
+}

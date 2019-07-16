@@ -111,16 +111,23 @@ Roxana Angheluta <roxana.angheluta@xenit.eu>
 
 ### How to build
 
-Release builds are produced by [Travis](https://travis-ci.org/xenit-eu/) driving Gradle from a `.travis.yml` file.
+Release builds for community images are produced by [Travis](https://travis-ci.org/xenit-eu/) driving Gradle from a `.travis.yml` file.
 
-To build a local version of the _tomcat_ image:
+To build a local version of the _solr_ image:
 
 ```
 ./gradlew buildDockerImage
 ```
 
-Note that locally build image-tags will be prefixed with `local-`, so they can be clearly distinguished from official
-builds created and published from [Travis](https://travis-ci.org/xenit-eu/).
+To run the integration tests:
+```
+./gradlew integrationTests
+```
+
+To see all available tasks:
+```
+./gradlew tasks
+```
 
 If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add -Penterprise to your build command.
 

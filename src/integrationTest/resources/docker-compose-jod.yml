@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+ jodconverter:
+   image: xeniteu/jodconverter:4.2.3-SNAPSHOT
+   restart: unless-stopped
+

@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+ solr:
+   image: ${DOCKER_IMAGE}
+   restart: unless-stopped
+   ports:
+   - 8443
+     #   - 8000:8000
+     #   - 5000:5000
+   environment:
+   - ALFRESCO_HOST=alfresco
+   - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
+     #   - JMX_ENABLED=true
+     #   - DEBUG=true

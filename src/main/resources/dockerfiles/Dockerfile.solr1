@@ -1,0 +1,98 @@
+FROM	alpine:latest AS build-stage-solr1
+
+ARG SOLR_VERSION_MAJOR
+ARG SOLR_VERSION_MINOR
+ARG SOLR_VERSION_REV
+ARG SOLR_FLAVOR
+
+ENV 	SOLR_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
+
+COPY    alfresco-solr-${SOLR_VERSION}.zip /tmp/solr.zip
+RUN    	apk add zip && \
+	mkdir /tmp/solr && \
+        unzip /tmp/solr.zip -d /tmp/solr/ && \
+	rm /tmp/solr.zip
+
+FROM 	xeniteu/tomcat:alfresco-4.2-ubuntu
+COPY    --from=build-stage-solr1 /tmp/solr /tmp/solr
+
+ARG SOLR_VERSION_MAJOR
+ARG SOLR_VERSION_MINOR
+ARG SOLR_VERSION_REV
+ARG SOLR_FLAVOR
+
+ENV 	SOLR_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
+ENV     SOLR_DIR_ROOT /opt/alfresco/solr
+
+# ${CATALINA_HOME} = /usr/local/tomcat
+
+# SOLR installation & configuration
+USER	root
+RUN apt-get update && \
+	mkdir -p /opt/alfresco/alf_data && \
+    mv /tmp/solr /opt/alfresco/ && \
+    apt-get install -y curl unzip xmlstarlet jq && \
+	mkdir -p ${CATALINA_HOME}/conf/Catalina/localhost && \
+	mv /opt/alfresco/solr/context.xml ${CATALINA_HOME}/conf/Catalina/localhost/solr.xml && \
+	sed -i "s/rootLogger=WARN, Console, File/rootLogger=WARN, Console/g" ${SOLR_DIR_ROOT}/log4j-solr.properties && \
+
+    # Configure server.xml
+    xmlstarlet edit --inplace \
+        --var connector "/Server/Service[@name='Catalina']/Connector[@protocol=\"AJP/1.3\"]" \
+        --append '$connector' --type elem --name Connector \
+            --var connector '$prev' \
+            --insert '$connector' --type attr --name port --value \$\{TOMCAT_PORT_SSL\} \
+            --insert '$connector' --type attr --name URIEncoding --value UTF-8 \
+            --insert '$connector' --type attr --name protocol --value org.apache.coyote.http11.Http11Protocol \
+            --insert '$connector' --type attr --name SSLEnabled --value true \
+            --insert '$connector' --type attr --name maxThreads --value \$\{TOMCAT_MAX_THREADS\} \
+            --insert '$connector' --type attr --name scheme --value https \
+            --insert '$connector' --type attr --name keystoreFile --value /opt/alfresco/keystore/\$\{SSL_KEY_STORE\} \
+            --insert '$connector' --type attr --name keystorePass --value \$\{SSL_KEY_STORE_PASSWORD\} \
+            --insert '$connector' --type attr --name keystoreType --value JCEKS \
+            --insert '$connector' --type attr --name secure --value true \
+            --insert '$connector' --type attr --name connectionTimeout --value 240000 \
+            --insert '$connector' --type attr --name truststoreFile --value /opt/alfresco/keystore/\$\{SSL_TRUST_STORE\} \
+            --insert '$connector' --type attr --name truststorePass --value \$\{SSL_KEY_STORE_PASSWORD\} \
+            --insert '$connector' --type attr --name truststoreType --value JCEKS \
+            --insert '$connector' --type attr --name clientAuth --value want \
+            --insert '$connector' --type attr --name sslProtocol --value TLS \
+            --insert '$connector' --type attr --name allowUnsafeLegacyRenegotiation --value true \
+            --insert '$connector' --type attr --name maxHttpHeaderSize --value \$\{TOMCAT_MAX_HTTP_HEADER_SIZE\} \
+            --insert '$connector' --type attr --name maxSavePostSize --value -1 \
+        ${CATALINA_HOME}/conf/server.xml && \
+
+    xmlstarlet edit --inplace \
+        --subnode "/tomcat-users" --type elem --name user \
+            --var user '$prev' \
+            --insert '$user' --type attr --name username --value "CN=Alfresco Repository Client, OU=Unknown, O=Alfresco Software Ltd., L=Maidenhead, ST=UK, C=GB" \
+            --insert '$user' --type attr --name roles --value "repoclient" \
+            --insert '$user' --type attr --name password --value "null" \
+        --append '$user' --type elem --name user \
+            --var user '$prev' \
+            --insert '$user' --type attr --name username --value "CN=Alfresco Repository, OU=Unknown, O=Alfresco Software Ltd., L=Maidenhead, ST=UK, C=GB" \
+            --insert '$user' --type attr --name roles --value "repository" \
+            --insert '$user' --type attr --name password --value "null" \
+        ${CATALINA_HOME}/conf/tomcat-users.xml && \
+
+# clean up
+  	apt-get --purge -y remove unzip xmlstarlet && \
+    apt-get --purge -y autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* &&\
+ 	ls -lha ${CATALINA_HOME}/webapps/ && \
+	sed -i "s#@@ALFRESCO_SOLR_DIR@@#/opt/alfresco/solr#" ${CATALINA_HOME}/conf/Catalina/localhost/solr.xml && \
+ 	sed -i "s#^\(data.dir.root\s*=\s*\).*\$#\1/opt/alfresco/alf_data/solr/index#" /opt/alfresco/solr/workspace-SpacesStore/conf/solrcore.properties && \
+ 	sed -i "s#^\(data.dir.root\s*=\s*\).*\$#\1/opt/alfresco/alf_data/solr/index#" /opt/alfresco/solr/archive-SpacesStore/conf/solrcore.properties && \
+ 	chown -hR tomcat /opt/alfresco && \
+ 	chown -hR tomcat ${CATALINA_HOME}
+
+COPY 	92-init-solr.sh /docker-entrypoint.d/
+
+# add the keystore
+ADD keystore /opt/alfresco/keystore
+
+VOLUME ${CATALINA_HOME}/temp ${CATALINA_HOME}/logs
+
+WORKDIR /opt/alfresco
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 --start-period=20s CMD curl -f http://localhost:${TOMCAT_PORT}/solr || exit 1

@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  solr:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    hostname: solr
+    environment:
+    - ALFRESCO_HOST=alfresco
+    - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
+    - CUSTOM_SCHEMA=true
+    volumes:
+    - ./schema.xml:/opt/alfresco-search-services/schema.xml
+    - solr:/opt/alfresco-search-services/data
+
+volumes:
+  solr:

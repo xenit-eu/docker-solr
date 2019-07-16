@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+ alfresco:
+   image: ${ALFRESCO_IMAGE}
+   ports:
+   - 8080
+   restart: unless-stopped
+   environment:
+   - SOLR_HOST=solr
+   - INDEX
+

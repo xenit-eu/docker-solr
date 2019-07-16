@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  solr1:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    ports:
+    - 8080
+    hostname: solr1
+    environment:
+    - ALFRESCO_HOST=alfresco
+    - SOLR_HOST=solr1
+    - ALFRESCO_SSL=none
+    - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false
+    - ARCHIVE_INDEX_CONTENT=false
+    - ALFRESCO_INDEX_CONTENT=false
+    - MAX_HTTP_HEADER_SIZE=65536
+    - SHARDING=true
+    - SHARD_IDS=0,1
+    - SHARD_METHOD=DB_ID    
+    - CORE_NAME=alfresco    
+    - NUM_SHARDS=3
+    - NUM_NODES=2
+    - NODE_INSTANCE=1
+    - TEMPLATE=rerank
+
+  solr2:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    ports:
+    - 8080
+    hostname: solr2
+    environment:
+    - ALFRESCO_HOST=alfresco
+    - SOLR_HOST=solr2
+    - ALFRESCO_SSL=none
+    - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false
+    - ARCHIVE_INDEX_CONTENT=false
+    - ALFRESCO_INDEX_CONTENT=false
+    - MAX_HTTP_HEADER_SIZE=65536
+    - SHARDING=true
+    - SHARD_IDS=2
+    - SHARD_METHOD=DB_ID    
+    - CORE_NAME=alfresco
+    - NUM_SHARDS=3
+    - NUM_NODES=2
+    - NODE_INSTANCE=2
+    - TEMPLATE=rerank

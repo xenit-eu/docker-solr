@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  solr:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    hostname: solr
+    environment:
+    - ALFRESCO_SOLR_SUGGESTER_ENABLED=false
+    - ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED=true
+    - GLOBAL_WORKSPACE_alfresco.batch.count=10000
+    - GLOBAL_ARCHIVE_alfresco.batch.count=2000
+    - GLOBAL_alfresco.corePoolSize=16

@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  solr:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    hostname: solr
+    environment:
+    - ALFRESCO_HOST=alfresco
+    - ALFRESCO_SSL=none

@@ -1,0 +1,63 @@
+ARG BASE_IMAGE=xeniteu/openjdk:alfresco-6.1-ubuntu
+FROM	alpine:latest AS build-stage-solr6
+
+ARG SOLR_VERSION_MAJOR
+ARG SOLR_VERSION_MINOR
+ARG SOLR_VERSION_REV
+ARG SOLR_FLAVOR
+
+ENV ALFRESCO_SEARCH_SERVICES_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
+
+COPY    alfresco-search-services-${ALFRESCO_SEARCH_SERVICES_VERSION}.zip /tmp/solr6.zip
+RUN    	apk add zip && \
+        unzip /tmp/solr6.zip -d /tmp/ && \
+	rm /tmp/solr6.zip
+
+FROM  $BASE_IMAGE
+COPY    --from=build-stage-solr6 /tmp/alfresco-search-services/ /opt/alfresco-search-services/
+
+ARG SOLR_VERSION_MAJOR
+ARG SOLR_VERSION_MINOR
+ARG SOLR_VERSION_REV
+ARG SOLR_FLAVOR
+
+ENV ALFRESCO_SEARCH_SERVICES_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
+ENV SOLR_INSTALL_HOME=/opt/alfresco-search-services
+
+ENV GOSU_VERSION 1.9
+
+# SOLR installation & configuration
+USER root
+RUN apt-get update && \
+    apt-get install -y unzip lsof less vim curl jq && \
+	groupadd solr -g 990 && \
+	useradd solr -u 990 -g 990 -d /opt/alfresco-search-services -s /bin/bash && \
+	sed -i "s/rootLogger=WARN, file, CONSOLE/rootLogger=WARN, CONSOLE/g" /opt/alfresco-search-services/logs/log4j.properties && \
+	touch /opt/alfresco-search-services/startup.sh && chmod +x /opt/alfresco-search-services/startup.sh && \
+	mkdir -p /opt/alfresco-search-services/data/solr6Backup/alfresco  /opt/alfresco-search-services/data/solr6Backup/archive && \
+	chown -hR solr /opt/alfresco-search-services \
+# gosu
+    && apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
+    && dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
+    && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" \
+    && wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true \
+    && apt-get purge -y --auto-remove wget
+
+COPY 	92-init-solr.sh /docker-entrypoint.d/
+
+# add the keystore
+ADD keystore /opt/alfresco-search-services/solrhome/keystore
+
+VOLUME ${CATALINA_HOME}/temp ${CATALINA_HOME}/logs
+
+WORKDIR /opt/alfresco-search-services
+
+# we don't know upfront on which port will jetty run (with or without ssl) so we cannot define a healthcheck
+#HEALTHCHECK --interval=10s --timeout=3s --retries=3 --start-period=20s CMD curl -f http://localhost:8080/solr || exit 1
+
+CMD ["/opt/alfresco-search-services/startup.sh"]
+

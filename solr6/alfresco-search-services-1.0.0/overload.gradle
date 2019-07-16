@@ -1,0 +1,19 @@
+ext {
+    solr = [
+            version: [
+                    major: 1,
+                    minor: 0,
+                    rev: 0
+            ],
+            flavor: 'solr6'
+    ]
+    alfrescoimage ='hub.xenit.eu/alfresco-enterprise:5.2'
+    tests = false
+
+    extraBuildArgs = [
+            BASE_IMAGE: 'xeniteu/openjdk:alfresco-5.2-ubuntu'
+    ]
+}
+dependencies {
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '1.0.0', ext: 'zip'
+}
