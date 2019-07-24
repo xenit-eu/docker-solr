@@ -107,7 +107,7 @@ These images are updated via pull requests to the [xenit-eu/docker-solr/](https:
 
 **Maintained by:**
 
-Roxana Angheluta <roxana.angheluta@xenit.eu>
+Roxana Angheluta <roxana.angheluta@xenit.eu>, Lars Vierbergen <lars.vierbergen@xenit.eu>
 
 ### How to build
 
