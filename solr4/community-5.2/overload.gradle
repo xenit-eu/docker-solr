@@ -1,0 +1,15 @@
+ext {
+    solr = [
+            version: [
+                    major: 5,
+                    minor: 2,
+                    rev: 'g'
+            ],
+            flavor: 'solr4'
+    ]
+    alfrescoimage ='xeniteu/alfresco-community:5.2.g'
+    tests = true
+}
+dependencies {
+    runtime group: 'org.alfresco', name: 'alfresco-solr4-distribution', version: '5.2.g', ext: 'zip'
+}
