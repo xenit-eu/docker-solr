@@ -214,7 +214,7 @@ subprojects {
         isRequiredBy(project.tasks.integrationTestDefault)
 
         useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr.yml",
-                           "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-jod.yml"];
+                           "$composeDir/docker-compose-db.yml"];
 
         sharded {
             isRequiredBy(project.tasks.integrationTestSharded)
@@ -223,21 +223,21 @@ subprojects {
                 environment.put 'LICENSE', project.license
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded.yml", "$composeDir/docker-compose-solr-sharded.yml",
-                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-jod.yml"];
+                               "$composeDir/docker-compose-db.yml"];
         }
 
         nonSsl {
             isRequiredBy(project.tasks.integrationTestNonSsl)
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
-                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-jod.yml"];
+                               "$composeDir/docker-compose-db.yml"];
         }
 
         mounts {
             isRequiredBy(project.tasks.integrationTestMounts)
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr-with-mounts.yml",
-                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-jod.yml"];
+                               "$composeDir/docker-compose-db.yml"];
         }
     }
 
