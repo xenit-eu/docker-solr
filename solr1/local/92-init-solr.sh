@@ -175,10 +175,10 @@ echo "export JAVA_OPTS" >> $TOMCAT_CONFIG_FILE
 
 user="tomcat"
 # make sure backup folders exist and have the right permissions in case of mounts
-if [[ ! -d "${DIR_ROOT}/solr4Backup" ]]
+if [[ ! -d "${DIR_ROOT}/solrBackup" ]]
 then
-    mkdir -p "${DIR_ROOT}/solr4Backup/alfresco" "${DIR_ROOT}/solr4Backup/archive"
-	chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup"
+    mkdir -p "${DIR_ROOT}/solrBackup/alfresco" "${DIR_ROOT}/solrBackup/archive"
+	chown -hR "$user":"$user" "${DIR_ROOT}/solrBackup"
 fi
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U /opt/alfresco/alf_data) != "$user" ]]
