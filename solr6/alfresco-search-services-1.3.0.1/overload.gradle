@@ -7,7 +7,7 @@ ext {
             ],
             flavor: 'solr6'
     ]
-    alfrescoimage ='hub.xenit.eu/alfresco-enterprise:6.1'
+    alfrescoimage ='hub.xenit.eu/alfresco-repository-enterprise:6.1'
     tests = true
     testsSharded = true
     testsMounts = true
