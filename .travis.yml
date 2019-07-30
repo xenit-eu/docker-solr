@@ -11,9 +11,31 @@ matrix:
   - os: linux
     jdk: oraclejdk8
     env:
-    - DOCKER_USER=xenitpublisher
+    - DOCKER_USER: xenitpublisher
     - secure: "RDtHqrRZ+pA66IXCZf2j/MxEp9ZtpoWBdBlNf8gyGETL/d2HpOZVR5OqKRG8udgzbcFbEOXil1NdbXg9Yt3G5K4g22B3M5++f4i+AyaKoXq6+XRFA7bTtRfQa7NqOaUCP8ThqSR1yf9mbm1RfttywrmIDJrf3QzbVNKwZ473tyxk4Bj+4CYcANBS0a43fYy7I0m4g3f0Chgm3KlyMEOc5nwLs5pIVQHPbIh8O66JnHn0g5TRG1QCxOnjTXzKQIUyVd9O4Cl3z7MANwud6+4skp3Qoshnyf0EujAxW/E5jRd/FvjYr+Hc4c4naGq1zHWBO/TaNN5ze2f+rvhwU7u7LGKDCJmFpRpvzM4i3ENd0kLck0l/Q/XXcutl2+ZE6Esv/pUGLhhV2K+xT+7L4LyzxdaP60eyA41fpmwTeByYiCwAIqxPhV7H3bS905aaL2uZssJm8Lq5DgC7F1YvCE/EgySz9Wc0hBMxRFHm8bTqlXrUG5YnFu1GV18LYUk6iJb5dO6ZBLenOOq58pic2YYjhD7CEosmNlvntAhv08dnOyhYtSV5sW2aCQTEYBs1nmyXh0CPUiaenfKb0LO0UWsLCDe8Rdg7aEXCgyku8XlOU2rQUlY0Dgweb10Smxqm9qPxZLiUZodNo1f1FW3ea24LJtUcytw9lkEddPqfPiPnXp8="
+    - VERSIONS_TO_BUILD: solr1
     before_install:
     - chmod +x ./gradlew
     script:
     - if [[ $TRAVIS_BRANCH = "master" ]] ; then ./gradlew -PrepoName=xeniteu integrationTests pushDockerImage ; else ./gradlew -PrepoName=xeniteu integrationTests --info ; fi
+  - os: linux
+      jdk: oraclejdk8
+      env:
+        - DOCKER_USER: xenitpublisher
+        - secure: "RDtHqrRZ+pA66IXCZf2j/MxEp9ZtpoWBdBlNf8gyGETL/d2HpOZVR5OqKRG8udgzbcFbEOXil1NdbXg9Yt3G5K4g22B3M5++f4i+AyaKoXq6+XRFA7bTtRfQa7NqOaUCP8ThqSR1yf9mbm1RfttywrmIDJrf3QzbVNKwZ473tyxk4Bj+4CYcANBS0a43fYy7I0m4g3f0Chgm3KlyMEOc5nwLs5pIVQHPbIh8O66JnHn0g5TRG1QCxOnjTXzKQIUyVd9O4Cl3z7MANwud6+4skp3Qoshnyf0EujAxW/E5jRd/FvjYr+Hc4c4naGq1zHWBO/TaNN5ze2f+rvhwU7u7LGKDCJmFpRpvzM4i3ENd0kLck0l/Q/XXcutl2+ZE6Esv/pUGLhhV2K+xT+7L4LyzxdaP60eyA41fpmwTeByYiCwAIqxPhV7H3bS905aaL2uZssJm8Lq5DgC7F1YvCE/EgySz9Wc0hBMxRFHm8bTqlXrUG5YnFu1GV18LYUk6iJb5dO6ZBLenOOq58pic2YYjhD7CEosmNlvntAhv08dnOyhYtSV5sW2aCQTEYBs1nmyXh0CPUiaenfKb0LO0UWsLCDe8Rdg7aEXCgyku8XlOU2rQUlY0Dgweb10Smxqm9qPxZLiUZodNo1f1FW3ea24LJtUcytw9lkEddPqfPiPnXp8="
+        - VERSIONS_TO_BUILD: solr4
+      before_install:
+        - chmod +x ./gradlew
+      script:
+        - if [[ $TRAVIS_BRANCH = "master" ]] ; then ./gradlew -PrepoName=xeniteu integrationTests pushDockerImage ; else ./gradlew -PrepoName=xeniteu integrationTests --info ; fi
+  - os: linux
+      jdk: oraclejdk8
+      env:
+        - DOCKER_USER: xenitpublisher
+        - secure: "RDtHqrRZ+pA66IXCZf2j/MxEp9ZtpoWBdBlNf8gyGETL/d2HpOZVR5OqKRG8udgzbcFbEOXil1NdbXg9Yt3G5K4g22B3M5++f4i+AyaKoXq6+XRFA7bTtRfQa7NqOaUCP8ThqSR1yf9mbm1RfttywrmIDJrf3QzbVNKwZ473tyxk4Bj+4CYcANBS0a43fYy7I0m4g3f0Chgm3KlyMEOc5nwLs5pIVQHPbIh8O66JnHn0g5TRG1QCxOnjTXzKQIUyVd9O4Cl3z7MANwud6+4skp3Qoshnyf0EujAxW/E5jRd/FvjYr+Hc4c4naGq1zHWBO/TaNN5ze2f+rvhwU7u7LGKDCJmFpRpvzM4i3ENd0kLck0l/Q/XXcutl2+ZE6Esv/pUGLhhV2K+xT+7L4LyzxdaP60eyA41fpmwTeByYiCwAIqxPhV7H3bS905aaL2uZssJm8Lq5DgC7F1YvCE/EgySz9Wc0hBMxRFHm8bTqlXrUG5YnFu1GV18LYUk6iJb5dO6ZBLenOOq58pic2YYjhD7CEosmNlvntAhv08dnOyhYtSV5sW2aCQTEYBs1nmyXh0CPUiaenfKb0LO0UWsLCDe8Rdg7aEXCgyku8XlOU2rQUlY0Dgweb10Smxqm9qPxZLiUZodNo1f1FW3ea24LJtUcytw9lkEddPqfPiPnXp8="
+        - VERSIONS_TO_BUILD: solr6
+      before_install:
+        - chmod +x ./gradlew
+      script:
+        - if [[ $TRAVIS_BRANCH = "master" ]] ; then ./gradlew -PrepoName=xeniteu integrationTests pushDockerImage ; else ./gradlew -PrepoName=xeniteu integrationTests --info ; fi
+
