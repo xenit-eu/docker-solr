@@ -7,7 +7,7 @@ ext {
             ],
             flavor: 'solr6'
     ]
-    alfrescoimage ='xeniteu/alfresco-community:6.1.2-ga'
+    alfrescoimage ='xeniteu/alfresco-repository-community:6.1.2-ga'
     tests = true
 }
 dependencies {
