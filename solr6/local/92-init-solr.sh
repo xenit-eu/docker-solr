@@ -9,7 +9,9 @@ echo "Solr init start"
 
 SOLR_DIR_ROOT="$SOLR_INSTALL_HOME/solrhome"
 SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
+DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_HOST=${SOLR_HOST:-'localhost'}
+
 
 DEBUG=${DEBUG:-'false'}
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
@@ -350,19 +352,19 @@ then
   for i in $(echo $SHARD_IDS | tr "," "\n")
   do
 	  solrCoreName=alfresco-$i
-	  mkdir -p "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName"
-	  if [[ $(stat -c %U "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
+	  mkdir -p "${DIR_ROOT}/solr6Backup/$solrCoreName"
+	  if [[ $(stat -c %U "${DIR_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
 	  then
-	    chown -hR "$user":"$user" "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName"
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr6Backup/$solrCoreName"
 	  fi
   done
 else
   for solrCoreName in alfresco archive
   do
-      mkdir -p "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName"
-      if [[ $(stat -c %U "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
+      mkdir -p "${DIR_ROOT}/solr6Backup/$solrCoreName"
+      if [[ $(stat -c %U "${DIR_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
 	  then
-	    chown -hR "$user":"$user" "${SOLR_DATA_ROOT}/solr6Backup/$solrCoreName"
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr6Backup/$solrCoreName"
 	  fi
   done
 fi
