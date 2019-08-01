@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+* [DOCKER-248] Make sure backup folders exist in the case of a sharded setup. Backup needs to be triggered manually
+* [DOCKER-248] Default backup locations are: /opt/alfresco/alf_data/solrBackup, /opt/alfresco/alf_data/solr4Backup, /opt/alfresco-search-services/data/solr6Backup
+
 ## [v1.0.0] - 2019-07-15 Move to github
 
 ### Removed

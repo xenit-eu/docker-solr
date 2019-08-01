@@ -9,6 +9,7 @@ set -e
 echo "Solr init start"
 
 SOLR_DATA_ROOT=${SOLR_DATA_ROOT:-'/opt/alfresco/alf_data/solr4'}
+DIR_ROOT=${DIR_ROOT:-'/opt/alfresco/alf_data'}
 
 JAVA_XMS=${JAVA_XMS:-'512M'}
 JAVA_XMX=${JAVA_XMX:-'2048M'}
@@ -240,11 +241,28 @@ echo "export JAVA_OPTS" >> $TOMCAT_CONFIG_FILE
 
 user="tomcat"
 # make sure backup folders exist and have the right permissions in case of mounts
-if [[ ! -d "${SOLR_DATA_ROOT}/solr4Backup" ]]
+if [ $SHARDING = true ]
 then
-    mkdir -p "${SOLR_DATA_ROOT}/solr4Backup/alfresco" "${SOLR_DATA_ROOT}/solr4Backup/alfresco"
-	chown -hR "$user":"$user" "${SOLR_DATA_ROOT}/solr4Backup"
-fi
+  for i in $(echo $SHARD_IDS | tr "," "\n")
+  do
+	  solrCoreName=alfresco-$i
+	  mkdir -p "${DIR_ROOT}/solr4Backup/$solrCoreName"
+	  if [[ $(stat -c %U "${DIR_ROOT}/solr4Backup/$solrCoreName") != "$user" ]]
+	  then
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup/$solrCoreName"
+	  fi
+  done
+else
+  for solrCoreName in alfresco archive
+  do
+      mkdir -p "${DIR_ROOT}/solr4Backup/$solrCoreName"
+      if [[ $(stat -c %U "${DIR_ROOT}/solr4Backup/$solrCoreName") != "$user" ]]
+	  then
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup/$solrCoreName"
+	  fi
+  done
+ fi
+
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U /opt/alfresco/alf_data) != "$user" ]]
  then

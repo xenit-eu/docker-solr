@@ -9,7 +9,9 @@ echo "Solr init start"
 
 SOLR_DIR_ROOT="$SOLR_INSTALL_HOME/solrhome"
 SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
+DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_HOST=${SOLR_HOST:-'localhost'}
+
 
 DEBUG=${DEBUG:-'false'}
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
@@ -345,11 +347,28 @@ makeConfigs
 
 user="solr"
 # make sure backup folders exist and have the right permissions in case of mounts
-if [[ ! -d "${SOLR_DATA_ROOT}/solr6Backup" ]] || [[ $(stat -c %U "${SOLR_DATA_ROOT}/solr6Backup") != "$user" ]]
+if [ $SHARDING = true ]
 then
-    mkdir -p "${SOLR_DATA_ROOT}/solr6Backup/alfresco"  "${SOLR_DATA_ROOT}/solr6Backup/archive"
-	chown -hR "$user":"$user" "${SOLR_DATA_ROOT}/solr6Backup"
+  for i in $(echo $SHARD_IDS | tr "," "\n")
+  do
+	  solrCoreName=alfresco-$i
+	  mkdir -p "${DIR_ROOT}/solr6Backup/$solrCoreName"
+	  if [[ $(stat -c %U "${DIR_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
+	  then
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr6Backup/$solrCoreName"
+	  fi
+  done
+else
+  for solrCoreName in alfresco archive
+  do
+      mkdir -p "${DIR_ROOT}/solr6Backup/$solrCoreName"
+      if [[ $(stat -c %U "${DIR_ROOT}/solr6Backup/$solrCoreName") != "$user" ]]
+	  then
+	    chown -hR "$user":"$user" "${DIR_ROOT}/solr6Backup/$solrCoreName"
+	  fi
+  done
 fi
+
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U "${SOLR_DATA_ROOT}") != "$user" ]]
 then

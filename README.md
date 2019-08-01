@@ -131,6 +131,13 @@ To see all available tasks:
 
 If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add -Penterprise to your build command.
 
+## Solr backup
+
+In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco. 
+Parameters for the backup (location, maximum number of backups to keep) are set on Alfresco's side and passed to solr via the scheduled job, which calls the replication handler from solr.
+By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
+
+In the case of a sharded setup, backup needs to be done manually.
 
 ## FAQ
 
