@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 * [DOCKER-248] Make sure backup folders exist in the case of a sharded setup. Backup needs to be triggered manually
-* [DOCKER-248] For solr1 and solr6 default backup locations are: /opt/alfresco/alf_data/solrBackup and /opt/alfresco/alf_data/solr4Backup
+* [DOCKER-248] Default backup locations are: /opt/alfresco/alf_data/solrBackup, /opt/alfresco/alf_data/solr4Backup, /opt/alfresco-search-services/data/solr6Backup
 
 ## [v1.0.0] - 2019-07-15 Move to github
 
