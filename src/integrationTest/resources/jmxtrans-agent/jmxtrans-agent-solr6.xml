@@ -1,0 +1,46 @@
+<jmxtrans-agent>
+    <queries>
+        <!-- OS -->
+        <query objectName="java.lang:type=OperatingSystem" attribute="SystemLoadAverage" resultAlias="os.systemLoadAverage"/>
+
+        <!-- JVM -->
+        <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="used"
+               resultAlias="jvm.heapMemoryUsage.used"/>
+        <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="committed"
+               resultAlias="jvm.heapMemoryUsage.committed"/>
+        <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="max"
+               resultAlias="jvm.heapMemoryUsage.max"/>
+        <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="used"
+               resultAlias="jvm.nonHeapMemoryUsage.used"/>
+        <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="committed"
+               resultAlias="jvm.nonHeapMemoryUsage.committed"/>
+        <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="max"
+               resultAlias="jvm.nonHeapMemoryUsage.max"/>	       	       
+        <query objectName="java.lang:type=ClassLoading" attribute="LoadedClassCount" resultAlias="jvm.loadedClasses"/>
+
+        <query objectName="java.lang:type=Threading" attribute="ThreadCount" resultAlias="jvm.thread"/>
+
+   	<!-- GC -->
+        <query objectName="java.lang:type=GarbageCollector,name=ConcurrentMarkSweep" attribute="CollectionCount" resultAlias="gc.collectionCount"/>
+        <query objectName="java.lang:type=GarbageCollector,name=ConcurrentMarkSweep" attribute="CollectionTime" resultAlias="gc.collectionTime"/>
+
+        <!-- SOLR -->
+	<query objectName="solr/alfresco:type=searcher,id=org.apache.solr.search.SolrIndexSearcher" attributes="numDocs,maxDoc,deletedDocs,warmupTime" resultAlias="solr.searcher.#attribute#"/>
+        <query objectName="solr/alfresco:type=/afts,id=org.apache.solr.handler.component.AlfrescoSearchHandler" attributes="requests,errors,timeouts,totalTime,avgRequestsPerSecond,5minRateReqsPerSecond,15minRateReqsPerSecond,avgTimePerRequest,medianRequestTime,75thPcRequestTime,95thPcRequestTime,99thPcRequestTime,999thPcRequestTime"  resultAlias="solr.afts.#attribute#"/>
+        <query objectName="solr/alfresco:type=/cmis,id=org.apache.solr.handler.component.AlfrescoSearchHandler" attributes="requests,errors,timeouts,totalTime,avgRequestsPerSecond,5minRateReqsPerSecond,15minRateReqsPerSecond,avgTimePerRequest,medianRequestTime,75thPcRequestTime,95thPcRequestTime,99thPcRequestTime,999thPcRequestTime"  resultAlias="solr.cmis.#attribute#"/>
+
+        <query objectName="solr/alfresco:type=alfrescoAuthorityCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.alfrescoAuthorityCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=alfrescoDeniedCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.alfrescoDeniedCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=alfrescoOwnerCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.alfrescoOwnerCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=alfrescoPathCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.alfrescoPathCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=alfrescoReaderCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.alfrescoReaderCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=documentCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.documentCache.#attribute#"/>
+
+        <query objectName="solr/alfresco:type=fieldValueCache,id=org.apache.solr.search.FastLRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.fieldValueCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=filterCache,id=org.apache.solr.search.FastLRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.filterCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=queryResultCache,id=org.apache.solr.search.LRUCache" attributes="lookups,hits,hitratio,inserts,evictions,size,warmupTime,cumulative_lookups,cumulative_hits,cumulative_hitratio,cumulative_inserts,cumulative_evictions" resultAlias="solr.queryResultCache.#attribute#"/>
+        <query objectName="solr/alfresco:type=fieldCache,id=org.apache.solr.search.SolrFieldCacheMBean" attributes="entries_count,insanity_count" resultAlias="solr.fieldCache.#attribute#"/>
+    </queries>
+   
+   <outputWriter class="org.jmxtrans.agent.ConsoleOutputWriter"/>
+</jmxtrans-agent>

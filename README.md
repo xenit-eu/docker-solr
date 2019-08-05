@@ -109,6 +109,35 @@ These images are updated via pull requests to the [xenit-eu/docker-solr/](https:
 
 Roxana Angheluta <roxana.angheluta@xenit.eu>, Lars Vierbergen <lars.vierbergen@xenit.eu>
 
+## Monitoring
+
+Solr exposes a number of beans which can be used for monitoring via Jmx. Additionally, there are some system beans in java.lang which can be used to monitor memory, garbage collector, Java threads.
+
+For Solr1 and Solr4, tomcat has also specific beans for the thread pool per connector and for session attributes for a specific web application.
+
+For Solr6, Jetty does not expose thread pool + webapp information out-of-the-box.
+
+There are multiple variants for exposing/shipping these metrics.
+
+### [Jmxtrans-agent](https://github.com/jmxtrans/jmxtrans-agent/)
+
+Can be used by including the following sections in the docker-compose-solr file (example below is for solr6):
+
+```
+   volumes:
+    - ./jmxtrans-agent:/jmxtrans
+    ....
+   environment:
+    - JAVA_OPTS_jmxtrans=-javaagent:/jmxtrans/jmxtrans-agent-1.2.6.jar=/jmxtrans/jmxtrans-agent-solr6.xml
+```
+
+Example configuration files are in directory [jmxtrans-agent](src/integrationTest/resources/jmxtrans-agent/).
+Update to the latest jar file for jmxtrans-agent.
+
+### [Jmx exporter](https://github.com/prometheus/jmx_exporter)
+
+Currently there are no example configuration files for jmx exporter in this project.
+
 ### How to build
 
 Release builds for community images are produced by [Travis](https://travis-ci.org/xenit-eu/) driving Gradle from a `.travis.yml` file.
