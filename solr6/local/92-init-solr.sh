@@ -59,19 +59,6 @@ function setJavaOption {
     JAVA_OPTS="$JAVA_OPTS $2"
 }
 
-function setJavaOptions {
-    IFS=$'\n'
-    for i in `env`
-    do
-	if [[ $i == JAVA_OPTS_* ]]
-	    then
-	    key=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-`
-	    value=`echo $i | cut -d '=' -f 2-`
-	    setJavaOption $key $value
-	fi
-    done
-}
-
 function setOption {
     if grep --quiet -e "$1\s*=" "$3"; then
         # replace option
@@ -342,7 +329,6 @@ fi
 # make sure there is an option in JAVA_OPTS, otherwise it throws an error
 JAVA_OPTS="${JAVA_OPTS} -Ddummy=true"
 
-setJavaOptions
 makeConfigs
 
 user="solr"

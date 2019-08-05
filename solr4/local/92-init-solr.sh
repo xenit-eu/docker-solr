@@ -41,19 +41,6 @@ function setJavaOption {
     JAVA_OPTS="$JAVA_OPTS $2"
 }
 
-function setJavaOptions {
-    IFS=$'\n'
-    for i in `env`
-    do
-	if [[ $i == JAVA_OPTS_* ]]
-	    then
-	    key=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-`
-	    value=`echo $i | cut -d '=' -f 2-`
-	    setJavaOption $key $value
-	fi
-    done
-}
-
 function setOption {
     if grep --quiet -e "$1\s*=" "$3"; then
         # replace option
@@ -211,8 +198,6 @@ then
     # be sure port 5000 is mapped on the host also on 5000
     setJavaOption "jmx" "-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.rmi.port=5000 -Dcom.sun.management.jmxremote.port=5000 -Djava.rmi.server.hostname=${JMX_RMI_HOST}"
 fi
-
-setJavaOptions
 
 ### DEPRECATED
 # for backwards compatibility with ansible-role-solr we keep the old options as well
