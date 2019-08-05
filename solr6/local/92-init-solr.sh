@@ -59,19 +59,6 @@ function setJavaOption {
     JAVA_OPTS="$JAVA_OPTS $2"
 }
 
-function setJavaOptions {
-    IFS=$'\n'
-    for i in `env`
-    do
-	if [[ $i == JAVA_OPTS_* ]]
-	    then
-	    key=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-`
-	    value=`echo $i | cut -d '=' -f 2-`
-	    setJavaOption $key $value
-	fi
-    done
-}
-
 function setOption {
     if grep --quiet -e "$1\s*=" "$3"; then
         # replace option
@@ -304,12 +291,7 @@ function makeConfigs {
 
 if [ $DEBUG = true ]
 then
-    if [[ $ALFRESCO_SEARCH_SERVICES_VERSION = "1.0"* ]] ||  [[ $ALFRESCO_SEARCH_SERVICES_VERSION = "1.1"* ]] || [[ $ALFRESCO_SEARCH_SERVICES_VERSION = "1.2"* ]]
-    then
-    setJavaOption "debug" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
-    else
-    setJavaOption "debug" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"
-    fi
+    setJavaOption "debug" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
 fi
 if [ $JMX_ENABLED = true ]
 then
@@ -342,7 +324,6 @@ fi
 # make sure there is an option in JAVA_OPTS, otherwise it throws an error
 JAVA_OPTS="${JAVA_OPTS} -Ddummy=true"
 
-setJavaOptions
 makeConfigs
 
 user="solr"

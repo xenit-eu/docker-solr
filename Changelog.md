@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Fixed
+* [DOCKER-251] Remove from solr's init duplicating logic related to JAVA_OPTS_ variables
+	
 ### Changed
 * [DOCKER-248] Make sure backup folders exist in the case of a sharded setup. Backup needs to be triggered manually
 * [DOCKER-248] Default backup locations are: /opt/alfresco/alf_data/solrBackup, /opt/alfresco/alf_data/solr4Backup, /opt/alfresco-search-services/data/solr6Backup
