@@ -82,7 +82,10 @@ subprojects {
             if (!(project.hasProperty("repoName"))) {
                 ext.repoName = "hub.xenit.eu"
             }
-            repository = "${repoName}" + "/alfresco-" + "${project.solr.flavor}"
+	    def namespace = (project.alfrescoimage.contains("enterprise") ? "alfresco-enterprise" : "public");
+	    repository = ((repoName == "hub.xenit.eu") ?
+			  "${repoName}" + "/" + namespace + "/" + "alfresco-${project.solr.flavor}" :
+			  "${repoName}" + "/" + "alfresco-${project.solr.flavor}")			    
             tags = calcTags(project.solr.version)
             pull = true
             automaticTags = false
@@ -199,7 +202,7 @@ subprojects {
                 password = System.getenv("DOCKER_PASSWORD")
             }
         } else {
-            println "using default credentials"
+            logger.debug "using default credentials"
         }
     }
 
