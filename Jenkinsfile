@@ -14,20 +14,76 @@ pipeline {
         }
 
         stage("Build Docker Image") {
-            steps {
-                sh "./gradlew -Penterprise buildDockerImage"
+	    parallel {
+		stage('Version solr1') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr1"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise buildDockerImage"
+		    }
+		}
+		stage('Version solr4') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr4"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise buildDockerImage"
+		    }
+		}
+		stage('Version solr6') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr6"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise buildDockerImage"
+		    }
+		}		
             }
-        }
+	}
 
         stage("Integration Tests") {
-            steps {
-                sh "./gradlew -Penterprise integrationTests --info"
-            }
-            post {
-                always {
-                    sh "./gradlew -Penterprise composeDownAll"
-                }
-            }
+	    parallel {
+		stage('Version solr1') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr1"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise integrationTests --info"
+		    }
+		    post {
+			always {
+			    sh "./gradlew -Penterprise composeDownAll"
+			}
+		    }
+		}
+		stage('Version solr4') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr4"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise integrationTests --info"
+		    }
+		    post {
+			always {
+			    sh "./gradlew -Penterprise composeDownAll"
+			}
+		    }
+		}
+		stage('Version solr6') {
+		    environment {
+			VERSIONS_TO_BUILD = "solr6"
+		    }
+		    steps {
+			sh "./gradlew -Penterprise integrationTests --info"
+		    }
+		    post {
+			always {
+			    sh "./gradlew -Penterprise composeDownAll"
+			}
+		    }
+		}
+	    }
         }
         
         stage("Publish Docker Image") {

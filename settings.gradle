@@ -12,22 +12,24 @@ rootProject.name = 'docker-solr'
 
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr6")) {
     include 'solr6/alfresco-search-services-community-1.3.0.1'
+    if(hasProperty("enterprise")) {
+	include 'solr6/alfresco-search-services-1.3.0.1'
+	include 'solr6/alfresco-search-services-1.2.0'
+	include 'solr6/alfresco-search-services-1.1.1'
+	include 'solr6/alfresco-search-services-1.0.0'    
+    }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
     include 'solr4/community-5.2'
     include 'solr4/community-5.1'
+    if(hasProperty("enterprise")) {
+	include 'solr4/enterprise-5.2'
+	include 'solr4/enterprise-5.1'	
+    }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
     include 'solr1/community-4.2'
-}
-
-// test also against enterprise versions of Alfresco
-if(hasProperty("enterprise")) {
-    include 'solr6/alfresco-search-services-1.3.0.1'
-    include 'solr6/alfresco-search-services-1.2.0'
-    include 'solr6/alfresco-search-services-1.1.1'
-    include 'solr6/alfresco-search-services-1.0.0'
-    include 'solr4/enterprise-5.2'
-    include 'solr4/enterprise-5.1'
-    include 'solr1/enterprise-4.2'
+    if(hasProperty("enterprise")) {
+	include 'solr1/enterprise-4.2'
+    }
 }
