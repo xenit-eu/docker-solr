@@ -9,27 +9,42 @@
  */
 
 rootProject.name = 'docker-solr'
+// flavor is one of 'solr1','solr4','solr6'
+// classification is one of 'community', 'enterprise'
+def includeSubprojectPerVersion(flavor,classification) {
+    rootProject.projectDir
+        .listFiles({ File f -> f.name.equals(flavor)
+    } as FileFilter)
+    
+        .collectMany ({ File v -> v.listFiles({ File f -> f.name.contains(classification)
+        } as FileFilter).toList()
+    })
+    
+        .each { File projectFile ->
+        def version = projectFile.name
+        def projectName = "${flavor}-${version}"
+
+        include projectName
+        project(":${projectName}").projectDir = file("${flavor}/${version}")
+	println "included $projectName"
+    }
+}
 
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr6")) {
-    include 'solr6/alfresco-search-services-community-1.3.0.1'
+    includeSubprojectPerVersion("solr6","community")
     if(hasProperty("enterprise")) {
-	include 'solr6/alfresco-search-services-1.3.0.1'
-	include 'solr6/alfresco-search-services-1.2.0'
-	include 'solr6/alfresco-search-services-1.1.1'
-	include 'solr6/alfresco-search-services-1.0.0'    
+	includeSubprojectPerVersion("solr6","enterprise")	
     }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
-    include 'solr4/community-5.2'
-    include 'solr4/community-5.1'
+    includeSubprojectPerVersion("solr4","community")
     if(hasProperty("enterprise")) {
-	include 'solr4/enterprise-5.2'
-	include 'solr4/enterprise-5.1'	
+	includeSubprojectPerVersion("solr4","enterprise")	
     }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
-    include 'solr1/community-4.2'
+    includeSubprojectPerVersion("solr1","community")
     if(hasProperty("enterprise")) {
-	include 'solr1/enterprise-4.2'
+	includeSubprojectPerVersion("solr1","enterprise")	
     }
 }
