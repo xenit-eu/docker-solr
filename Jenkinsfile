@@ -6,9 +6,11 @@ pipeline {
         stage("Create License Files") {
             steps {
                 withCredentials([file(credentialsId: 'ALFRESCO_LICENSE51', variable: 'alfrescolicense51'),
-                                 file(credentialsId: 'ALFRESCO_LICENSE52', variable: 'alfrescolicense52')]) {
+                                 file(credentialsId: 'ALFRESCO_LICENSE52', variable: 'alfrescolicense52'),
+                                 file(credentialsId: 'ALFRESCO_LICENSE61', variable: 'alfrescolicense61')]) {
                     sh "cp \"\${alfrescolicense51}\" src/integrationTest/resources/license51/license.lic ; chmod +w src/integrationTest/resources/license51/license.lic ; chmod o+r src/integrationTest/resources/license51/license.lic"
                     sh "cp \"\${alfrescolicense52}\" src/integrationTest/resources/license52/license.lic ; chmod +w src/integrationTest/resources/license52/license.lic ; chmod o+r src/integrationTest/resources/license52/license.lic"
+                    sh "cp \"\${alfrescolicense61}\" src/integrationTest/resources/license61/license.lic ; chmod +w src/integrationTest/resources/license61/license.lic ; chmod o+r src/integrationTest/resources/license61/license.lic"
                 }
             }
         }
