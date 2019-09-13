@@ -11,7 +11,7 @@ ext {
     tests = true
     testsSharded = true
     testsMounts = true
-    license='./license52'
+    license='./license61'
 }
 dependencies {
     runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '1.3.0.6', ext: 'zip'
