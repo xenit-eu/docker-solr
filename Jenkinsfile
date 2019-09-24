@@ -44,7 +44,7 @@ pipeline {
             }
 	}
 
-        stage("Integration Tests") {
+/*        stage("Integration Tests") {
 	    parallel {
 		stage('Version solr1') {
 		    environment {
@@ -86,7 +86,7 @@ pipeline {
 		    }
 		}
 	    }
-        }
+        }*/
         
         stage("Publish Docker Image") {
             when {
