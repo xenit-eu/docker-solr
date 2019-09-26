@@ -209,6 +209,8 @@ subprojects {
     dockerCompose {
         def composeDir = "${project.parent.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
+        def date = new Date().getTime().toString()
+        environmentVariable('BUILD_DATE', date.substring(0,date.length()-3))  // do not consider milliseconds
         if("solr1".equals(project.solr.flavor))
             environment.put 'INDEX', "solr"
         else
