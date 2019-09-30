@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=xeniteu/openjdk:alfresco-6.1-ubuntu
+ARG BASE_IMAGE=xenit/openjdk:alfresco-6.1-ubuntu
 FROM	alpine:latest AS build-stage-solr6
 
 ARG SOLR_VERSION_MAJOR
