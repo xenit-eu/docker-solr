@@ -65,7 +65,7 @@ Environment variables:
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
 | ALFRESCO_SOLR_SUGGESTER_ENABLED                     | solr.suggester.enabled |                                                              | true                                                | needs also changes to schema.xml, otherwise not correct. |
 | ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED                     |                            |                                                              |                                                          | changes schema.xml |
-| ALFRESCO_HOST        | alfresco.host              |                                                              | localhost |  |
+| ALFRESCO_HOST        | alfresco.host              |                                                              | alfresco |  |
 | ALFRESCO_PORT    | alfresco.port          |                                                              | 8080 |  |
 | ALFRESCO_PORT_SSL | alfresco.port.ssl      |                                                              | 8443 |  |
 | ALFRESCO_SSL | alfresco.secureComms | | https | changes also server.xml for tomcat-based images and solr.in.sh for jetty-based images |

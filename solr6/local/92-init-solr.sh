@@ -10,7 +10,7 @@ echo "Solr init start"
 SOLR_DIR_ROOT="$SOLR_INSTALL_HOME/solrhome"
 SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
-SOLR_HOST=${SOLR_HOST:-'localhost'}
+SOLR_HOST=${SOLR_HOST:-'solr'}
 
 
 DEBUG=${DEBUG:-'false'}
@@ -126,7 +126,7 @@ function createCoreStatically {
     setOption 'data.dir.root' "${SOLR_DATA_DIR:-$SOLR_DATA_ROOT/index}" "$CONFIG_FILE_CORE"
     setOption 'data.dir.store' "$coreName" "$CONFIG_FILE_CORE"
     setOption 'alfresco.template' "${TEMPLATE}" "$CONFIG_FILE_CORE"
-    setOption 'alfresco.host' "${ALFRESCO_HOST:-localhost}" "$CONFIG_FILE_CORE"
+    setOption 'alfresco.host' "${ALFRESCO_HOST:-alfresco}" "$CONFIG_FILE_CORE"
     setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_CORE"
     setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_CORE"
     setOption 'alfresco.secureComms' "$ALFRESCO_SSL" "$CONFIG_FILE_CORE"

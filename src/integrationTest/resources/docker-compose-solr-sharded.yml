@@ -8,7 +8,6 @@ services:
     - 8080
     hostname: solr1
     environment:
-    - ALFRESCO_HOST=alfresco
     - SOLR_HOST=solr1
     - ALFRESCO_SSL=none
     - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false
@@ -31,7 +30,6 @@ services:
     - 8080
     hostname: solr2
     environment:
-    - ALFRESCO_HOST=alfresco
     - SOLR_HOST=solr2
     - ALFRESCO_SSL=none
     - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false

@@ -6,7 +6,6 @@ services:
     restart: unless-stopped
     hostname: solr
     environment:
-    - ALFRESCO_HOST=alfresco
     - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
     - CUSTOM_SCHEMA=true
     volumes:

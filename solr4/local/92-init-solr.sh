@@ -90,7 +90,7 @@ function setGlobalOptions {
 # workspace core file might not exist (if sharded index)
 if [ -f "$CONFIG_FILE_SOLR_WORKSPACE" ]
 then
-  setOption 'alfresco.host' "${ALFRESCO_HOST:-localhost}" "$CONFIG_FILE_SOLR_WORKSPACE"
+  setOption 'alfresco.host' "${ALFRESCO_HOST:-alfresco}" "$CONFIG_FILE_SOLR_WORKSPACE"
   setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_SOLR_WORKSPACE"
   setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_SOLR_WORKSPACE"
   setOption 'alfresco.secureComms' "${ALFRESCO_SSL:-https}" "$CONFIG_FILE_SOLR_WORKSPACE"
@@ -118,7 +118,7 @@ fi
 
 if [ -f "$CONFIG_FILE_SOLR_ARCHIVE" ]
 then
-  setOption 'alfresco.host' "${ALFRESCO_HOST:-localhost}" "$CONFIG_FILE_SOLR_ARCHIVE"
+  setOption 'alfresco.host' "${ALFRESCO_HOST:-alfresco}" "$CONFIG_FILE_SOLR_ARCHIVE"
   setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_SOLR_ARCHIVE"
   setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_SOLR_ARCHIVE"
   setOption 'alfresco.secureComms' "${ALFRESCO_SSL:-https}" "$CONFIG_FILE_SOLR_ARCHIVE"
@@ -149,7 +149,7 @@ then
    newCore=$SOLR_DIR_ROOT/$collectionName/$coreName
    cp -r $SOLR_DIR_ROOT/templates/$TEMPLATE $newCore
    CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
-   setOption 'alfresco.host' "${ALFRESCO_HOST:-localhost}" "$CONFIG_FILE_CORE"
+   setOption 'alfresco.host' "${ALFRESCO_HOST:-alfresco}" "$CONFIG_FILE_CORE"
    setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_CORE"
    setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_CORE"
    setOption 'alfresco.secureComms' "${ALFRESCO_SSL:-https}" "$CONFIG_FILE_CORE"

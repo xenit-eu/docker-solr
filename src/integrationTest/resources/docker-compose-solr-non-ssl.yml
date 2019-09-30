@@ -6,5 +6,4 @@ services:
     restart: unless-stopped
     hostname: solr
     environment:
-    - ALFRESCO_HOST=alfresco
     - ALFRESCO_SSL=none

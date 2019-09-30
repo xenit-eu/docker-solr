@@ -7,6 +7,5 @@ services:
     ports:
     - 8080
     environment:
-    - SOLR_HOST=solr
     - INDEX
     - SOLR_SSL=none

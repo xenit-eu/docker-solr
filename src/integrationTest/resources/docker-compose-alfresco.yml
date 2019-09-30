@@ -7,6 +7,5 @@ services:
    - 8080
    restart: unless-stopped
    environment:
-   - SOLR_HOST=solr
    - INDEX
 
