@@ -13,7 +13,7 @@ RUN    	apk add zip && \
         unzip /tmp/solr.zip -d /tmp/solr/ && \
 	rm /tmp/solr.zip
 
-FROM 	xenit/tomcat:alfresco-4.2-ubuntu
+FROM 	docker.io/xenit/tomcat:alfresco-4.2-ubuntu
 COPY    --from=build-stage-solr1 /tmp/solr /tmp/solr
 
 ARG SOLR_VERSION_MAJOR

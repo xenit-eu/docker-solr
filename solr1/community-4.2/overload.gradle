@@ -7,7 +7,7 @@ ext {
             ],
             flavor: 'solr1'
     ]
-    alfrescoimage ='xenit/alfresco-repository-community:4.2.f'
+    alfrescoimage ='docker.io/xenit/alfresco-repository-community:4.2.f'
     tests = true
 }
 dependencies {

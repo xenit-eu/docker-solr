@@ -11,7 +11,7 @@ ext {
     tests = false
 
     extraBuildArgs = [
-            BASE_IMAGE: 'xenit/openjdk:alfresco-5.2-ubuntu'
+            BASE_IMAGE: 'docker.io/xenit/openjdk:alfresco-5.2-ubuntu'
     ]
 }
 dependencies {
