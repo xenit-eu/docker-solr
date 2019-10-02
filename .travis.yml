@@ -23,10 +23,10 @@ env:
     - VERSIONS_TO_BUILD=solr4
     - VERSIONS_TO_BUILD=solr6
 
-script: ./gradlew -PrepoName=xenit integrationTests --info
+script: ./gradlew -PrepoName=docker.io/xenit integrationTests --info
 
 deploy:
   provider: script
-  script: ./gradlew -PrepoName=xenit pushDockerImage
+  script: ./gradlew -PrepoName=docker.io/xenit pushDockerImage
   on:
     branch: master
