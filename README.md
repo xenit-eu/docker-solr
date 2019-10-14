@@ -92,10 +92,10 @@ Environment variables:
 | GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
 | GLOBAL_\<variable\> | \<variable> | | |  |
 | JAVA_OPTS_\<ignored_variable\>=\<value\> |  | \<value\> | | |
-| SSL_KEY_STORE | | | ssl.repo.client.keystore | solr6 only |
-| SSL_KEY_STORE_PASSWORD' | | | keystore | solr6 only |
-| SSL_TRUST_STORE | | | ssl.repo.client.truststore | solr6 only |
-| SSL_TRUST_STORE_PASSWORD | | | truststore | solr6 only |
+| SSL_KEY_STORE | | | ssl.repo.client.keystore |  |
+| SSL_KEY_STORE_PASSWORD' | | | kT9X6oe68t | |
+| SSL_TRUST_STORE | | | ssl.repo.client.truststore | |
+| SSL_TRUST_STORE_PASSWORD | | | kT9X6oe68t | |
 
 ## Docker-compose files
 
