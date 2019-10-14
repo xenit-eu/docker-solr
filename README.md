@@ -97,7 +97,7 @@ Environment variables:
 | \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
 | \* SSL_TRUST_STORE_PASSWORD | | | kT9X6oe68t | |
 
-* = tested for solr6
+\* = tested for solr6
 
 ## Docker-compose files
 
