@@ -176,4 +176,11 @@ Set the environment variable DEBUG=true. The debug port is 8000.
 
 ### How do I enable JMX?
 
-Set the environment variable JMX_ENABLED=true. Jmx port is 5000.
+Set the environment variable JMX_ENABLED=true. Jmx port is 5000, needs to be mapped on the host.
+
+### How do I take a thread dump?
+
+Either use:
+
+* ```kill -3 1``` inside the container and then look at the logs of the container
+* ```jstack -l 1``` inside the container. Make sure you are running the command as user 'solr'.
