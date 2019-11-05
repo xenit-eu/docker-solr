@@ -12,13 +12,9 @@ SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_HOST=${SOLR_HOST:-'solr'}
 
-
-DEBUG=${DEBUG:-'false'}
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
 JETTY_PORT=${JETTY_PORT:-'8080'}
 JETTY_PORT_SSL=${JETTY_PORT_SSL:-'8443'}
-JMX_ENABLED=${JMX_ENABLED:-'false'}
-JMX_RMI_HOST=${JMX_RMI_HOST:-'0.0.0.0'}
 CORES_TO_TRACK=${CORES_TO_TRACK:-"alfresco;archive"}
 IFS=';' read -r -a DEFAULT_CORES <<< "$CORES_TO_TRACK"
 
@@ -288,16 +284,6 @@ function makeConfigs {
 		fi
 		done
 }
-
-if [ $DEBUG = true ]
-then
-    setJavaOption "debug" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
-fi
-if [ $JMX_ENABLED = true ]
-then
-    setJavaOption "jmx" "-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.rmi.port=5000 -Dcom.sun.management.jmxremote.port=5000 -Djava.rmi.server.hostname=${JMX_RMI_HOST}"
-fi
-
 
 #follow http://docs.alfresco.com/5.2/tasks/solr6-install.html
 echo "export SOLR_SOLR_DATA_DIR=${SOLR_DATA_DIR:-$SOLR_DATA_ROOT/index}" >>"$CONFIG_FILE_SOLR_START"
