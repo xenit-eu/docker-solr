@@ -23,7 +23,9 @@ Community images are built by [Travis](https://travis-ci.org/xenit-eu/) and publ
 
 Each time images are built, tests are automatically ran on containers started via docker-compose files.
 
-If sharding is involved, then a valid license file which allows clustering is needed.
+If sharding is involved, then a valid license file which allows clustering is needed (\*)
+
+(\*) this is conform alfresco documentation, although in practice I could run a sharded setup also without a clustering license. The admin console does not have the Sharding screen, but indexing and search actually works.
 
 ## Environment variables
 
@@ -33,18 +35,15 @@ There are several environment variables available to tweak the behaviour. The va
 * schema.xml
 * server.xml (ports, ssl-related properties for tomcat-based images)
 * solr.in.sh (ports, ssl-related properties, paths for jetty-based images)
-* setenv.sh (JAVA_OPTS parameters for tomcat-based images)
 
 solrcore.properties can be set via a generic mechanism by setting environment variables of the form
 GLOBAL_WORKSPACE\_\<parameter\> for workspace store,
 GLOBAL_ARCHIVE\_<\parameter\> for archive store,
 GLOBAL\_\<parameter\> for all cores.
 
-They can also be set via environment variables of the form JAVA_OPTS\_<ignored_key> where the value should be "-Dkey=value".
-
 A subset of the properties have also dedicated environment variables e.g. ALFRESCO_ENABLE_TRACKING. Generic variables take precedence.
 
-A subset of java variables have also dedicated environment variables e.g. JAVA_XMX. Generic variables take precedence.
+See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat).
 
 Environment variables:
 
@@ -75,23 +74,11 @@ Environment variables:
 | ALFRESCO_DO_PERMISSION_CHECKS | alfresco.doPermissionChecks |  | true | post filtering of results still happens on Alfresco side |
 | ARCHIVE_ENABLE_TRACKING | enable.alfresco.tracking |  | true | in the archive core |
 | ARCHIVE_INDEX_CONTENT | alfresco.index.transformContent |                                                              | true | in the archive core |
-| TOMCAT_PORT |  | -DTOMCAT_PORT | 8080 | solr1 and solr4 only; Warning: at the moment changing this is not possible in practice, because the healthcheck always uses 8080|
-| TOMCAT_PORT_SSL | | -DTOMCAT_PORT_SSL | 8443 | solr1 and solr4 only |
-| TOMCAT_AJP_PORT | | -DTOMCAT_AJP_PORT | 8009 | solr1 and solr4 only |
-| TOMCAT_SERVER_PORT | | -DTOMCAT_SERVER_PORT | 8005 | solr1 and solr4 only |
-| TOMCAT_MAX_HTTP_HEADER_SIZE | | -DTOMCAT_MAX_HTTP_HEADER_SIZE  or -DMAX_HTTP_HEADER_SIZE | 32768 | solr1 and solr4 only |
-| TOMCAT_MAX_THREADS | | -DTOMCAT_MAX_THREADS or -DMAX_THREADS | 200 | solr1 and solr4 only |
 | JETTY_PORT | |  | 8080 | solr6 only |
 | JETTY_PORT_SSL | |  | 8443 | solr6 only |
-| JAVA_XMX | | -Xmx | 2048M | |
-| JAVA_XMS | | -Xms | 512M | |
-| JMX_ENABLED | | -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.rmi.port=5000 -Dcom.sun.management.jmxremote.port=5000 -Djava.rmi.server.hostname=$JMX_RMI_HOST | false | |
-| JMX_RMI_HOST | |  | 0.0.0.0 | |
-| DEBUG | | -Xdebug -Xrunjdwp:transport=dt_socket, address=8000, server=y, suspend=n | false | |
 | GLOBAL_WORKSPACE_\<variable\> | \<variable\> | | | for workspace core or shards |
 | GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
 | GLOBAL_\<variable\> | \<variable> | | |  |
-| JAVA_OPTS_\<ignored_variable\>=\<value\> |  | \<value\> | | |
 | \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
 | \* SSL_KEY_STORE_PASSWORD' | | | kT9X6oe68t | |
 | \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
@@ -171,14 +158,6 @@ By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/a
 In the case of a sharded setup, backup needs to be done manually.
 
 ## FAQ
-
-### How do I access the Tomcat debugport?
-
-Set the environment variable DEBUG=true. The debug port is 8000.
-
-### How do I enable JMX?
-
-Set the environment variable JMX_ENABLED=true. Jmx port is 5000, needs to be mapped on the host.
 
 ### How do I take a thread dump?
 

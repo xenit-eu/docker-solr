@@ -11,12 +11,6 @@ echo "Solr init start"
 SOLR_DATA_ROOT=${SOLR_DATA_ROOT:-'/opt/alfresco/alf_data/solr4'}
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco/alf_data'}
 
-JAVA_XMS=${JAVA_XMS:-'512M'}
-JAVA_XMX=${JAVA_XMX:-'2048M'}
-DEBUG=${DEBUG:-'false'}
-JMX_ENABLED=${JMX_ENABLED:-'false'}
-JMX_RMI_HOST=${JMX_RMI_HOST:-'0.0.0.0'}
-
 CONFIG_FILE_SOLR_WORKSPACE=${SOLR_DIR_ROOT}'/workspace-SpacesStore/conf/solrcore.properties'
 CONFIG_FILE_SOLR_ARCHIVE=${SOLR_DIR_ROOT}'/archive-SpacesStore/conf/solrcore.properties'
 CONFIG_FILE_SOLR_SCHEMA_WORKSPACE=${SOLR_DIR_ROOT}'/workspace-SpacesStore/conf/schema.xml'
@@ -136,19 +130,7 @@ then
 sed -i '/<Connector port="\${TOMCAT_PORT_SSL}" URIEncoding="UTF-8" protocol="org.apache.coyote.http11.Http11Protocol" SSLEnabled="true"/,+5d' $TOMCAT_SERVER_FILE
 fi
 
-setJavaOption "defaults" "-Xms$JAVA_XMS -Xmx$JAVA_XMX -Dfile.encoding=UTF-8"
-
-if [ $DEBUG = true ]
-then
-    setJavaOption "debug" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
-fi
-
-
-if [ $JMX_ENABLED = true ]
-then
-    # be sure port 5000 is mapped on the host also on 5000
-    setJavaOption "jmx" "-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.rmi.port=5000 -Dcom.sun.management.jmxremote.port=5000 -Djava.rmi.server.hostname=${JMX_RMI_HOST}"
-fi
+setJavaOption "defaults" "-Dfile.encoding=UTF-8"
 
 setJavaOption 'SSL_TRUST_STORE' "-DSSL_TRUST_STORE=${SSL_TRUST_STORE:-'ssl.truststore'}"
 setJavaOption 'SSL_TRUST_STORE_PASSWORD' "-DSSL_TRUST_STORE_PASSWORD=${SSL_TRUST_STORE_PASSWORD:-'kT9X6oe68t'}"
