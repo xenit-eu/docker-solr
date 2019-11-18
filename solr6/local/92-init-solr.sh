@@ -344,6 +344,6 @@ fi
 # fix permissions for config folders
 chown -R "$user":"$user" "${SOLR_DIR_ROOT}"
 
-echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -m ${JAVA_XMX} -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a ${JAVA_OPTS}" >"${SOLR_INSTALL_HOME}/startup.sh"
+echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -m ${JAVA_XMX} -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a \"${JAVA_OPTS}\"" >"${SOLR_INSTALL_HOME}/startup.sh"
 
 echo "Solr init done"
