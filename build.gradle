@@ -1,5 +1,5 @@
 plugins {
-    id "eu.xenit.docker-alfresco" version "4.0.3" apply false
+    id "eu.xenit.docker-alfresco" version "4.1.1" apply false
 }
 
 import com.avast.gradle.dockercompose.tasks.ComposeDown
@@ -101,13 +101,10 @@ subprojects {
             'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
             'SOLR_FLAVOR'       : "${project.solr.flavor}",
             'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds	
-        ]
-
-        if (project.hasProperty('extraBuildArgs'))
-            buildArgs << project.extraBuildArgs
+        ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
 
         doFirst {
-            println buildArgs
+            println buildArgs.get()
         }
     }
 
@@ -129,11 +126,11 @@ subprojects {
         buildDockerImage {
             doLast {
                 if (project.hasProperty('testsSharded'))
-                    dockerCompose.sharded.environment.put 'DOCKER_IMAGE', getImageId()
+                    dockerCompose.sharded.environment.put 'DOCKER_IMAGE', getImageId().get()
                 if (project.hasProperty('testsNonSsl'))
-                    dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', getImageId()
+                    dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
                 if (project.hasProperty('testsMounts'))
-                    dockerCompose.mounts.environment.put 'DOCKER_IMAGE', getImageId()
+                    dockerCompose.mounts.environment.put 'DOCKER_IMAGE', getImageId().get()
             }
         }
     }
