@@ -4,14 +4,14 @@ plugins {
 
 import com.avast.gradle.dockercompose.tasks.ComposeDown
 
-static def calcTags (version) {
+static def calcTags(version) {
     return [
             "${version.major}.${version.minor}.${version.rev}".toString(),
             "${version.major}.${version.minor}".toString()
     ];
 }
 
-subprojects {
+allprojects {
     repositories {
         mavenCentral()
         jcenter()
@@ -19,8 +19,13 @@ subprojects {
             url 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
         }
     }
+    if (!project.hasProperty("repoName")) {
+        ext.repoName = "hub.xenit.eu"
+    }
 
+}
 
+buildAspects.subprojects {
     configurations {
         runtime
         integrationTestCompile.extendsFrom testCompile
@@ -54,8 +59,8 @@ subprojects {
 
     task copyDockerfile(type: Copy) {
         from("$project.parent.projectDir/src/main/resources/dockerfiles/") {
-            include "Dockerfile.${project.solr.flavor}"
-            rename "Dockerfile.${project.solr.flavor}", 'Dockerfile'
+            include "Dockerfile.solr${buildVariant.solrVersion.solrVersion}"
+            rename "Dockerfile.solr${buildVariant.solrVersion.solrVersion}", 'Dockerfile'
         }
         into workingDir
     }
@@ -64,7 +69,8 @@ subprojects {
         into workingDir
     }
     task copyLocalResources(type: Copy) {
-        from "$project.projectDir/../local"
+        from "$project.parent.projectDir/src/main/resources/init-script/92-init-solr.solr${buildVariant.solrVersion.solrVersion}.sh"
+        rename "92-init-solr.solr${buildVariant.solrVersion.solrVersion}.sh", "92-init-solr.sh"
         into workingDir
     }
     task pullRuntimeDependencies(type: Copy) {
@@ -79,13 +85,10 @@ subprojects {
     dockerFile {
         dockerFile = file("$workingDir/Dockerfile")
         dockerBuild {
-            if (!(project.hasProperty("repoName"))) {
-                ext.repoName = "hub.xenit.eu"
-            }
-	    def namespace = (project.alfrescoimage.contains("enterprise") ? "alfresco-enterprise" : "public");
-	    repository = ((repoName == "hub.xenit.eu") ?
-			  "${repoName}" + "/" + namespace + "/" + "alfresco-${project.solr.flavor}" :
-			  "${repoName}" + "/" + "alfresco-${project.solr.flavor}")			    
+            def namespace = buildVariant.enterpriseEdition ? "alfresco-enterprise" : "public";
+            repository = ((repoName == "hub.xenit.eu") ?
+                    "${repoName}" + "/" + namespace + "/" + "alfresco-solr${buildVariant.solrVersion.solrVersion}" :
+                    "${repoName}" + "/" + "alfresco-solr${buildVariant.solrVersion.solrVersion}")
             tags = calcTags(project.solr.version)
             pull = true
             automaticTags = false
@@ -93,15 +96,15 @@ subprojects {
     }
 
     buildDockerImage {
-	def date = new Date().getTime().toString()
+        def date = new Date().getTime().toString()
 
         buildArgs = [
-            'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
-            'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
-            'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
-            'SOLR_FLAVOR'       : "${project.solr.flavor}",
-            'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds	
-        ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
+                'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
+                'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
+                'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
+                'SOLR_FLAVOR'       : "solr${buildVariant.solrVersion.solrVersion}",
+                'BUILD_DATE'        : date.substring(0, date.length() - 3)  // do not consider milliseconds
+        ] << (project.hasProperty('extraBuildArgs') ? project.extraBuildArgs : [:])
 
         doFirst {
             println buildArgs.get()
@@ -112,15 +115,15 @@ subprojects {
         if (project.hasProperty('testsSharded') && project.testsSharded)
             shardedComposeUp.dependsOn(buildDockerImage)
         else
-            shardedComposeUp.enabled=false
+            shardedComposeUp.enabled = false
         if (project.hasProperty('testsNonSsl') && project.testsNonSsl)
             nonSslComposeUp.dependsOn(buildDockerImage)
         else
-            nonSslComposeUp.enabled=false
+            nonSslComposeUp.enabled = false
         if (project.hasProperty('testsMounts') && project.testsMounts)
             mountsComposeUp.dependsOn(buildDockerImage)
         else
-            mountsComposeUp.enabled=false
+            mountsComposeUp.enabled = false
 
         // nested configurations do not get the DOCKER_IMAGE
         buildDockerImage {
@@ -145,7 +148,7 @@ subprojects {
 
         doFirst {
             dockerCompose.exposeAsSystemProperties(integrationTestDefault)
-            systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("flavor", "solr${buildVariant.solrVersion.solrVersion}")
         }
     }
 
@@ -158,7 +161,7 @@ subprojects {
 
         doFirst {
             dockerCompose.sharded.exposeAsSystemProperties(integrationTestSharded)
-            systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("flavor", "solr${buildVariant.solrVersion.solrVersion}")
         }
     }
 
@@ -171,7 +174,7 @@ subprojects {
 
         doFirst {
             dockerCompose.nonSsl.exposeAsSystemProperties(integrationTestNonSsl)
-            systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("flavor", "solr${buildVariant.solrVersion.solrVersion}")
         }
     }
 
@@ -184,7 +187,7 @@ subprojects {
 
         doFirst {
             dockerCompose.mounts.exposeAsSystemProperties(integrationTestMounts)
-            systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("flavor", "solr${buildVariant.solrVersion.solrVersion}")
         }
     }
 
@@ -196,7 +199,7 @@ subprojects {
     }
 
     docker {
-        if(System.getenv("DOCKER_USER") != null) {
+        if (System.getenv("DOCKER_USER") != null) {
             registryCredentials {
                 username = System.getenv("DOCKER_USER")
                 password = System.getenv("DOCKER_PASSWORD")
@@ -209,10 +212,10 @@ subprojects {
     dockerCompose {
         def composeDir = "${project.parent.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
-        if("solr1".equals(project.solr.flavor))
+        if (buildVariant.solrVersion.solrVersion == 1)
             environment.put 'INDEX', "solr"
         else
-            environment.put 'INDEX', project.solr.flavor
+            environment.put 'INDEX', "solr" + buildVariant.solrVersion.solrVersion
 
         isRequiredBy(project.tasks.integrationTestDefault)
 
@@ -222,7 +225,7 @@ subprojects {
         sharded {
             isRequiredBy(project.tasks.integrationTestSharded)
 
-            if(project.hasProperty("license"))
+            if (project.hasProperty("license"))
                 environment.put 'LICENSE', project.license
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded.yml", "$composeDir/docker-compose-solr-sharded.yml",

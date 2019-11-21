@@ -7,44 +7,116 @@
  * Detailed information about configuring a multi-project build in Gradle can be found
  * in the user guide at https://docs.gradle.org/4.0/userguide/multi_project_builds.html
  */
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'be.vbgn.gradle:build-aspects-plugin:0.2.0'
+    }
+}
+apply plugin: be.vbgn.gradle.buildaspects.BuildAspectsPlugin
 
 rootProject.name = 'docker-solr'
+
+class SolrVersion {
+    int solrVersion
+    String searchServicesVersion
+    boolean hasCommunityEdition
+
+    SolrVersion(int solrVersion, String searchServicesVersion) {
+        this(solrVersion, searchServicesVersion, true)
+    }
+
+    SolrVersion(int solrVersion, String searchServicesVersion, boolean hasCommunityEdition) {
+        this.solrVersion = solrVersion;
+        this.searchServicesVersion = searchServicesVersion;
+        this.hasCommunityEdition = hasCommunityEdition
+    }
+
+    boolean isSearchServices() {
+        return solrVersion == 6;
+    }
+
+    String toString() {
+        return isSearchServices() ? "alfresco-search-services-" + searchServicesVersion : "solr" + solrVersion + "-alfresco-" + searchServicesVersion
+    }
+}
+
+def versionsToBuild = (System.getenv("VERSIONS_TO_BUILD") ?: "solr1,solr4,solr6").split(",");
+
+buildAspects {
+    aspects {
+        create('solrVersion', SolrVersion) {
+            if (versionsToBuild.contains("solr1")) {
+                add(new SolrVersion(1, "4.2"))
+            }
+            if (versionsToBuild.contains("solr4")) {
+                add(new SolrVersion(4, "5.1"))
+                add(new SolrVersion(4, "5.2"))
+            }
+            if (versionsToBuild.contains("solr6")) {
+                add(new SolrVersion(6, "1.0.0", false))
+                add(new SolrVersion(6, "1.1.1", false))
+                add(new SolrVersion(6, "1.2.0", false))
+                add(new SolrVersion(6, "1.3.0.1"))
+                add(new SolrVersion(6, "1.3.0.6", false))
+                add(new SolrVersion(6, "1.4.0"))
+            }
+        }
+        create('enterpriseEdition', Boolean) {
+            add(false)
+            if (settings.hasProperty('enterprise')) {
+                add(true)
+            }
+        }
+    }
+    projectNamer {
+        it.variant.getProperty("solrVersion").toString() + "-" + (it.variant.getProperty("enterpriseEdition") ? "enterprise" : "community")
+    }
+    exclude { variant.getProperty("solrVersion").hasCommunityEdition == false && variant.getProperty('enterpriseEdition') == false }
+    projects {
+        project(':')
+    }
+}
+/*
 // flavor is one of 'solr1','solr4','solr6'
 // classification is one of 'community', 'enterprise'
-def includeSubprojectPerVersion(flavor,classification) {
+def includeSubprojectPerVersion(flavor, classification) {
     rootProject.projectDir
-        .listFiles({ File f -> f.name.equals(flavor)
-    } as FileFilter)
-    
-        .collectMany ({ File v -> v.listFiles({ File f -> f.name.contains(classification)
-        } as FileFilter).toList()
-    })
-    
-        .each { File projectFile ->
-        def version = projectFile.name
-        def projectName = "${flavor}-${version}"
+            .listFiles({ File f -> f.name.equals(flavor)
+            } as FileFilter)
 
-        include projectName
-        project(":${projectName}").projectDir = file("${flavor}/${version}")
-	println "included $projectName"
-    }
+            .collectMany({ File v ->
+                v.listFiles({ File f -> f.name.contains(classification)
+                } as FileFilter).toList()
+            })
+
+            .each { File projectFile ->
+                def version = projectFile.name
+                def projectName = "${flavor}-${version}"
+
+                include projectName
+                project(":${projectName}").projectDir = file("${flavor}/${version}")
+                println "included $projectName"
+            }
 }
 
-if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr6")) {
-    includeSubprojectPerVersion("solr6","community")
-    if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr6","enterprise")	
+    includeSubprojectPerVersion("solr6", "community")
+    if (hasProperty("enterprise")) {
+        includeSubprojectPerVersion("solr6", "enterprise")
     }
 }
-if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
-    includeSubprojectPerVersion("solr4","community")
-    if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr4","enterprise")	
+if (System.getenv("VERSIONS_TO_BUILD") == null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
+    includeSubprojectPerVersion("solr4", "community")
+    if (hasProperty("enterprise")) {
+        includeSubprojectPerVersion("solr4", "enterprise")
     }
 }
-if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
-    includeSubprojectPerVersion("solr1","community")
-    if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr1","enterprise")	
+if (System.getenv("VERSIONS_TO_BUILD") == null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
+    includeSubprojectPerVersion("solr1", "community")
+    if (hasProperty("enterprise")) {
+        includeSubprojectPerVersion("solr1", "enterprise")
     }
 }
+*/

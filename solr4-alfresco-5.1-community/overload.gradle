@@ -3,11 +3,10 @@ ext {
             version: [
                     major: 5,
                     minor: 1,
-                    rev: 'g'
+                    rev  : 'g'
             ],
-            flavor: 'solr4'
     ]
-    alfrescoimage ='docker.io/xenit/alfresco-repository-community:5.1.e'
+    alfrescoimage = 'docker.io/xenit/alfresco-repository-community:5.1.e'
     tests = true
 }
 

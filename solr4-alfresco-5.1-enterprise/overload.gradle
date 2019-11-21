@@ -3,12 +3,11 @@ ext {
             version: [
                     major: 5,
                     minor: 1,
-                    rev: 5
+                    rev  : 5
             ],
-            flavor: 'solr4'
     ]
-    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:5.1.5'
-    license='./license51'
+    alfrescoimage = 'hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:5.1.5'
+    license = './license51'
     tests = true
     testsSharded = true
 }

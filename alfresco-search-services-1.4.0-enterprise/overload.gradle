@@ -3,11 +3,10 @@ ext {
             version: [
                     major: 1,
                     minor: 4,
-                    rev: 0
+                    rev  : 0
             ],
-            flavor: 'solr6'
     ]
-    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.1.0'
+    alfrescoimage = 'hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.1.0'
     tests = true
 }
 dependencies {
