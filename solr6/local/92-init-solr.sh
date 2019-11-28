@@ -13,17 +13,8 @@ DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_HOST=${SOLR_HOST:-'solr'}
 
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
-JETTY_PORT=${JETTY_PORT:-'8080'}
-JETTY_PORT_SSL=${JETTY_PORT_SSL:-'8443'}
 CORES_TO_TRACK=${CORES_TO_TRACK:-"alfresco;archive"}
 IFS=';' read -r -a DEFAULT_CORES <<< "$CORES_TO_TRACK"
-
-if [ $ALFRESCO_SSL != none ]
-then
-    PORT=$JETTY_PORT_SSL
-else
-    PORT=$JETTY_PORT
-fi    
 
 SHARDING=${SHARDING:-'false'}
 NUM_SHARDS=${NUM_SHARDS:-'3'}
