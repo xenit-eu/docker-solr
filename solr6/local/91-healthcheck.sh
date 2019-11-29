@@ -21,7 +21,7 @@ if [ $ALFRESCO_SSL != none ]
 then
     if [ ! -f "${SOLR_DIR_ROOT}/keystore/browser.p12" ]
     then
-	keytool -importkeystore -srckeystore "${SOLR_DIR_ROOT}/keystore/${SSL_KEY_STORE}" -srcstorepass ${SSL_KEY_STORE_PASSWORD} -srcstoretype JCEKS -srcalias ssl.repo -destkeystore  "${SOLR_DIR_ROOT}/keystore/browser.p12" -deststoretype pkcs12 -destalias ssl.repo -deststorepass alfresco
+	keytool -importkeystore -srckeystore "${SOLR_DIR_ROOT}/keystore/${SSL_KEY_STORE}" -srcstorepass ${SSL_KEY_STORE_PASSWORD} -srcstoretype JCEKS -srcalias ssl.repo -destkeystore  "${SOLR_DIR_ROOT}/keystore/browser.p12" -deststoretype pkcs12 -destalias ssl.repo -deststorepass alfresco -destkeypass alfresco
 	openssl pkcs12 -in "${SOLR_DIR_ROOT}/keystore/browser.p12" -out "${SOLR_DIR_ROOT}/keystore/browser.pem" -nodes -passin pass:alfresco
     fi
     echo "curl -f -k -L -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr >/dev/null" >${SOLR_INSTALL_HOME}/healthcheck.sh
