@@ -7,12 +7,10 @@ set -e
 
 echo "Solr init start"
 
-SOLR_DIR_ROOT="$SOLR_INSTALL_HOME/solrhome"
 SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_HOST=${SOLR_HOST:-'solr'}
 
-ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
 CORES_TO_TRACK=${CORES_TO_TRACK:-"alfresco;archive"}
 IFS=';' read -r -a DEFAULT_CORES <<< "$CORES_TO_TRACK"
 
@@ -39,8 +37,6 @@ sed -i 's/log4j.rootLogger=INFO, file, CONSOLE/log4j.rootLogger=ERROR, CONSOLE/'
 
 SSL_TRUST_STORE=${SSL_TRUST_STORE:-'ssl.repo.client.truststore'}
 SSL_TRUST_STORE_PASSWORD=${SSL_TRUST_STORE_PASSWORD:-'kT9X6oe68t'}
-SSL_KEY_STORE=${SSL_KEY_STORE:-'ssl.repo.client.keystore'}
-SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD:-'kT9X6oe68t'}
 
 function setJavaOption {
     JAVA_OPTS="$JAVA_OPTS $2"
