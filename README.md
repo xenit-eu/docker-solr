@@ -1,5 +1,5 @@
 # Solr in Docker
-Xenit specific Alfresco Solr images.
+Alfresco Solr images built and maintained by Xenit.
 
 ## Images created
 
