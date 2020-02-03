@@ -1,4 +1,5 @@
 # Solr in Docker
+Xenit specific Alfresco Solr images.
 
 ## Images created
 
