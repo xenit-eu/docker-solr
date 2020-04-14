@@ -8,8 +8,8 @@
 
 ## Supported Tags
 
-* [`:4.2`, `:4.2.8`,`:5.1`, `:5.1.4.1`] = minor, major, revision for solr1 and solr4
-* [`:1.0.0`, `:1.1.1`, `:1.2.0`] = version of the alfresco search services used for solr6
+* [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr1 and solr4
+* [`:1.0.0`, `:1.1.1`, `:1.3.0.6`, `:1.4.0`] = version of the alfresco search services used for solr6
 
 ## Overview
 
@@ -45,8 +45,6 @@ A subset of the properties have also dedicated environment variables e.g. ALFRES
 
 See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat).
 
-Environment variables:
-
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
 | SHARDING                    |                      |                                                              | false                                               | if true, configuration folders for shards will be created |
@@ -57,7 +55,8 @@ Environment variables:
 | REPLICATION_FACTOR              |                     |                                                              | 1                                                        |  |
 | SHARD_IDS                   | shard.instance / acl.shard.instance |                                                              | 0,1                                     | loop over values to create config folders \\ solr6 / solr4 |
 | SHARD_METHOD | shard.method | | DB_ID | solr6 only |
-| SHARD_KEY | shard.key | | cm:creator | solr6 only |
+| SHARD_KEY | shard.key | | cm:creator | solr6 only, used when SHARD_METHOD=PROPERTY |
+| SHARD_RANGE | shard.range | | 0-100000 | solr6 only, used when SHARD_METHOD=DB_ID_RANGE |
 | CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders \\ solr6 only |
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
@@ -112,7 +111,7 @@ There are multiple variants for exposing/shipping these metrics.
 
 Can be used by including the following sections in the docker-compose-solr file (example below is for solr6):
 
-```
+```yaml
    volumes:
     - ./jmxtrans-agent:/jmxtrans
     ....
@@ -133,25 +132,33 @@ Release builds for community images are produced by [Travis](https://travis-ci.o
 
 To build a local version of the _solr_ image:
 
-```
+```bash
 ./gradlew buildDockerImage
 ```
 
 To run the integration tests:
-```
+
+```bash
 ./gradlew integrationTests
 ```
 
 To see all available tasks:
-```
+
+```bash
 ./gradlew tasks
 ```
 
-If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add -Penterprise to your build command.
+If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add
+
+```bash
+-Penterprise
+```
+
+to your build command.
 
 ## Solr backup
 
-In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco. 
+In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco.
 Parameters for the backup (location, maximum number of backups to keep) are set on Alfresco's side and passed to solr via the scheduled job, which calls the replication handler from solr.
 By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
 
