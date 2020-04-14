@@ -3,3 +3,6 @@
 .idea/
 pom*
 **/*class
+**/.project
+**/.settings
+**/.classpath
