@@ -40,7 +40,7 @@ RUN apt-get update && \
 
     # Configure server.xml
     xmlstarlet edit --inplace \
-        --append "/Server/Service/Connector[@port='8080']" --type elem --name Connector \
+        --append "/Server/Service/Connector" --type elem --name Connector \
             --var connector '$prev' \
             --insert '$connector' --type attr --name port --value \$\{TOMCAT_PORT_SSL\} \
             --insert '$connector' --type attr --name URIEncoding --value UTF-8 \
@@ -63,8 +63,8 @@ RUN apt-get update && \
             --insert '$connector' --type attr --name maxSavePostSize --value -1 \
         ${CATALINA_HOME}/conf/server.xml && \
 
-    xmlstarlet edit --inplace -N tomcat="http://tomcat.apache.org/xml" \
-        --subnode "/tomcat:tomcat-users" --type elem --name user \
+    xmlstarlet edit --inplace -N apache="http://tomcat.apache.org/xml" \
+        --subnode "/apache:tomcat-users" --type elem --name user \
             --var user '$prev' \
             --insert '$user' --type attr --name username --value "CN=Alfresco Repository Client, OU=Unknown, O=Alfresco Software Ltd., L=Maidenhead, ST=UK, C=GB" \
             --insert '$user' --type attr --name roles --value "repoclient" \
