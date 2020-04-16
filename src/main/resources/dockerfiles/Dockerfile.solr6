@@ -58,6 +58,9 @@ COPY 	91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
 # add the keystore
 ADD keystore ${SOLR_INSTALL_HOME}/solrhome/keystore
 
+# add jmx_exporter
+ADD jmx_exporter /opt/jmx_exporter
+
 VOLUME ${SOLR_INSTALL_HOME}/data ${SOLR_INSTALL_HOME}/logs
 
 WORKDIR ${SOLR_INSTALL_HOME}
