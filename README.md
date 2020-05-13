@@ -17,7 +17,7 @@ This is the repository building Solr Docker images.
 
 All images are automatically built by [jenkins-2](https://jenkins-2.xenit.eu) and published to [hub.xenit.eu](https://hub.xenit.eu).
 
-Community images are built by [Travis](https://travis-ci.org/xenit-eu/) and published to [docker hub](https://hub.docker.com/u/xenit).
+Community images are built by a [github workflow](https://github.com/xenit-eu/docker-solr/actions) and published to [docker hub](https://hub.docker.com/u/xenit).
 
 ## Example docker-compose files
 
@@ -127,8 +127,6 @@ Update to the latest jar file for jmxtrans-agent.
 Currently there are no example configuration files for jmx exporter in this project.
 
 ### How to build
-
-Release builds for community images are produced by [Travis](https://travis-ci.org/xenit-eu/) driving Gradle from a `.travis.yml` file.
 
 To build a local version of the _solr_ image:
 
