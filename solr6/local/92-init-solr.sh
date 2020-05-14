@@ -116,7 +116,18 @@ function createCoreStatically {
 }
 
 function makeConfigs {
+    SHARED_PROPERTIES=${SOLR_DIR_ROOT}/conf/shared.properties
+    setOption 'solr.host' "$SOLR_HOST" "$SHARED_PROPERTIES"
+    setOption 'solr.port' "$PORT" "$SHARED_PROPERTIES"
 
+    if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
+    then
+	setOption 'alfresco.suggestable.property.0' '{http://www.alfresco.org/model/content/1.0}name' "$SHARED_PROPERTIES"
+	setOption 'alfresco.suggestable.property.1' '{http://www.alfresco.org/model/content/1.0}title' "$SHARED_PROPERTIES"
+	setOption 'alfresco.suggestable.property.2' '{http://www.alfresco.org/model/content/1.0}description' "$SHARED_PROPERTIES"
+	setOption 'alfresco.suggestable.property.3' '{http://www.alfresco.org/model/content/1.0}content' "$SHARED_PROPERTIES"
+    fi
+    
     for coreName in "${DEFAULT_CORES[@]}"
     do
 	newCore=${SOLR_DIR_ROOT}/$coreName
@@ -124,7 +135,6 @@ function makeConfigs {
 
 	if [ $coreName = alfresco ]
 	then
-	    SHARED_PROPERTIES=${SOLR_DIR_ROOT}/conf/shared.properties
 	    # for sharding - dynamic registration of shards
 	    if [ $SHARDING = true ]
 	    then
@@ -163,10 +173,6 @@ function makeConfigs {
                 if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
                 then
                     sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/\1/g' "$CONFIG_FILE_SOLR_SCHEMA"
-                    setOption 'alfresco.suggestable.property.0' '{http://www.alfresco.org/model/content/1.0}name' "$SHARED_PROPERTIES"
-                    setOption 'alfresco.suggestable.property.1' '{http://www.alfresco.org/model/content/1.0}title' "$SHARED_PROPERTIES"
-                    setOption 'alfresco.suggestable.property.2' '{http://www.alfresco.org/model/content/1.0}description' "$SHARED_PROPERTIES"
-                    setOption 'alfresco.suggestable.property.3' '{http://www.alfresco.org/model/content/1.0}content' "$SHARED_PROPERTIES"
                 else
                     sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/<!--\1-->/g' "$CONFIG_FILE_SOLR_SCHEMA"
                 fi
@@ -177,9 +183,6 @@ function makeConfigs {
                 fi
 
                 setGlobalOptions "$CONFIG_FILE_CORE" alfresco
-
-                setOption 'solr.host' "$SOLR_HOST" "$SHARED_PROPERTIES"
-                setOption 'solr.port' "$PORT" "$SHARED_PROPERTIES"
 
                 escapeFile "$CONFIG_FILE_CORE"
 
@@ -209,10 +212,6 @@ function makeConfigs {
             if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
             then
                 sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/\1/g' "$CONFIG_FILE_SOLR_SCHEMA"
-                setOption 'alfresco.suggestable.property.0' '{http://www.alfresco.org/model/content/1.0}name' "$SHARED_PROPERTIES"
-                setOption 'alfresco.suggestable.property.1' '{http://www.alfresco.org/model/content/1.0}title' "$SHARED_PROPERTIES"
-                setOption 'alfresco.suggestable.property.2' '{http://www.alfresco.org/model/content/1.0}description' "$SHARED_PROPERTIES"
-                setOption 'alfresco.suggestable.property.3' '{http://www.alfresco.org/model/content/1.0}content' "$SHARED_PROPERTIES"
             else
                 sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/<!--\1-->/g' "$CONFIG_FILE_SOLR_SCHEMA"
             fi
