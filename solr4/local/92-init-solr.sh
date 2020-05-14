@@ -18,14 +18,6 @@ TOMCAT_SERVER_FILE=${CATALINA_HOME}'/conf/server.xml'
 
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
 
-SHARDING=${SHARDING:-'false'}
-NUM_SHARDS=${NUM_SHARDS:-'4'}
-NUM_NODES=${NUM_NODES:-'2'}
-NODE_INSTANCE=${NODE_INSTANCE:-'1'}
-TEMPLATE=${TEMPLATE:-'rerank'}
-REPLICATION_FACTOR=${REPLICATION_FACTOR:-'1'}
-SHARD_IDS=${SHARD_IDS:-'0,1'}
-
 ALFRESCO_SOLR_SUGGESTER_ENABLED=${ALFRESCO_SOLR_SUGGESTER_ENABLED:-'true'}
 ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED=${ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED:-'false'}
 
@@ -128,57 +120,6 @@ sed -i '/<Connector port="\${TOMCAT_PORT_SSL}" URIEncoding="UTF-8" protocol="org
 fi
 
 
-# for sharding
-if [ $SHARDING = true ]
-then
-  # assuming we shard the workspace store
-  # TO DO: add storeRef parameter
-  rm -rf $SOLR_DIR_ROOT/workspace-SpacesStore
-  collectionName=$TEMPLATE--workspace-SpacesStore--shards--$NUM_SHARDS-x-$REPLICATION_FACTOR--node--$NODE_INSTANCE-of-$NUM_NODES
-  mkdir -p $SOLR_DIR_ROOT/$collectionName
-  for i in $(echo $SHARD_IDS | tr "," "\n")
-  do
-   coreName=workspace-SpacesStore-$i
-   solrCoreName=alfresco-$i
-   newCore=$SOLR_DIR_ROOT/$collectionName/$coreName
-   cp -r $SOLR_DIR_ROOT/templates/$TEMPLATE $newCore
-   CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
-   setOption 'alfresco.host' "${ALFRESCO_HOST:-alfresco}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.secureComms' "${ALFRESCO_SSL:-https}" "$CONFIG_FILE_CORE"
-   setOption 'data.dir.root' "${DATA_DIR_ROOT:-/opt/alfresco/alf_data/solr4/index}" "$CONFIG_FILE_CORE"
-   setOption 'data.dir.store' "$coreName" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.template' "$TEMPLATE" "$CONFIG_FILE_CORE"
-   setOption 'acl.shard.count' "$NUM_SHARDS" "$CONFIG_FILE_CORE"
-   setOption 'acl.shard.instance' "$i" "$CONFIG_FILE_CORE"
-   setOption 'enable.alfresco.tracking' "${ALFRESCO_ENABLE_TRACKING:-true}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.index.transformContent' "${ALFRESCO_INDEX_CONTENT:-true}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
-   setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
-   setOption 'solr.suggester.enabled' "${ALFRESCO_SOLR_SUGGESTER_ENABLED:-true}" "$CONFIG_FILE_CORE"
-
-   CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
-   if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
-   then
-     sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/\1/g' "$CONFIG_FILE_SOLR_SCHEMA"
-   else
-     sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/<!--\1-->/g' "$CONFIG_FILE_SOLR_SCHEMA"
-   fi
-   if [ $ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED = true ]
-   then
-     sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@m_.*type="\)\(oldStandardAnalysis\)\(".*\)\(\/\)\(.*\)/\1identifier\4docValues="true" \/\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
-     sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@s_.*type="\)\(oldStandardAnalysis\)\(".*\)\(sortMissingLast="true"\)\(.*\)/\1identifier\4docValues="true"\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
-   fi
-
-   setGlobalOptions "$CONFIG_FILE_CORE" alfresco
-
-   FILE_CORE=$newCore/core.properties
-   touch $FILE_CORE
-   setOption 'name' "$solrCoreName" "$FILE_CORE"
-  done
-fi
-
 setJavaOption "defaults" "-Dfile.encoding=UTF-8"
 
 ### DEPRECATED
@@ -208,18 +149,6 @@ echo "export JAVA_OPTS" >> $TOMCAT_CONFIG_FILE
 
 user="tomcat"
 # make sure backup folders exist and have the right permissions in case of mounts
-if [ $SHARDING = true ]
-then
-  for i in $(echo $SHARD_IDS | tr "," "\n")
-  do
-	  solrCoreName=alfresco-$i
-	  mkdir -p "${DIR_ROOT}/solr4Backup/$solrCoreName"
-	  if [[ $(stat -c %U "${DIR_ROOT}/solr4Backup/$solrCoreName") != "$user" ]]
-	  then
-	    chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup/$solrCoreName"
-	  fi
-  done
-else
   for solrCoreName in alfresco archive
   do
       mkdir -p "${DIR_ROOT}/solr4Backup/$solrCoreName"
@@ -228,7 +157,6 @@ else
 	    chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup/$solrCoreName"
 	  fi
   done
- fi
 
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U /opt/alfresco/alf_data) != "$user" ]]

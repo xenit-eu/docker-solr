@@ -5,14 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [v1.0.1] - 2020-05-14 Refactorings for sharded setup
 ### Added
-* [DOCKER-264] Alfresco-search-services-1.3.0.6	
+* [DOCKER-264] Alfresco-search-services-1.3.0.6
 	
 ### Fixed
 * [DOCKER-251] Remove from solr's init duplicating logic related to JAVA_OPTS_ variables
 	
 ### Changed
+* [DOCKER-332] Simplified sharding code	
 * [DOCKER-278] Move Java specific variables to java layer
 * [DOCKER-261], [DOCKER-259], [DOCKER-257] Refactorings, notifications	
 * [DOCKER-248] Make sure backup folders exist in the case of a sharded setup. Backup needs to be triggered manually

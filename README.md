@@ -47,17 +47,9 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
-| SHARDING                    |                      |                                                              | false                                               | if true, configuration folders for shards will be created |
-| NUM_SHARDS                  | shard.count / acl.shard.count |                                                              | 3 | solr6 / solr4 |
-| NUM_NODES           |                  |                                                              | 2                                                        |  |
-| NODE_INSTANCE                  |                         |                                                              | 1                                                   |  |
 | TEMPLATE                  | alfresco.template |                                                              | rerank                                                   |  |
-| REPLICATION_FACTOR              |                     |                                                              | 1                                                        |  |
-| SHARD_IDS                   | shard.instance / acl.shard.instance |                                                              | 0,1                                     | loop over values to create config folders \\ solr6 / solr4 |
-| SHARD_METHOD | shard.method | | DB_ID | solr6 only |
-| SHARD_KEY | shard.key | | cm:creator | solr6 only, used when SHARD_METHOD=PROPERTY |
-| SHARD_RANGE | shard.range | | 0-100000 | solr6 only, used when SHARD_METHOD=DB_ID_RANGE |
 | CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders \\ solr6 only |
+| CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host \\ solr6 only |
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
@@ -77,7 +69,8 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | JETTY_PORT_SSL | |  | 8443 | solr6 only |
 | GLOBAL_WORKSPACE_\<variable\> | \<variable\> | | | for workspace core or shards |
 | GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
-| GLOBAL_\<variable\> | \<variable> | | |  |
+| GLOBAL_ALL_\<variable\> | \<variable> | | | for all cores |
+| GLOBAL_<core>_\<variable\> | \<variable> | | | for specific core |
 | \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
 | \* SSL_KEY_STORE_PASSWORD' | | | kT9X6oe68t | |
 | \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
