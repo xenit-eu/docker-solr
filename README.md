@@ -48,8 +48,8 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
 | TEMPLATE                  | alfresco.template |                                                              | rerank                                                   |  |
-| CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders \\ solr6 only |
-| CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host \\ solr6 only |
+| CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders <br> solr6 only |
+| CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host, separated by ";" <br> Example: alfresco-01;alfresco-02 <br> Leave default for non-sharded setup <br> solr6 only |
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
