@@ -43,7 +43,7 @@ function setOption {
     if grep --quiet -e "$1\s*=" "$3"; then
         # replace option
         sed -i "s#^\($1\s*=\s*\).*\$#\1$2#" $3
-	    sed -i "s#^\#\($1\s*=\s*\).*\$#\1$2#" $3
+	sed -i "s#^\#\($1\s*=\s*\).*\$#\1$2#" $3
         if (( $? )); then
             echo "setOption failed (replacing option $1=$2 in $3)"
             exit 1
@@ -63,13 +63,13 @@ function setGlobalOptions {
     IFS=$'\n'
     for i in `env`
     do
-      envCoreName=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 2`
-      if [[ $envCoreName = $coreName ]] || [[ $envCoreName = "ALL" ]] || [[ $envCoreName = "WORKSPACE" && $coreName =~ alfresco ]]
-      then
-         key=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-`
-         value=`echo $i | cut -d '=' -f 2-`
-         setOption $key $value "$file"
-      fi
+	envCoreName=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 2`
+	if [[ $envCoreName = $coreName ]] || [[ $envCoreName = "ALL" ]] || [[ $envCoreName = "WORKSPACE" && $coreName =~ alfresco ]]
+	then
+            key=`echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-`
+            value=`echo $i | cut -d '=' -f 2-`
+            setOption $key $value "$file"
+	fi
     done
 }
 
@@ -80,7 +80,7 @@ function escapeFile {
 function createCoreStatically {
     coreName="$1"
     newCore="$2"
-
+    
     echo "Creating Alfresco core=$coreName in $newCore"
     CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
     if [ ! -d  "$newCore" ]
@@ -103,7 +103,7 @@ function makeConfigs {
     SHARED_PROPERTIES=${SOLR_DIR_ROOT}/conf/shared.properties
     setOption 'solr.host' "$SOLR_HOST" "$SHARED_PROPERTIES"
     setOption 'solr.port' "$PORT" "$SHARED_PROPERTIES"
-
+    
     if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
     then
 	setOption 'alfresco.suggestable.property.0' '{http://www.alfresco.org/model/content/1.0}name' "$SHARED_PROPERTIES"
@@ -116,100 +116,100 @@ function makeConfigs {
     do
 	newCore=${SOLR_DIR_ROOT}/$coreName
 	CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
-
+	
 	if [ $coreName = alfresco ]
 	then
-          for coreAlfrescoName in "${DEFAULT_CORES_ALFRESCO[@]}"
-	  do
-             # only use a collection in the case of a real sharded setup
-             if [ $coreAlfrescoName != $coreName ]
-	     then
-		 collectionName=${TEMPLATE}-alfresco
-		 mkdir -p ${SOLR_DIR_ROOT}/$collectionName
-		 newCore=${SOLR_DIR_ROOT}/$collectionName/$coreAlfrescoName
-	     fi
-
-             CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
-
-             createCoreStatically "$coreAlfrescoName" "$newCore"
-
-             setOption 'alfresco.stores' "workspace://SpacesStore" "$CONFIG_FILE_CORE"
-             setOption 'enable.alfresco.tracking' "${ALFRESCO_ENABLE_TRACKING:-true}" "$CONFIG_FILE_CORE"
-             setOption 'alfresco.index.transformContent' "${ALFRESCO_INDEX_CONTENT:-true}" "$CONFIG_FILE_CORE"
-             setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
-             setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
-             setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
-
-             CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
-             if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
-             then
-                 sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/\1/g' "$CONFIG_FILE_SOLR_SCHEMA"
-             else
-                 sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/<!--\1-->/g' "$CONFIG_FILE_SOLR_SCHEMA"
-             fi
-             if [ $ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED = true ]
-             then
-                 sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@m_.*type="\)\(oldStandardAnalysis\)\(".*\)\(\/\)\(.*\)/\1identifier\4docValues="true" \/\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
-                 sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@s_.*type="\)\(oldStandardAnalysis\)\(".*\)\(sortMissingLast="true"\)\(.*\)/\1identifier\4docValues="true"\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
-             fi
-	     
-             setGlobalOptions "$CONFIG_FILE_CORE" $coreAlfrescoName
-
-             escapeFile "$CONFIG_FILE_CORE"
-
-             if [ $CUSTOM_SCHEMA = true ]
-             then
-                 echo "Will copy custom schema to shard $newCore/conf/schema.xml"
-                 cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
-             fi
-             if [ $CUSTOM_RESOURCES = true ]
-             then
-                 echo "Copying custom resources to shard $newCore/conf/custom_resources/"
-                 cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
-             fi
-          done
-
-    elif [ $coreName = archive ]
-    then
-        createCoreStatically "archive" "$newCore"
-
-        setOption 'alfresco.stores' "archive://SpacesStore" "$CONFIG_FILE_CORE"
-        setOption 'enable.alfresco.tracking' "${ARCHIVE_ENABLE_TRACKING:-true}" "$CONFIG_FILE_CORE"
-        setOption 'alfresco.index.transformContent' "${ARCHIVE_INDEX_CONTENT:-true}" "$CONFIG_FILE_CORE"
-
-        setGlobalOptions "$CONFIG_FILE_CORE" archive
-        escapeFile "$CONFIG_FILE_CORE"
-
-        if [ $CUSTOM_SCHEMA = true ]
-        then
-            cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
-        fi
-        if [ $CUSTOM_RESOURCES = true ]
-        then
-            echo "Copying custom resources to shard $newCore/conf/custom_resources/"
-            cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
-        fi
-    elif [ $coreName = version ]
-    then
-        createCoreStatically "version" "$newCore"
-
-        setOption 'alfresco.stores' "workspace://version2Store" "$CONFIG_FILE_CORE"
-
-        setGlobalOptions "$CONFIG_FILE_CORE" version
-        escapeFile "$CONFIG_FILE_CORE"
-
-        if [ $CUSTOM_SCHEMA = true ]
-        then
-            cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
-        fi
-        if [ $CUSTOM_RESOURCES = true ]
-        then
-            echo "Copying custom resources to shard $newCore/conf/custom_resources/"
-            cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
-        fi
-    else
-        "Core $coreName not found"
-    fi
+            for coreAlfrescoName in "${DEFAULT_CORES_ALFRESCO[@]}"
+	    do
+		# only use a collection in the case of a real sharded setup
+		if [ $coreAlfrescoName != $coreName ]
+		then
+		    collectionName=${TEMPLATE}-alfresco
+		    mkdir -p ${SOLR_DIR_ROOT}/$collectionName
+		    newCore=${SOLR_DIR_ROOT}/$collectionName/$coreAlfrescoName
+		fi
+		
+		CONFIG_FILE_CORE=$newCore/conf/solrcore.properties
+		
+		createCoreStatically "$coreAlfrescoName" "$newCore"
+		
+		setOption 'alfresco.stores' "workspace://SpacesStore" "$CONFIG_FILE_CORE"
+		setOption 'enable.alfresco.tracking' "${ALFRESCO_ENABLE_TRACKING:-true}" "$CONFIG_FILE_CORE"
+		setOption 'alfresco.index.transformContent' "${ALFRESCO_INDEX_CONTENT:-true}" "$CONFIG_FILE_CORE"
+		setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
+		setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
+		setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
+		
+		CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
+		if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
+		then
+                    sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/\1/g' "$CONFIG_FILE_SOLR_SCHEMA"
+		else
+                    sed -i 's/.*\(<copyField source="suggest_\*" dest="suggest" \/>\).*/<!--\1-->/g' "$CONFIG_FILE_SOLR_SCHEMA"
+		fi
+		if [ $ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED = true ]
+		then
+                    sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@m_.*type="\)\(oldStandardAnalysis\)\(".*\)\(\/\)\(.*\)/\1identifier\4docValues="true" \/\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
+                    sed -i 's/\(.*<dynamicField.*name="\(category\|noderef\)@s_.*type="\)\(oldStandardAnalysis\)\(".*\)\(sortMissingLast="true"\)\(.*\)/\1identifier\4docValues="true"\6/g' "$CONFIG_FILE_SOLR_SCHEMA"
+		fi
+		
+		setGlobalOptions "$CONFIG_FILE_CORE" $coreAlfrescoName
+		
+		escapeFile "$CONFIG_FILE_CORE"
+		
+		if [ $CUSTOM_SCHEMA = true ]
+		then
+                    echo "Will copy custom schema to shard $newCore/conf/schema.xml"
+                    cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
+		fi
+		if [ $CUSTOM_RESOURCES = true ]
+		then
+                    echo "Copying custom resources to shard $newCore/conf/custom_resources/"
+                    cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
+		fi
+            done
+	    
+	elif [ $coreName = archive ]
+	then
+            createCoreStatically "archive" "$newCore"
+	    
+            setOption 'alfresco.stores' "archive://SpacesStore" "$CONFIG_FILE_CORE"
+            setOption 'enable.alfresco.tracking' "${ARCHIVE_ENABLE_TRACKING:-true}" "$CONFIG_FILE_CORE"
+            setOption 'alfresco.index.transformContent' "${ARCHIVE_INDEX_CONTENT:-true}" "$CONFIG_FILE_CORE"
+	    
+            setGlobalOptions "$CONFIG_FILE_CORE" archive
+            escapeFile "$CONFIG_FILE_CORE"
+	    
+            if [ $CUSTOM_SCHEMA = true ]
+            then
+		cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
+            fi
+            if [ $CUSTOM_RESOURCES = true ]
+            then
+		echo "Copying custom resources to shard $newCore/conf/custom_resources/"
+		cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
+            fi
+	elif [ $coreName = version ]
+	then
+            createCoreStatically "version" "$newCore"
+	    
+            setOption 'alfresco.stores' "workspace://version2Store" "$CONFIG_FILE_CORE"
+	    
+            setGlobalOptions "$CONFIG_FILE_CORE" version
+            escapeFile "$CONFIG_FILE_CORE"
+	    
+            if [ $CUSTOM_SCHEMA = true ]
+            then
+		cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
+            fi
+            if [ $CUSTOM_RESOURCES = true ]
+            then
+		echo "Copying custom resources to shard $newCore/conf/custom_resources/"
+		cp -r "$SOLR_INSTALL_HOME/custom_resources/" $newCore/conf/custom_resources/
+            fi
+	else
+            "Core $coreName not found"
+	fi
     done
 }
 
@@ -221,7 +221,7 @@ echo "export SOLR_SOLR_CONTENT_DIR=${SOLR_CONTENT_DIR:-$SOLR_DATA_ROOT/contentst
 if [ $ALFRESCO_SSL != none ]
 then
     cp -r ${SOLR_DIR_ROOT}/keystore/* ${SOLR_DIR_ROOT}/templates/${TEMPLATE}/conf/
-
+    
     setOption 'SOLR_SSL_KEY_STORE' "${SOLR_DIR_ROOT}/keystore/${SSL_KEY_STORE}" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SSL_KEY_STORE_PASSWORD' "$SSL_KEY_STORE_PASSWORD" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SSL_TRUST_STORE' "${SOLR_DIR_ROOT}/keystore/${SSL_TRUST_STORE}" "$CONFIG_FILE_SOLR_START"
@@ -255,7 +255,7 @@ done
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U "${SOLR_DATA_ROOT}") != "$user" ]]
 then
-   chown -R "$user":"$user" "${SOLR_DATA_ROOT}"
+    chown -R "$user":"$user" "${SOLR_DATA_ROOT}"
 fi
 # fix permissions for config folders
 chown -R "$user":"$user" "${SOLR_DIR_ROOT}"
