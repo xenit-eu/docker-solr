@@ -9,7 +9,7 @@
 ## Supported Tags
 
 * [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr1 and solr4
-* [`:1.0.0`, `:1.1.1`, `:1.3.0.6`, `:1.4.0`] = version of the alfresco search services used for solr6
+* [`:1.3.1`, `:1.4.0`] = version of the alfresco search services used for solr6
 
 ## Overview
 
