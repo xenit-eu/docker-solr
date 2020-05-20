@@ -10,7 +10,6 @@ ext {
     alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:5.1.5'
     license='./license51'
     tests = true
-    testsSharded = true
 }
 dependencies {
     runtime group: 'org.alfresco', name: 'alfresco-solr4-distribution', version: '5.1.5', ext: 'zip'

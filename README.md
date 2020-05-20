@@ -8,8 +8,8 @@
 
 ## Supported Tags
 
-* [`:4.2`, `:4.2.8`,`:5.1`, `:5.1.4.1`] = minor, major, revision for solr1 and solr4
-* [`:1.0.0`, `:1.1.1`, `:1.2.0`] = version of the alfresco search services used for solr6
+* [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr1 and solr4
+* [`:1.0.0`, `:1.1.1`, `:1.3.0.6`, `:1.4.0`] = version of the alfresco search services used for solr6
 
 ## Overview
 
@@ -17,7 +17,7 @@ This is the repository building Solr Docker images.
 
 All images are automatically built by [jenkins-2](https://jenkins-2.xenit.eu) and published to [hub.xenit.eu](https://hub.xenit.eu).
 
-Community images are built by [Travis](https://travis-ci.org/xenit-eu/) and published to [docker hub](https://hub.docker.com/u/xenit).
+Community images are built by a [github workflow](https://github.com/xenit-eu/docker-solr/actions) and published to [docker hub](https://hub.docker.com/u/xenit).
 
 ## Example docker-compose files
 
@@ -45,20 +45,11 @@ A subset of the properties have also dedicated environment variables e.g. ALFRES
 
 See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat).
 
-Environment variables:
-
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
-| SHARDING                    |                      |                                                              | false                                               | if true, configuration folders for shards will be created |
-| NUM_SHARDS                  | shard.count / acl.shard.count |                                                              | 3 | solr6 / solr4 |
-| NUM_NODES           |                  |                                                              | 2                                                        |  |
-| NODE_INSTANCE                  |                         |                                                              | 1                                                   |  |
 | TEMPLATE                  | alfresco.template |                                                              | rerank                                                   |  |
-| REPLICATION_FACTOR              |                     |                                                              | 1                                                        |  |
-| SHARD_IDS                   | shard.instance / acl.shard.instance |                                                              | 0,1                                     | loop over values to create config folders \\ solr6 / solr4 |
-| SHARD_METHOD | shard.method | | DB_ID | solr6 only |
-| SHARD_KEY | shard.key | | cm:creator | solr6 only |
-| CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders \\ solr6 only |
+| CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders <br> solr6 only |
+| CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host, separated by ";" <br> Example: alfresco-01;alfresco-02 <br> Leave default for non-sharded setup <br> solr6 only |
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
@@ -78,7 +69,8 @@ Environment variables:
 | JETTY_PORT_SSL | |  | 8443 | solr6 only |
 | GLOBAL_WORKSPACE_\<variable\> | \<variable\> | | | for workspace core or shards |
 | GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
-| GLOBAL_\<variable\> | \<variable> | | |  |
+| GLOBAL_ALL_\<variable\> | \<variable> | | | for all cores |
+| GLOBAL_<core>_\<variable\> | \<variable> | | | for specific core |
 | \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
 | \* SSL_KEY_STORE_PASSWORD' | | | kT9X6oe68t | |
 | \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
@@ -96,7 +88,7 @@ These images are updated via pull requests to the [xenit-eu/docker-solr/](https:
 
 **Maintained by:**
 
-Roxana Angheluta <roxana.angheluta@xenit.eu>
+Roxana Angheluta <roxana.angheluta@xenit.eu>, Thijs Lemmens <thijs.lemmens@xenit.eu>
 
 ## Monitoring
 
@@ -112,7 +104,7 @@ There are multiple variants for exposing/shipping these metrics.
 
 Can be used by including the following sections in the docker-compose-solr file (example below is for solr6):
 
-```
+```yaml
    volumes:
     - ./jmxtrans-agent:/jmxtrans
     ....
@@ -129,29 +121,35 @@ Currently there are no example configuration files for jmx exporter in this proj
 
 ### How to build
 
-Release builds for community images are produced by [Travis](https://travis-ci.org/xenit-eu/) driving Gradle from a `.travis.yml` file.
-
 To build a local version of the _solr_ image:
 
-```
+```bash
 ./gradlew buildDockerImage
 ```
 
 To run the integration tests:
-```
+
+```bash
 ./gradlew integrationTests
 ```
 
 To see all available tasks:
-```
+
+```bash
 ./gradlew tasks
 ```
 
-If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add -Penterprise to your build command.
+If you have access to [Alfresco private repository](https://artifacts.alfresco.com/nexus/content/groups/private/) add the repository to build.gradle and add
+
+```bash
+-Penterprise
+```
+
+to your build command.
 
 ## Solr backup
 
-In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco. 
+In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco.
 Parameters for the backup (location, maximum number of backups to keep) are set on Alfresco's side and passed to solr via the scheduled job, which calls the replication handler from solr.
 By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
 
