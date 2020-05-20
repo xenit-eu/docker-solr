@@ -14,14 +14,11 @@ services:
     - ARCHIVE_INDEX_CONTENT=false
     - ALFRESCO_INDEX_CONTENT=false
     - MAX_HTTP_HEADER_SIZE=65536
-    - SHARDING=true
-    - SHARD_IDS=0,1
-    - SHARD_METHOD=DB_ID    
-    - CORE_NAME=alfresco    
-    - NUM_SHARDS=3
-    - NUM_NODES=2
-    - NODE_INSTANCE=1
-    - TEMPLATE=rerank
+    - CORES_ALFRESCO=alfresco-0;alfresco-1
+    - GLOBAL_ALL_shard.method=DB_ID
+    - GLOBAL_ALL_shard.count=3
+    - GLOBAL_alfresco-0_shard.instance=0
+    - GLOBAL_alfresco-1_shard.instance=1
 
   solr2:
     image: ${DOCKER_IMAGE}
@@ -36,11 +33,7 @@ services:
     - ARCHIVE_INDEX_CONTENT=false
     - ALFRESCO_INDEX_CONTENT=false
     - MAX_HTTP_HEADER_SIZE=65536
-    - SHARDING=true
-    - SHARD_IDS=2
-    - SHARD_METHOD=DB_ID    
-    - CORE_NAME=alfresco
-    - NUM_SHARDS=3
-    - NUM_NODES=2
-    - NODE_INSTANCE=2
-    - TEMPLATE=rerank
+    - CORES_ALFRESCO=alfresco-2
+    - GLOBAL_ALL_shard.method=DB_ID
+    - GLOBAL_ALL_shard.count=3    
+    - GLOBAL_alfresco-2_shard.instance=2
