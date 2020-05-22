@@ -1,5 +1,5 @@
 plugins {
-    id "eu.xenit.docker-alfresco" version "4.1.1" apply false
+    id "eu.xenit.docker-alfresco" version "5.0.5" apply false
 }
 
 import com.avast.gradle.dockercompose.tasks.ComposeDown
@@ -29,6 +29,7 @@ subprojects {
 
     apply plugin: 'java'
     apply plugin: 'eu.xenit.docker'
+    apply plugin: 'eu.xenit.docker-compose'
 
     sourceSets {
         integrationTest {
