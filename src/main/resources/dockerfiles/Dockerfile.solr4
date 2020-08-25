@@ -55,7 +55,7 @@ RUN apt-get update && \
             --insert '$connector' --type attr --name secure --value true \
             --insert '$connector' --type attr --name connectionTimeout --value 240000 \
             --insert '$connector' --type attr --name truststoreFile --value /opt/alfresco/keystore/\$\{SSL_TRUST_STORE\} \
-            --insert '$connector' --type attr --name truststorePass --value \$\{SSL_KEY_STORE_PASSWORD\} \
+            --insert '$connector' --type attr --name truststorePass --value \$\{SSL_TRUST_STORE_PASSWORD\} \
             --insert '$connector' --type attr --name truststoreType --value JCEKS \
             --insert '$connector' --type attr --name clientAuth --value want \
             --insert '$connector' --type attr --name sslProtocol --value TLS \
