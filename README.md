@@ -1,4 +1,5 @@
 # Solr in Docker
+Alfresco-specific solr docker images, compatible with Alfresco versions higher than 4.2.
 
 ## Images created
 
