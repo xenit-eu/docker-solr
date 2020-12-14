@@ -221,6 +221,9 @@ if [ $ALFRESCO_SSL != none ]
 then
     cp -r ${SOLR_DIR_ROOT}/keystore/* ${SOLR_DIR_ROOT}/templates/${TEMPLATE}/conf/
     
+    setOption 'SOLR_SSL_KEY_STORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
+    setOption 'SOLR_SSL_KEYSTORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
+    setOption 'SOLR_SSL_TRUST_STORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SSL_KEY_STORE' "${SOLR_DIR_ROOT}/keystore/${SSL_KEY_STORE}" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SSL_KEY_STORE_PASSWORD' "$SSL_KEY_STORE_PASSWORD" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SSL_TRUST_STORE' "${SOLR_DIR_ROOT}/keystore/${SSL_TRUST_STORE}" "$CONFIG_FILE_SOLR_START"
@@ -229,9 +232,15 @@ then
     setOption 'SOLR_SSL_WANT_CLIENT_AUTH' "false" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SOLR_HOST' "$SOLR_HOST" "$CONFIG_FILE_SOLR_START"
     setOption 'SOLR_SOLR_PORT' "$PORT" "$CONFIG_FILE_SOLR_START"
-    setOption 'SOLR_SSL_KEY_STORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
-    setOption 'SOLR_SSL_KEYSTORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
-    setOption 'SOLR_SSL_TRUST_STORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
+
+    setJavaOption 'ssl-keystore.password' "-Dssl-keystore.password=$SSL_KEY_STORE_PASSWORD"
+    setJavaOption 'ssl-keystore.aliases' "-Dssl-keystore.aliases=ssl-alfresco-ca,ssl-repo-client"
+    setJavaOption 'ssl-keystore.ssl-alfresco-ca.password' "-Dssl-keystore.ssl-alfresco-ca.password=$SSL_KEY_STORE_PASSWORD"
+    setJavaOption 'ssl-keystore.ssl-repo-client.password' "-Dssl-keystore.ssl-repo-client.password=$SSL_KEY_STORE_PASSWORD"
+    setJavaOption 'ssl-truststore.password' "-Dssl-truststore.password=$SSL_TRUST_STORE_PASSWORD"
+    setJavaOption 'ssl-truststore.aliases' "-Dssl-truststore.aliases=ssl-alfresco-ca,ssl-repo-client"
+    setJavaOption 'ssl-truststore.ssl-alfresco-ca.password' "-Dssl-truststore.ssl-alfresco-ca.password=$SSL_TRUST_STORE_PASSWORD"
+    setJavaOption 'ssl-truststore.ssl-repo-client.password' "-Dssl-truststore.ssl-repo-client.password=$SSL_TRUST_STORE_PASSWORD"
 fi
 
 # make sure there is an option in JAVA_OPTS, otherwise it throws an error

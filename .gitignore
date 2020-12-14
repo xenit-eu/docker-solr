@@ -7,3 +7,5 @@ pom*
 **/.settings
 **/.classpath
 **~
+#*
+**/#*

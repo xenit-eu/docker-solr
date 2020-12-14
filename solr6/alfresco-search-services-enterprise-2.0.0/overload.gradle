@@ -1,0 +1,15 @@
+ext {
+    solr = [
+            version: [
+                    major: 2,
+                    minor: 0,
+                    rev: 0
+            ],
+            flavor: 'solr6'
+    ]
+    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.0'
+    tests = true
+}
+dependencies {
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.0', ext: 'zip'
+}
