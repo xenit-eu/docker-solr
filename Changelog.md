@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [v1.0.1] - 2020-05-14 Refactorings for sharded setup
+## Unreleased
+
+## [v1.1.0] - 2020-12-14 New versions, refactorings
+### Added
+* [DOCKER-360] Alfresco-search-services-2.0.0
+* [DOCKER-360] Alfresco-search-services-2.0.1
+* [DOCKER-271] Alfresco-search-services-1.4.0
+* [DOCKER-334] Alfresco-search-services-1.3.1
+* [DOCKER-190] Healthcheck script for solr6
+
+### Changed
+* [DOCKER-273], [DOCKER-274] Refactorings, gradle (plugins) upgrades
+* [DOCKER-278], [DOCKER-285] Move java-specific variables to java layer
+* [DOCKER-306] Add jaxb dependency for jdk-11 compatibility
+* [DOCKER-317] Improvements for sharded setup	
+
+## [v1.0.1] - 2020-09-14 Refactorings for sharded setup
 ### Added
 * [DOCKER-264] Alfresco-search-services-1.3.0.6
 	
