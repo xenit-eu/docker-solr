@@ -1,17 +1,45 @@
 plugins {
-    id "eu.xenit.docker-alfresco" version "5.0.5" apply false
+    id "eu.xenit.docker" version "5.1.1" apply false
+    id "be.vbgn.ci-detect" version "0.5.0"
 }
 
-import com.avast.gradle.dockercompose.tasks.ComposeDown
+import java.util.stream.Collectors
 
-static def calcTags (version) {
-    return [
-            "${version.major}.${version.minor}.${version.rev}".toString(),
-            "${version.major}.${version.minor}".toString()
-    ];
+
+def calcTags(version) {
+    def tags = [
+        "${version.major}.${version.minor}.${version.rev}".toString(),
+        "${version.major}.${version.minor}".toString()
+    ]
+
+    if (version.label) {
+        tags += "${version.major}.${version.minor}.${version.rev}.${version.label}".toString()
+    }
+    // For non-master/non-release builds, change the tags to contain branch and build number
+    def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"
+    if(isTestBuild) {
+        tags = tags.stream().map({ it + "-build-${ci.branch}-${ci.buildNumber}" }).collect(Collectors.toList());
+    }
+
+    return tags
+}
+
+def calcRepository(flavor) {
+    def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu");
+    if(repoName == "hub.xenit.eu") {
+        def namespace = (flavor == "enterprise") ? "alfresco-enterprise" : "public";
+        repoName += "/" + namespace;
+    }
+    return "${repoName}/alfresco-${flavor}";
 }
 
 subprojects {
+    apply plugin: 'java'
+
+    ext {
+        alfredTelemetryVersion = '0.3.1'
+    }
+
     repositories {
         mavenCentral()
         maven {
@@ -32,233 +60,16 @@ subprojects {
     }
 
 
-    configurations {
-        runtime
-        integrationTestCompile.extendsFrom testCompile
-        integrationTestRuntime.extendsFrom testRuntime
-    }
-
-    apply plugin: 'java'
-    apply plugin: 'eu.xenit.docker'
-    apply plugin: 'eu.xenit.docker-compose'
-
-    sourceSets {
-        integrationTest {
-            java {
-                compileClasspath += main.output + test.output
-                runtimeClasspath += main.output + test.output
-                srcDirs = ["${project.parent.projectDir}/src/integrationTest/java"]
+    pluginManager.withPlugin('eu.xenit.docker-config') {
+        docker {
+            if (System.getenv("DOCKER_USER") != null) {
+                registryCredentials {
+                    username = System.getenv("DOCKER_USER")
+                    password = System.getenv("DOCKER_PASSWORD")
+                }
+            } else {
+                logger.debug "using default credentials"
             }
         }
-    }
-
-    dependencies {
-        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.1'
-        integrationTestCompile group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
-        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
-        integrationTestCompile group: 'junit', name: 'junit', version: '4.11'
-
-        integrationTestRuntime group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
-    }
-
-    if (new File("${project.projectDir}/overload.gradle").exists())
-        apply from: "${project.projectDir}/overload.gradle"
-
-    def workingDir = "$project.buildDir/dockerbuild"
-
-    task copyDockerfile(type: Copy) {
-        from("$project.parent.projectDir/src/main/resources/dockerfiles/") {
-            include "Dockerfile.${project.solr.flavor}"
-            rename "Dockerfile.${project.solr.flavor}", 'Dockerfile'
-        }
-        into workingDir
-    }
-    task copyGlobalResources(type: Copy) {
-        from "$project.parent.projectDir/src/main/resources/global"
-        into workingDir
-    }
-    task copyLocalResources(type: Copy) {
-        from "$project.projectDir/../local"
-        into workingDir
-    }
-    task pullRuntimeDependencies(type: Copy) {
-        from configurations.runtime
-        into workingDir
-    }
-    buildDockerImage.dependsOn(copyGlobalResources)
-    buildDockerImage.dependsOn(copyDockerfile)
-    buildDockerImage.dependsOn(copyLocalResources)
-    buildDockerImage.dependsOn(pullRuntimeDependencies)
-
-    dockerFile {
-        dockerFile = file("$workingDir/Dockerfile")
-        dockerBuild {
-            if (!(project.hasProperty("repoName"))) {
-                ext.repoName = "hub.xenit.eu"
-            }
-	    def namespace = (project.alfrescoimage.contains("enterprise") ? "alfresco-enterprise" : "public");
-	    repository = ((repoName == "hub.xenit.eu") ?
-			  "${repoName}" + "/" + namespace + "/" + "alfresco-${project.solr.flavor}" :
-			  "${repoName}" + "/" + "alfresco-${project.solr.flavor}")			    
-            tags = calcTags(project.solr.version)
-            pull = true
-            automaticTags = false
-        }
-    }
-
-    buildDockerImage {
-	def date = new Date().getTime().toString()
-
-        buildArgs = [
-            'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
-            'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
-            'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
-            'SOLR_FLAVOR'       : "${project.solr.flavor}",
-            'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds	
-        ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
-
-        doFirst {
-            println buildArgs.get()
-        }
-    }
-
-    afterEvaluate {
-        if (project.hasProperty('testsSharded') && project.testsSharded)
-            shardedComposeUp.dependsOn(buildDockerImage)
-        else
-            shardedComposeUp.enabled=false
-        if (project.hasProperty('testsNonSsl') && project.testsNonSsl)
-            nonSslComposeUp.dependsOn(buildDockerImage)
-        else
-            nonSslComposeUp.enabled=false
-        if (project.hasProperty('testsMounts') && project.testsMounts)
-            mountsComposeUp.dependsOn(buildDockerImage)
-        else
-            mountsComposeUp.enabled=false
-
-        // nested configurations do not get the DOCKER_IMAGE
-        buildDockerImage {
-            doLast {
-                if (project.hasProperty('testsSharded'))
-                    dockerCompose.sharded.environment.put 'DOCKER_IMAGE', getImageId().get()
-                if (project.hasProperty('testsNonSsl'))
-                    dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
-                if (project.hasProperty('testsMounts'))
-                    dockerCompose.mounts.environment.put 'DOCKER_IMAGE', getImageId().get()
-            }
-        }
-    }
-
-
-    task integrationTestDefault(type: Test, group: "verification") {
-        enabled = (project.hasProperty('tests') && project.tests)
-
-        testClassesDirs = sourceSets.integrationTest.output.classesDirs
-        classpath = sourceSets.integrationTest.runtimeClasspath
-        outputs.upToDateWhen { false }
-
-        doFirst {
-            dockerCompose.exposeAsSystemProperties(integrationTestDefault)
-            systemProperty("flavor", "${project.solr.flavor}")
-        }
-    }
-
-    task integrationTestSharded(type: Test, group: "verification") {
-        enabled = (project.hasProperty('testsSharded') && project.testsSharded)
-
-        testClassesDirs = sourceSets.integrationTest.output.classesDirs
-        classpath = sourceSets.integrationTest.runtimeClasspath
-        outputs.upToDateWhen { false }
-
-        doFirst {
-            dockerCompose.sharded.exposeAsSystemProperties(integrationTestSharded)
-            systemProperty("flavor", "${project.solr.flavor}")
-        }
-    }
-
-    task integrationTestNonSsl(type: Test, group: "verification") {
-        enabled = (project.hasProperty('testsNonSsl') && project.testsNonSsl)
-
-        testClassesDirs = sourceSets.integrationTest.output.classesDirs
-        classpath = sourceSets.integrationTest.runtimeClasspath
-        outputs.upToDateWhen { false }
-
-        doFirst {
-            dockerCompose.nonSsl.exposeAsSystemProperties(integrationTestNonSsl)
-            systemProperty("flavor", "${project.solr.flavor}")
-        }
-    }
-
-    task integrationTestMounts(type: Test, group: "verification") {
-        enabled = (project.hasProperty('testsMounts') && project.testsMounts)
-
-        testClassesDirs = sourceSets.integrationTest.output.classesDirs
-        classpath = sourceSets.integrationTest.runtimeClasspath
-        outputs.upToDateWhen { false }
-
-        doFirst {
-            dockerCompose.mounts.exposeAsSystemProperties(integrationTestMounts)
-            systemProperty("flavor", "${project.solr.flavor}")
-        }
-    }
-
-    task integrationTests(type: Test, group: "verification") {
-        dependsOn integrationTestDefault
-        dependsOn integrationTestSharded
-        dependsOn integrationTestNonSsl
-        dependsOn integrationTestMounts
-    }
-
-    docker {
-        if(System.getenv("DOCKER_USER") != null) {
-            registryCredentials {
-                username = System.getenv("DOCKER_USER")
-                password = System.getenv("DOCKER_PASSWORD")
-            }
-        } else {
-            logger.debug "using default credentials"
-        }
-    }
-
-    dockerCompose {
-        def composeDir = "${project.parent.projectDir}/src/integrationTest/resources";
-        environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
-        if("solr1".equals(project.solr.flavor))
-            environment.put 'INDEX', "solr"
-        else
-            environment.put 'INDEX', project.solr.flavor
-
-        isRequiredBy(project.tasks.integrationTestDefault)
-
-        useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr.yml",
-                           "$composeDir/docker-compose-db.yml"];
-
-        sharded {
-            isRequiredBy(project.tasks.integrationTestSharded)
-
-            if(project.hasProperty("license"))
-                environment.put 'LICENSE', project.license
-
-            useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded.yml", "$composeDir/docker-compose-solr-sharded.yml",
-                               "$composeDir/docker-compose-db.yml"];
-        }
-
-        nonSsl {
-            isRequiredBy(project.tasks.integrationTestNonSsl)
-
-            useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
-                               "$composeDir/docker-compose-db.yml"];
-        }
-
-        mounts {
-            isRequiredBy(project.tasks.integrationTestMounts)
-
-            useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr-with-mounts.yml",
-                               "$composeDir/docker-compose-db.yml"];
-        }
-    }
-
-    task composeDownAll {
-        dependsOn project.tasks.withType(ComposeDown)
     }
 }

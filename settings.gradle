@@ -12,7 +12,7 @@ rootProject.name = 'docker-solr'
 // flavor is one of 'solr1','solr4','solr6'
 // classification is one of 'community', 'enterprise'
 def includeSubprojectPerVersion(flavor,classification) {
-    rootProject.projectDir
+    new File("$rootProject.projectDir/upstream")
         .listFiles({ File f -> f.name.equals(flavor)
     } as FileFilter)
     
@@ -22,10 +22,10 @@ def includeSubprojectPerVersion(flavor,classification) {
     
         .each { File projectFile ->
         def version = projectFile.name
-        def projectName = "${flavor}-${version}"
+        def projectName = "upstream:${flavor}-${version}"
 
         include projectName
-        project(":${projectName}").projectDir = file("${flavor}/${version}")
+        project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
 	println "included $projectName"
     }
 }
