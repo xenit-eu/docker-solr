@@ -24,21 +24,21 @@ def calcTags(version) {
     return tags
 }
 
-def calcRepository(flavor) {
-    def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu");
+def calcRepository(flavor,customized) {
+    def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu")
     if(repoName == "hub.xenit.eu") {
-        def namespace = (flavor == "enterprise") ? "alfresco-enterprise" : "public";
-        repoName += "/" + namespace;
+        def namespace = (flavor == "enterprise") ? "alfresco-enterprise" : "public"
+        repoName += "/" + namespace
     }
-    return "${repoName}/alfresco-${flavor}";
+    if(customized)
+        return "${repoName}/alfresco-${flavor}-xenit"
+    else
+        return "${repoName}/alfresco-${flavor}"
 }
 
 subprojects {
     apply plugin: 'java'
 
-    ext {
-        alfredTelemetryVersion = '0.3.1'
-    }
 
     repositories {
         mavenCentral()

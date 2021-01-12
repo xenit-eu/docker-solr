@@ -13,38 +13,54 @@ rootProject.name = 'docker-solr'
 // classification is one of 'community', 'enterprise'
 def includeSubprojectPerVersion(flavor,classification) {
     new File("$rootProject.projectDir/upstream")
-        .listFiles({ File f -> f.name.equals(flavor)
-    } as FileFilter)
-    
-        .collectMany ({ File v -> v.listFiles({ File f -> f.name.contains(classification)
-        } as FileFilter).toList()
-    })
-    
-        .each { File projectFile ->
-        def version = projectFile.name
-        def projectName = "upstream:${flavor}-${version}"
+            .listFiles({ File f -> f.name.equals(flavor)
+            } as FileFilter)
 
-        include projectName
-        project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
-	println "included $projectName"
-    }
+            .collectMany ({ File v -> v.listFiles({ File f -> f.name.contains(classification)
+            } as FileFilter).toList()
+            })
+
+            .each { File projectFile ->
+                def version = projectFile.name
+                def projectName = "upstream:${flavor}-${version}"
+
+                include projectName
+                project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
+                println "included $projectName"
+            }
+    new File("$rootProject.projectDir/xenit")
+            .listFiles({ File f -> f.name.equals(flavor)
+            } as FileFilter)
+
+            .collectMany ({ File v -> v.listFiles({ File f -> f.name.contains(classification)
+            } as FileFilter).toList()
+            })
+
+            .each { File projectFile ->
+                def version = projectFile.name
+                def projectName = "xenit:${flavor}-${version}"
+
+                include projectName
+                project(":${projectName}").projectDir = file("xenit/${flavor}/${version}")
+                println "included $projectName"
+            }
 }
 
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr6")) {
     includeSubprojectPerVersion("solr6","community")
     if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr6","enterprise")	
+        includeSubprojectPerVersion("solr6","enterprise")
     }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
     includeSubprojectPerVersion("solr4","community")
     if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr4","enterprise")	
+        includeSubprojectPerVersion("solr4","enterprise")
     }
 }
 if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
     includeSubprojectPerVersion("solr1","community")
     if(hasProperty("enterprise")) {
-	includeSubprojectPerVersion("solr1","enterprise")	
+        includeSubprojectPerVersion("solr1","enterprise")
     }
 }

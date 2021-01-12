@@ -1,0 +1,50 @@
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
+
+subprojects {
+
+    configurations {
+        telemetry
+    }
+    
+    apply plugin: 'java'
+    apply plugin: 'eu.xenit.docker'
+    apply from: "${project.projectDir}/overload.gradle"
+
+    ext {
+        alfredTelemetryVersion = '0.3.1'
+    }
+
+    def upstreamProjectName = ":upstream:${project.name}"
+    def upstreamProject = project(upstreamProjectName)
+    evaluationDependsOn(upstreamProjectName)
+    def upstreamImage = upstreamProject.getTasks().getByName('buildDockerImage')
+    buildDockerImage.dependsOn(upstreamImage)
+    createDockerFile.dependsOn(upstreamImage)
+
+    buildDockerImage {
+        pull = false
+    }
+
+    dockerFile {
+        dockerBuild {
+            repository = [calcRepository(upstreamProject.solr.flavor,true)].get(0)
+            tags = calcTags(upstreamProject.solr.version)
+        }
+    }
+
+    createDockerFile {
+       from(upstreamImage.getImageId().map({ new From(it) }))
+        // micrometer handler init script
+        smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh","/docker-entrypoint.d/")
+        if("solr4".equals(upstreamProject.solr.flavor)) {
+            smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
+            smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
+        } else if("solr6".equals(upstreamProject.solr.flavor)) {
+            smartCopy "${project.projectDir}/../local/solrconfig.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig.xml"
+            smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
+            smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
+            smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solr/lib/"
+
+        }
+    }
+}

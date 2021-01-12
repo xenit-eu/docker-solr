@@ -63,7 +63,7 @@ subprojects {
     dockerFile {
         dockerFile = file("$workingDir/Dockerfile")
         dockerBuild {
-            repository = [calcRepository(project.solr.flavor)].get(0)
+            repository = [calcRepository(project.solr.flavor,false)].get(0)
             tags = calcTags(project.solr.version)
             pull = true
             automaticTags = false
@@ -171,17 +171,6 @@ subprojects {
         dependsOn integrationTestSharded
         dependsOn integrationTestNonSsl
         dependsOn integrationTestMounts
-    }
-
-    docker {
-        if(System.getenv("DOCKER_USER") != null) {
-            registryCredentials {
-                username = System.getenv("DOCKER_USER")
-                password = System.getenv("DOCKER_PASSWORD")
-            }
-        } else {
-            logger.debug "using default credentials"
-        }
     }
 
     dockerCompose {
