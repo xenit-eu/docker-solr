@@ -17,7 +17,7 @@ subprojects {
             java {
                 compileClasspath += main.output + test.output
                 runtimeClasspath += main.output + test.output
-                srcDirs = ["${project.parent.projectDir}/src/integrationTest/java"]
+                srcDirs = ["${rootProject.projectDir}/src/integrationTest/java"]
             }
         }
     }
@@ -174,7 +174,7 @@ subprojects {
     }
 
     dockerCompose {
-        def composeDir = "${project.parent.projectDir}/src/integrationTest/resources";
+        def composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
         if("solr1".equals(project.solr.flavor))
             environment.put 'INDEX', "solr"
