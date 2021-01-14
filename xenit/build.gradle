@@ -5,14 +5,15 @@ subprojects {
     configurations {
         telemetry
     }
-    
+
+    ext {
+        alfredTelemetryVersion = '0.4.0'
+    }
+
     apply plugin: 'java'
     apply plugin: 'eu.xenit.docker'
     apply from: "${project.projectDir}/overload.gradle"
 
-    ext {
-        alfredTelemetryVersion = '0.3.1'
-    }
 
     def upstreamProjectName = ":upstream:${project.name}"
     def upstreamProject = project(upstreamProjectName)
@@ -43,7 +44,7 @@ subprojects {
             smartCopy "${project.projectDir}/../local/solrconfig.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig.xml"
             smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
             smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
-            smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solr/lib/"
+            smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
 
         }
     }
