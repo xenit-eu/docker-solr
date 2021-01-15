@@ -63,7 +63,8 @@ subprojects {
     dockerFile {
         dockerFile = file("$workingDir/Dockerfile")
         dockerBuild {
-            repository = [calcRepository(project.solr.flavor,false)].get(0)
+            def enterprise = project.alfrescoimage.contains("enterprise")
+            repository = [calcRepository(project.solr.flavor,enterprise,false)].get(0)
             tags = calcTags(project.solr.version)
             pull = true
             automaticTags = false

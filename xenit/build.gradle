@@ -28,7 +28,8 @@ subprojects {
 
     dockerFile {
         dockerBuild {
-            repository = [calcRepository(upstreamProject.solr.flavor,true)].get(0)
+            def enterprise = upstreamProject.alfrescoimage.contains("enterprise")
+            repository = [calcRepository(upstreamProject.solr.flavor,enterprise,true)].get(0)
             tags = calcTags(upstreamProject.solr.version)
         }
     }

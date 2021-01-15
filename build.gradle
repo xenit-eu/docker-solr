@@ -24,10 +24,10 @@ def calcTags(version) {
     return tags
 }
 
-def calcRepository(flavor,customized) {
+def calcRepository(flavor,enterprise,customized) {
     def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu")
     if(repoName == "hub.xenit.eu") {
-        def namespace = (flavor == "enterprise") ? "alfresco-enterprise" : "public"
+        def namespace = (enterprise ? "alfresco-enterprise" : "public");
         repoName += "/" + namespace
     }
     if(customized)
