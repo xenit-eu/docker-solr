@@ -7,7 +7,7 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 * [`alfresco-solr4`] = solr4 images, using tomcat
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
 
-* [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry)
+* [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
 * [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
 
 ## Supported Tags
@@ -96,7 +96,7 @@ Roxana Angheluta <roxana.angheluta@xenit.eu>
 
 ## Monitoring
 
-Xenit-specific variants of the images contain [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) resources necessar for monitoring. See alfred-telemetry for more details.
+Xenit-specific variants of the images contain [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) resources necessary for monitoring. See [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) for more details.
 
 ### [Jmxtrans-agent](https://github.com/jmxtrans/jmxtrans-agent/)
 
