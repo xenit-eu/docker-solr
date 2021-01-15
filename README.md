@@ -7,6 +7,9 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 * [`alfresco-solr4`] = solr4 images, using tomcat
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
 
+* [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry)
+* [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
+
 ## Supported Tags
 
 * [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr1 and solr4
@@ -89,17 +92,11 @@ These images are updated via pull requests to the [xenit-eu/docker-solr/](https:
 
 **Maintained by:**
 
-Roxana Angheluta <roxana.angheluta@xenit.eu>, Thijs Lemmens <thijs.lemmens@xenit.eu>
+Roxana Angheluta <roxana.angheluta@xenit.eu>
 
 ## Monitoring
 
-Solr exposes a number of beans which can be used for monitoring via Jmx. Additionally, there are some system beans in java.lang which can be used to monitor memory, garbage collector, Java threads.
-
-For Solr1 and Solr4, tomcat has also specific beans for the thread pool per connector and for session attributes for a specific web application.
-
-For Solr6, Jetty does not expose thread pool + webapp information out-of-the-box.
-
-There are multiple variants for exposing/shipping these metrics.
+Xenit-specific variants of the images contain [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) resources necessar for monitoring. See alfred-telemetry for more details.
 
 ### [Jmxtrans-agent](https://github.com/jmxtrans/jmxtrans-agent/)
 
