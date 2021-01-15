@@ -27,7 +27,7 @@ def calcTags(version) {
 def calcRepository(flavor,customized) {
     def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu")
     if(repoName == "hub.xenit.eu") {
-        def namespace = (flavor == "enterprise") ? "alfresco-enterprise" : "public"
+        def namespace = (project.alfrescoimage.contains("enterprise") ? "alfresco-enterprise" : "public");
         repoName += "/" + namespace
     }
     if(customized)
