@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 * [DOCKER-363] New images with "-xenit" suffix, containing alfred-telemetry
-
+### Fixed
+* [PR #37](https://github.com/xenit-eu/docker-solr/pull/37) More elaborate healthchecks
+	
 ## [v1.1.0] - 2020-12-14 New versions, refactorings
 ### Added
 * [DOCKER-360] Alfresco-search-services-2.0.0
