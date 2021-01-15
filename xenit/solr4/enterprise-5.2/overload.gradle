@@ -1,0 +1,3 @@
+dependencies {
+    telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr4', version: "${alfredTelemetryVersion}"
+}
