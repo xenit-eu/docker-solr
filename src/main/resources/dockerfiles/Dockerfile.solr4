@@ -23,8 +23,9 @@ ARG SOLR_FLAVOR
 ARG BUILD_DATE
 
 ENV SOLR_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
-ENV SOLR_DIR_ROOT /opt/alfresco/solr4
-ENV BUILD_DATE ${BUILD_DATE}
+ENV SOLR_INSTALL_HOME=/opt/alfresco
+ENV SOLR_DIR_ROOT=/opt/alfresco/solr4
+ENV BUILD_DATE=${BUILD_DATE}
 
 # ${CATALINA_HOME} = /usr/local/tomcat
 
@@ -88,9 +89,13 @@ RUN apt-get update && \
  	sed -i "s#^\(data.dir.root\s*=\s*\).*\$#\1/opt/alfresco/alf_data/solr4/index#" /opt/alfresco/solr4/workspace-SpacesStore/conf/solrcore.properties && \
  	sed -i "s#^\(data.dir.root\s*=\s*\).*\$#\1/opt/alfresco/alf_data/solr4/index#" /opt/alfresco/solr4/archive-SpacesStore/conf/solrcore.properties && \
  	chown -hR tomcat /opt/alfresco && \
- 	chown -hR tomcat ${CATALINA_HOME}
+ 	chown -hR tomcat ${CATALINA_HOME} && \
 
-COPY 	92-init-solr.sh /docker-entrypoint.d/
+# healthcheck
+     touch ${SOLR_INSTALL_HOME}/healthcheck.sh && \
+     chmod +x ${SOLR_INSTALL_HOME}/healthcheck.sh
+
+COPY 	91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
 
 # add the keystore
 ADD keystore /opt/alfresco/keystore
@@ -99,4 +104,4 @@ VOLUME ${CATALINA_HOME}/temp ${CATALINA_HOME}/logs
 
 WORKDIR /opt/alfresco
 
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 --start-period=20s CMD curl -f http://localhost:${TOMCAT_PORT}/solr4 || exit 1
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 --start-period=20s CMD ${SOLR_INSTALL_HOME}/healthcheck.sh || exit 1
