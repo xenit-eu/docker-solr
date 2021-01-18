@@ -2,6 +2,8 @@ import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
 import com.avast.gradle.dockercompose.tasks.ComposeDown
 
 subprojects {
+    apply plugin: 'eu.xenit.docker'
+    apply plugin: 'eu.xenit.docker-compose'
 
     configurations {
         telemetry
@@ -11,10 +13,8 @@ subprojects {
         alfredTelemetryVersion = '0.4.0'
     }
 
-    apply plugin: 'java'
-    apply plugin: 'eu.xenit.docker'
-    apply plugin: 'eu.xenit.docker-compose'
-    apply from: "${project.projectDir}/overload.gradle"
+     if (new File("${project.projectDir}/overload.gradle").exists())
+         apply from: "${project.projectDir}/overload.gradle"
 
 
     def upstreamProjectName = ":upstream:${project.name}"
@@ -41,6 +41,8 @@ subprojects {
        from(upstreamImage.getImageId().map({ new From(it) }))
         // micrometer handler init script
         smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh","/docker-entrypoint.d/")
+        // jmx needs to be enabled
+        environmentVariable 'JMX_ENABLED', 'true'
         if("solr4".equals(upstreamProject.solr.flavor)) {
             smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
             smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
@@ -53,7 +55,7 @@ subprojects {
         }
     }
 
-    task integrationTestDefault(type: Test, group: "verification") {
+    task integrationTestTelemetry(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -61,13 +63,14 @@ subprojects {
         outputs.upToDateWhen { false }
 
         doFirst {
-            dockerCompose.exposeAsSystemProperties(integrationTestDefault)
+            dockerCompose.exposeAsSystemProperties(integrationTestTelemetry)
             systemProperty("flavor", "${upstreamProject.solr.flavor}")
+            systemProperty("telemetry", true)
         }
     }
 
     task integrationTests(type: Test, group: "verification") {
-        dependsOn integrationTestDefault
+        dependsOn integrationTestTelemetry
     }
 
     dockerCompose {
@@ -78,9 +81,10 @@ subprojects {
         else
             environment.put 'INDEX', upstreamProject.solr.flavor
 
-        isRequiredBy(project.tasks.integrationTestDefault)
+        isRequiredBy(project.tasks.integrationTestTelemetry)
 
-        useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr.yml",
+        // atm test without ssl enabled
+        useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
                            "$composeDir/docker-compose-db.yml"];
     }
 

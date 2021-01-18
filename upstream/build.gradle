@@ -1,16 +1,9 @@
 import com.avast.gradle.dockercompose.tasks.ComposeDown
 
 subprojects {
-
-    configurations {
-        runtime
-        integrationTestCompile.extendsFrom testCompile
-        integrationTestRuntime.extendsFrom testRuntime
-    }
-
-    apply plugin: 'java'
     apply plugin: 'eu.xenit.docker'
     apply plugin: 'eu.xenit.docker-compose'
+
 
     if (new File("${project.projectDir}/overload.gradle").exists())
         apply from: "${project.projectDir}/overload.gradle"

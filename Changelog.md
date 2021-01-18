@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
-* [DOCKER-363] New images with "-xenit" suffix, containing alfred-telemetry
+* [DOCKER-362, DOCKER-363] New images with "-xenit" suffix, containing alfred-telemetry
 ### Fixed
 * [PR #37](https://github.com/xenit-eu/docker-solr/pull/37) More elaborate healthchecks
 	

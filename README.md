@@ -97,6 +97,7 @@ Roxana Angheluta <roxana.angheluta@xenit.eu>
 ## Monitoring
 
 Xenit-specific variants of the images contain [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) resources necessary for monitoring. See [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) for more details.
+Since some of the metrics rely on jmx, it is enabled by default in this image variant.
 
 ### [Jmxtrans-agent](https://github.com/jmxtrans/jmxtrans-agent/)
 
@@ -112,10 +113,12 @@ Can be used by including the following sections in the docker-compose-solr file 
 
 Example configuration files are in directory [jmxtrans-agent](src/integrationTest/resources/jmxtrans-agent/).
 Update to the latest jar file for jmxtrans-agent.
+The agent is not needed if alfred-telemetry is installed.
 
 ### [Jmx exporter](https://github.com/prometheus/jmx_exporter)
 
-Currently there are no example configuration files for jmx exporter in this project.
+Currently there are no example configuration files for jmx exporter in this project.  
+The agent is not needed if alfred-telemetry is installed.
 
 ### How to build
 

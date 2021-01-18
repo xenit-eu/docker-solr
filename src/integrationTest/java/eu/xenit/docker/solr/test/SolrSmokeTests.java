@@ -3,6 +3,7 @@ package eu.xenit.docker.solr.test;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.Thread.sleep;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
 
@@ -19,27 +20,41 @@ public class SolrSmokeTests {
     static RequestSpecification spec;
     static RequestSpecification specShardedSolr1;
     static RequestSpecification specShardedSolr2;
+    static RequestSpecification specTelemetry;
+    static boolean telemetry = false;
 
     @BeforeClass
     public static void setup() {
 
         String basePath = "/alfresco";
         String basePathSolr = "solr/admin/cores";
-        if("solr4".equals(System.getProperty("flavor")))
+        String basePathSolrTelemetry = "solr/alfresco/metrics";
+        telemetry = Boolean.valueOf(System.getProperty("telemetry"));
+        if("solr4".equals(System.getProperty("flavor"))) {
             basePathSolr = "solr4/admin/cores";
+            basePathSolrTelemetry = "solr4/alfresco/metrics";	    
+	}
         String host = System.getProperty("alfresco.host");
+        String solrHost = System.getProperty("solr.host");
         String solr1 = System.getProperty("solr1.host");
         String solr2 = System.getProperty("solr2.host");
         int port = Integer.parseInt(System.getProperty("alfresco.tcp.8080"));
+        int solrPort = 0;
+	try {
+	    solrPort = Integer.parseInt(System.getProperty("solr.tcp.8080"));
+	} catch(NumberFormatException e) {
+	    System.out.println("Solr port 8080 is not exposed, probably ssl is enabled");
+	}
         int portShardedSolr1 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr1.tcp.8080")):-1);
         int portShardedSolr2 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr2.tcp.8080")):-1);
 
         System.out.println("basePath=" + basePath + " and basePathSolr=" + basePathSolr +
                 " and host=" + host + " and solr1=" + solr1 + " and solr2=" + solr2 +
                 " and port=" + port + " and portShardedSolr1=" + portShardedSolr1 +
-                " and portShardedSolr2=" + portShardedSolr2);
+                " and portShardedSolr2=" + portShardedSolr2 + " and telemetry=" + telemetry);
 
         String baseURI = "http://" + host;
+        String baseURISolr = "http://" + solrHost;
         String baseURIShardedSolr1 = "http://" + solr1;
         String baseURIShardedSolr2 = "http://" + solr2;
 
@@ -75,6 +90,15 @@ public class SolrSmokeTests {
             specShardedSolr2 = null;
         }
 
+        if(telemetry) {
+            specTelemetry = new RequestSpecBuilder()
+                    .setBaseUri(baseURISolr)
+                    .setPort(solrPort)
+                    .setBasePath(basePathSolrTelemetry)
+                    .addParam("wt","dummy")
+                    .build();
+            System.out.println("baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrTelemetry);
+        }
         // wait for solr to track
         long sleepTime = 30000;
         try {
@@ -158,6 +182,20 @@ public class SolrSmokeTests {
             assertThat(docs0,greaterThan(50));
             assertThat(docs1,greaterThan(50));
             assertThat(docs2,greaterThan(50));
+        }
+    }
+
+    @Test
+    public void testTelemetryEndpoint() {
+        if(telemetry) {
+            String response = given()
+                    .spec(specTelemetry)
+                    .when()
+                    .get()
+                    .then()
+                    .statusCode(200)
+                    .body(containsString("alfresco_nodes"))
+                    .toString();
         }
     }
 }
