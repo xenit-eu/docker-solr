@@ -60,6 +60,25 @@ subprojects {
     }
 
 
+    sourceSets {
+        integrationTest {
+            java {
+                compileClasspath += main.output + test.output
+                runtimeClasspath += main.output + test.output
+                srcDirs = ["${rootProject.projectDir}/src/integrationTest/java"]
+            }
+        }
+    }
+
+    dependencies {
+        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.1'
+        integrationTestCompile group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
+        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
+        integrationTestCompile group: 'junit', name: 'junit', version: '4.11'
+
+        integrationTestRuntime group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
+    }
+
     pluginManager.withPlugin('eu.xenit.docker-config') {
         docker {
             if (System.getenv("DOCKER_USER") != null) {

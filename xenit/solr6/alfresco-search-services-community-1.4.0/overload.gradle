@@ -1,3 +1,6 @@
+ext {
+ tests = true
+}
 dependencies {
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }
