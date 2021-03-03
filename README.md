@@ -1,10 +1,14 @@
 # Solr in Docker
+Alfresco-specific solr docker images, compatible with Alfresco versions higher than 4.2.
 
 ## Images created
 
 * [`alfresco-solr1`] = solr1 images, using tomcat
 * [`alfresco-solr4`] = solr4 images, using tomcat
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
+
+* [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
+* [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
 
 ## Supported Tags
 
@@ -89,17 +93,12 @@ These images are updated via pull requests to the [xenit-eu/docker-solr/](https:
 
 **Maintained by:**
 
-Roxana Angheluta <roxana.angheluta@xenit.eu>, Thijs Lemmens <thijs.lemmens@xenit.eu>
+Roxana Angheluta <roxana.angheluta@xenit.eu>
 
 ## Monitoring
 
-Solr exposes a number of beans which can be used for monitoring via Jmx. Additionally, there are some system beans in java.lang which can be used to monitor memory, garbage collector, Java threads.
-
-For Solr1 and Solr4, tomcat has also specific beans for the thread pool per connector and for session attributes for a specific web application.
-
-For Solr6, Jetty does not expose thread pool + webapp information out-of-the-box.
-
-There are multiple variants for exposing/shipping these metrics.
+Xenit-specific variants of the images contain [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) resources necessary for monitoring. See [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) for more details.
+Since some of the metrics rely on jmx, it is enabled by default in this image variant.
 
 ### [Jmxtrans-agent](https://github.com/jmxtrans/jmxtrans-agent/)
 
@@ -115,10 +114,12 @@ Can be used by including the following sections in the docker-compose-solr file 
 
 Example configuration files are in directory [jmxtrans-agent](src/integrationTest/resources/jmxtrans-agent/).
 Update to the latest jar file for jmxtrans-agent.
+The agent is not needed if alfred-telemetry is installed.
 
 ### [Jmx exporter](https://github.com/prometheus/jmx_exporter)
 
-Currently there are no example configuration files for jmx exporter in this project.
+Currently there are no example configuration files for jmx exporter in this project.  
+The agent is not needed if alfred-telemetry is installed.
 
 ### How to build
 

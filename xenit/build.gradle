@@ -1,0 +1,101 @@
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
+import com.avast.gradle.dockercompose.tasks.ComposeDown
+
+subprojects {
+    apply plugin: 'eu.xenit.docker'
+    apply plugin: 'eu.xenit.docker-compose'
+
+    configurations {
+        telemetry
+    }
+
+    ext {
+        alfredTelemetryVersion = '0.4.0'
+    }
+
+     if (new File("${project.projectDir}/overload.gradle").exists())
+         apply from: "${project.projectDir}/overload.gradle"
+
+
+    def upstreamProjectName = ":upstream:${project.name}"
+    def upstreamProject = project(upstreamProjectName)
+    evaluationDependsOn(upstreamProjectName)
+    def upstreamImage = upstreamProject.getTasks().getByName('buildDockerImage')
+    buildDockerImage.dependsOn(upstreamImage)
+    createDockerFile.dependsOn(upstreamImage)
+
+    buildDockerImage {
+        pull = false
+    }
+
+    dockerFile {
+        dockerBuild {
+            def enterprise = upstreamProject.alfrescoimage.contains("enterprise")
+            repository = [calcRepository(upstreamProject.solr.flavor,enterprise,true)].get(0)
+            tags = calcTags(upstreamProject.solr.version)
+        }
+    }
+
+
+    createDockerFile {
+       from(upstreamImage.getImageId().map({ new From(it) }))
+        // micrometer handler init script
+        smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh","/docker-entrypoint.d/")
+        // jmx needs to be enabled
+        environmentVariable 'JMX_ENABLED', 'true'
+        if("solr4".equals(upstreamProject.solr.flavor)) {
+            smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
+            smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
+       	    label([
+              "eu.xenit.prometheus.metrics-path":"/solr4/alfresco/metrics",
+              "eu.xenit.prometheus.params":"wt: ['dummy']"
+            ])
+        } else if("solr6".equals(upstreamProject.solr.flavor)) {
+            smartCopy "${project.projectDir}/../local/solrconfig.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig.xml"
+            smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
+            smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
+            smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
+       	    label([
+              "eu.xenit.prometheus.metrics-path":"/solr/alfresco/metrics",
+              "eu.xenit.prometheus.params":"wt: ['dummy']"	    
+            ]) 
+        }
+    }
+
+    task integrationTestTelemetry(type: Test, group: "verification") {
+        enabled = (project.hasProperty('tests') && project.tests)
+
+        testClassesDirs = sourceSets.integrationTest.output.classesDirs
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        outputs.upToDateWhen { false }
+
+        doFirst {
+            dockerCompose.exposeAsSystemProperties(integrationTestTelemetry)
+            systemProperty("flavor", "${upstreamProject.solr.flavor}")
+            systemProperty("telemetry", true)
+        }
+    }
+
+    task integrationTests(type: Test, group: "verification") {
+        dependsOn integrationTestTelemetry
+    }
+
+    dockerCompose {
+        def composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
+        environment.put 'ALFRESCO_IMAGE', upstreamProject.alfrescoimage
+        if("solr1".equals(upstreamProject.solr.flavor))
+            environment.put 'INDEX', "solr"
+        else
+            environment.put 'INDEX', upstreamProject.solr.flavor
+
+        isRequiredBy(project.tasks.integrationTestTelemetry)
+
+        // atm test without ssl enabled
+        useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
+                           "$composeDir/docker-compose-db.yml"];
+    }
+
+    task composeDownAll {
+        dependsOn project.tasks.withType(ComposeDown)
+    }
+}

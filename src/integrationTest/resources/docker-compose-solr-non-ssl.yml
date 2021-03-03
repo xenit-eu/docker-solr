@@ -5,5 +5,7 @@ services:
     image: ${DOCKER_IMAGE}
     restart: unless-stopped
     hostname: solr
+    ports:
+      - 8080
     environment:
     - ALFRESCO_SSL=none

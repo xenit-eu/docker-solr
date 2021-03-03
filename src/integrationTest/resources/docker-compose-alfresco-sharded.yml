@@ -6,12 +6,9 @@ services:
     restart: unless-stopped
     ports:
     - 8080
-    volumes:
-    - ${LICENSE}:/opt/alfresco/license
     environment:
     - SOLR_HOST=solr1
     - INDEX
     - SOLR_SSL=none
     - ENABLE_CLUSTERING=true
     - DYNAMIC_SHARD_REGISTRATION=true    
-    - GLOBAL_dir.license.external=/opt/alfresco/license
