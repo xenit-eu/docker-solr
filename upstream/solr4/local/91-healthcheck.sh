@@ -5,6 +5,7 @@ echo "Solr init healthcheck start"
 ALFRESCO_SSL=${ALFRESCO_SSL:-'https'}
 SSL_KEY_STORE=${SSL_KEY_STORE:-'ssl.repo.client.keystore'}
 SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD:-'kT9X6oe68t'}
+SSL_KEY_STORE_ALIAS=${SSL_KEY_STORE_ALIAS:-'ssl.repo'}
 
 CORES_ALFRESCO=${CORES_ALFRESCO:-"alfresco"}
 IFS=';' read -r -a DEFAULT_CORES_ALFRESCO <<< "$CORES_ALFRESCO"
@@ -26,7 +27,7 @@ then
     # this only works because images use the same keystore for alfresco and solr
     if [ ! -f "${SOLR_INSTALL_HOME}/keystore/browser.pem" ]
     then
-        keytool -importkeystore -srckeystore "${SOLR_INSTALL_HOME}/keystore/${SSL_KEY_STORE}" -srcstorepass ${SSL_KEY_STORE_PASSWORD} -srcstoretype JCEKS -srcalias ssl.repo -destkeystore  "${SOLR_INSTALL_HOME}/keystore/browser.p12" -deststoretype pkcs12 -destalias ssl.repo -deststorepass alfresco -destkeypass alfresco
+        keytool -importkeystore -srckeystore "${SOLR_INSTALL_HOME}/keystore/${SSL_KEY_STORE}" -srcstorepass ${SSL_KEY_STORE_PASSWORD} -srcstoretype JCEKS -srcalias ${SSL_KEY_STORE_ALIAS} -destkeystore  "${SOLR_INSTALL_HOME}/keystore/browser.p12" -deststoretype pkcs12 -destalias ssl.repo -deststorepass alfresco -destkeypass alfresco
         openssl pkcs12 -in "${SOLR_INSTALL_HOME}/keystore/browser.p12" -out "${SOLR_INSTALL_HOME}/keystore/browser.pem" -nodes -passin pass:alfresco
     fi
     echo "status=\$(curl -f -k -L -w %{http_code} -s -E ${SOLR_INSTALL_HOME}/keystore/browser.pem -o /dev/null https://localhost:${PORT}/solr4/${DEFAULT_CORES_ALFRESCO[0]}/admin/ping)" >>${SOLR_INSTALL_HOME}/healthcheck.sh

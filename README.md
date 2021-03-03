@@ -76,7 +76,8 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | GLOBAL_ALL_\<variable\> | \<variable> | | | for all cores |
 | GLOBAL_<core>_\<variable\> | \<variable> | | | for specific core |
 | \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
-| \* SSL_KEY_STORE_PASSWORD' | | | kT9X6oe68t | |
+| \* SSL_KEY_STORE_PASSWORD | | | kT9X6oe68t | |
+| \* SSL_KEY_STORE_ALIAS | | | ssl.repo | alias of the repository cert in the keystore, to be used in the solr6 healthcheck script |
 | \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
 | \* SSL_TRUST_STORE_PASSWORD | | | kT9X6oe68t | |
 
