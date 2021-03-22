@@ -6,10 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [v2.0.0] - 2021-03-22 Xenit specific images with telemetry
+
 ### Added
-* [DOCKER-362, DOCKER-363] New images with "-xenit" suffix, containing alfred-telemetry
+* [DOCKER-362, DOCKER-363] New images with "-xenit" suffix, containing alfred-telemetry [#38]
+
+[#38]: https://github.com/xenit-eu/docker-solr/pull/38
+
 ### Fixed
-* [PR #37](https://github.com/xenit-eu/docker-solr/pull/37) More elaborate healthchecks
+* [ALFREDOPS-715] Xenit-specific images for Solr Services >= 2.0.0 [#39]
+* More elaborate healthchecks [#37]
+
+[#39]: https://github.com/xenit-eu/docker-solr/pull/39
+[#37]: https://github.com/xenit-eu/docker-solr/pull/37
 	
 ## [v1.1.0] - 2020-12-14 New versions, refactorings
 ### Added
@@ -27,7 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v1.0.1] - 2020-09-14 Refactorings for sharded setup
 ### Added
 * [DOCKER-264] Alfresco-search-services-1.3.0.6
-	
+
 ### Fixed
 * [DOCKER-251] Remove from solr's init duplicating logic related to JAVA_OPTS_ variables
 	

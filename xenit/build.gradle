@@ -10,7 +10,7 @@ subprojects {
     }
 
     ext {
-        alfredTelemetryVersion = '0.4.0'
+        alfredTelemetryVersion = '0.5.0'
     }
 
      if (new File("${project.projectDir}/overload.gradle").exists())
@@ -44,6 +44,7 @@ subprojects {
         // jmx needs to be enabled
         environmentVariable 'JMX_ENABLED', 'true'
         if("solr4".equals(upstreamProject.solr.flavor)) {
+            environmentVariable 'METRICS_TOMCAT_ENABLED', 'true'
             smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
             smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
        	    label([
@@ -51,7 +52,8 @@ subprojects {
               "eu.xenit.prometheus.params":"wt: ['dummy']"
             ])
         } else if("solr6".equals(upstreamProject.solr.flavor)) {
-            smartCopy "${project.projectDir}/../local/solrconfig.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig.xml"
+            environmentVariable 'METRICS_JETTY_ENABLED', 'true'
+            smartCopy "${project.projectDir}/../local/solrconfig_insight.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig_insight.xml"
             smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
             smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
             smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
