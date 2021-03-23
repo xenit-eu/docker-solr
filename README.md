@@ -47,7 +47,7 @@ GLOBAL\_\<parameter\> for all cores.
 
 A subset of the properties have also dedicated environment variables e.g. ALFRESCO_ENABLE_TRACKING. Generic variables take precedence.
 
-See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat).
+See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat) and - for Xenit-specific images - [`alfred-telemetry`](https://github.com/xenit-eu/alfred-telemetry/tree/master/alfred-telemetry-solr)
 
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
 | --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
