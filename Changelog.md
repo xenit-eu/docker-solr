@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+* [DOCKER-371] Alfresco search services 2.0.1 [#40]
+
+[#40]: https://github.com/xenit-eu/docker-solr/pull/40
 
 ## [v2.0.0] - 2021-03-22 Xenit specific images with telemetry
 
