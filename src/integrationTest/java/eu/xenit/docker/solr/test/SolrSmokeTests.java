@@ -21,7 +21,9 @@ public class SolrSmokeTests {
     static RequestSpecification specShardedSolr1;
     static RequestSpecification specShardedSolr2;
     static RequestSpecification specTelemetry;
+    static RequestSpecification specActuators;
     static boolean telemetry = false;
+    static boolean actuators = false;
 
     @BeforeClass
     public static void setup() {
@@ -30,9 +32,12 @@ public class SolrSmokeTests {
         String basePathSolr = "solr/admin/cores";
         String basePathSolrTelemetry = "solr/alfresco/metrics";
         telemetry = Boolean.valueOf(System.getProperty("telemetry"));
+        String basePathSolrActuators = "solr/alfresco/xenit/actuators/readiness";
+        actuators = Boolean.valueOf(System.getProperty("actuators"));
         if("solr4".equals(System.getProperty("flavor"))) {
             basePathSolr = "solr4/admin/cores";
-            basePathSolrTelemetry = "solr4/alfresco/metrics";	    
+            basePathSolrTelemetry = "solr4/alfresco/metrics";
+            basePathSolrActuators = "solr4/alfresco/xenit/actuators/readiness";
 	}
         String host = System.getProperty("alfresco.host");
         String solrHost = System.getProperty("solr.host");
@@ -51,7 +56,7 @@ public class SolrSmokeTests {
         System.out.println("basePath=" + basePath + " and basePathSolr=" + basePathSolr +
                 " and host=" + host + " and solr1=" + solr1 + " and solr2=" + solr2 +
                 " and port=" + port + " and portShardedSolr1=" + portShardedSolr1 +
-                " and portShardedSolr2=" + portShardedSolr2 + " and telemetry=" + telemetry);
+                " and portShardedSolr2=" + portShardedSolr2 + " and telemetry=" + telemetry + " and actuators=" + actuators);
 
         String baseURI = "http://" + host;
         String baseURISolr = "http://" + solrHost;
@@ -98,6 +103,14 @@ public class SolrSmokeTests {
                     .addParam("wt","dummy")
                     .build();
             System.out.println("baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrTelemetry);
+        }
+        if(actuators) {
+            specActuators = new RequestSpecBuilder()
+                    .setBaseUri(baseURISolr)
+                    .setPort(solrPort)
+                    .setBasePath(basePathSolrActuators)
+                    .build();
+            System.out.println("baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrActuators);
         }
         // wait for solr to track
         long sleepTime = 30000;
@@ -195,6 +208,20 @@ public class SolrSmokeTests {
                     .then()
                     .statusCode(200)
                     .body(containsString("alfresco_nodes"))
+                    .toString();
+        }
+    }
+
+    @Test
+    public void testActuatorsEndpoint() {
+        if(actuators) {
+            String response = given()
+                    .spec(specActuators)
+                    .when()
+                    .get()
+                    .then()
+                    .statusCode(200)
+                    .body(containsString("UP"))
                     .toString();
         }
     }

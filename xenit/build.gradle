@@ -1,5 +1,5 @@
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
 import com.avast.gradle.dockercompose.tasks.ComposeDown
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
 
 subprojects {
     apply plugin: 'eu.xenit.docker'
@@ -7,14 +7,22 @@ subprojects {
 
     configurations {
         telemetry
+        actuators
     }
 
     ext {
         alfredTelemetryVersion = '0.5.0'
+        actuatorsVersion = '0.0.1'
     }
 
-     if (new File("${project.projectDir}/overload.gradle").exists())
-         apply from: "${project.projectDir}/overload.gradle"
+    dependencies {
+        actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}") {
+            transitive = false
+        }
+    }
+
+    if (new File("${project.projectDir}/overload.gradle").exists())
+        apply from: "${project.projectDir}/overload.gradle"
 
 
     def upstreamProjectName = ":upstream:${project.name}"
@@ -38,7 +46,7 @@ subprojects {
 
 
     createDockerFile {
-       from(upstreamImage.getImageId().map({ new From(it) }))
+        from(upstreamImage.getImageId().map({ new From(it) }))
         // micrometer handler init script
         smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh","/docker-entrypoint.d/")
         // jmx needs to be enabled
@@ -47,9 +55,10 @@ subprojects {
             environmentVariable 'METRICS_TOMCAT_ENABLED', 'true'
             smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
             smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
-       	    label([
-              "eu.xenit.prometheus.metrics-path":"/solr4/alfresco/metrics",
-              "eu.xenit.prometheus.params":"wt: ['dummy']"
+            smartCopy files(configurations.actuators.files), "/opt/alfresco/solr4/lib/"
+            label([
+                    "eu.xenit.prometheus.metrics-path":"/solr4/alfresco/metrics",
+                    "eu.xenit.prometheus.params":"wt: ['dummy']"
             ])
         } else if("solr6".equals(upstreamProject.solr.flavor)) {
             environmentVariable 'METRICS_JETTY_ENABLED', 'true'
@@ -57,14 +66,15 @@ subprojects {
             smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
             smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
             smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
-       	    label([
-              "eu.xenit.prometheus.metrics-path":"/solr/alfresco/metrics",
-              "eu.xenit.prometheus.params":"wt: ['dummy']"	    
-            ]) 
+            smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
+            label([
+                    "eu.xenit.prometheus.metrics-path":"/solr/alfresco/metrics",
+                    "eu.xenit.prometheus.params":"wt: ['dummy']"
+            ])
         }
     }
 
-    task integrationTestTelemetry(type: Test, group: "verification") {
+    task integrationTestXenitEndpoints(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -72,14 +82,15 @@ subprojects {
         outputs.upToDateWhen { false }
 
         doFirst {
-            dockerCompose.exposeAsSystemProperties(integrationTestTelemetry)
+            dockerCompose.exposeAsSystemProperties(integrationTestXenitEndpoints)
             systemProperty("flavor", "${upstreamProject.solr.flavor}")
             systemProperty("telemetry", true)
+            systemProperty("actuators", true)
         }
     }
 
     task integrationTests(type: Test, group: "verification") {
-        dependsOn integrationTestTelemetry
+        dependsOn integrationTestXenitEndpoints
     }
 
     dockerCompose {
@@ -90,7 +101,7 @@ subprojects {
         else
             environment.put 'INDEX', upstreamProject.solr.flavor
 
-        isRequiredBy(project.tasks.integrationTestTelemetry)
+        isRequiredBy(project.tasks.integrationTestXenitEndpoints)
 
         // atm test without ssl enabled
         useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",

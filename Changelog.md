@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 * [DOCKER-371] Alfresco search services 2.0.1 [#40]
+* [DOCKER-374] Readiness endpoint for solr [#41]
 
 [#40]: https://github.com/xenit-eu/docker-solr/pull/40
+[#41]: https://github.com/xenit-eu/docker-solr/pull/41
 
 ## [v2.0.0] - 2021-03-22 Xenit specific images with telemetry
 
