@@ -1058,9 +1058,11 @@
        </lst>
        -->
   </requestHandler>
-  
+
   <lib dir="lib/" regex=".*\.jar" />
   <requestHandler name="/metrics" class="eu.xenit.alfred.telemetry.solr.handler.MicrometerHandler" />
+  <requestHandler name="/xenit/actuators/readiness" class="eu.xenit.actuators.handler.ReadinessHandler" />
+
 
   <!-- for back compat with clients using /update/json and /update/csv -->  
   <requestHandler name="/update/json" class="solr.UpdateRequestHandler">
