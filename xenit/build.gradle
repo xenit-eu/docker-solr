@@ -12,13 +12,11 @@ subprojects {
 
     ext {
         alfredTelemetryVersion = '0.5.0'
-        actuatorsVersion = '0.0.1'
+        actuatorsVersion = '0.0.2'
     }
 
     dependencies {
-        actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}") {
-            transitive = false
-        }
+        actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}") 
     }
 
     if (new File("${project.projectDir}/overload.gradle").exists())
