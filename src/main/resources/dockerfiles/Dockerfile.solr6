@@ -38,6 +38,7 @@ RUN apt-get update && \
     sed -i "s/rootLogger=INFO, file, CONSOLE/rootLogger=ERROR, CONSOLE/" "$SOLR_INSTALL_HOME/logs/log4j.properties" && \
 	touch ${SOLR_INSTALL_HOME}/startup.sh && chmod +x ${SOLR_INSTALL_HOME}/startup.sh && \
 	mkdir -p ${SOLR_INSTALL_HOME}/data/solr6Backup/alfresco  ${SOLR_INSTALL_HOME}/data/solr6Backup/archive && \
+	mkdir -p ${SOLR_INSTALL_HOME}/temp && \
 	chown -hR solr ${SOLR_INSTALL_HOME} \
 # gosu
     && apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
@@ -59,7 +60,7 @@ COPY 	91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
 # add the keystore
 ADD keystore ${SOLR_INSTALL_HOME}/solrhome/keystore
 
-VOLUME ${SOLR_INSTALL_HOME}/data ${SOLR_INSTALL_HOME}/logs
+VOLUME ${SOLR_INSTALL_HOME}/data ${SOLR_INSTALL_HOME}/logs ${SOLR_INSTALL_HOME}/temp
 
 WORKDIR ${SOLR_INSTALL_HOME}
 
