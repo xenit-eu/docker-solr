@@ -241,8 +241,8 @@ then
     setJavaOption 'ssl-truststore.ssl-repo-client.password' "-Dssl-truststore.ssl-repo-client.password=$SSL_TRUST_STORE_PASSWORD"
 fi
 
-# make sure there is an option in JAVA_OPTS, otherwise it throws an error
-JAVA_OPTS="${JAVA_OPTS} -Ddummy=true"
+# set tmp folder
+JAVA_OPTS="${JAVA_OPTS} -Djava.io.tmpdir=${SOLR_INSTALL_HOME}/temp"
 
 makeConfigs
 

@@ -24,9 +24,12 @@ def includeSubprojectPerVersion(flavor,classification) {
                 def version = projectFile.name
                 def projectName = "upstream:${flavor}-${version}"
 
-                include projectName
-                project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
-                println "included $projectName"
+                // exclude directories left behind when a subproject was renamed
+                if (new File("$projectFile/overload.gradle").exists()) {
+                    include projectName
+                    project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
+                    println "included $projectName"
+                }
             }
     new File("$rootProject.projectDir/xenit")
             .listFiles({ File f -> f.name.equals(flavor)
@@ -40,9 +43,11 @@ def includeSubprojectPerVersion(flavor,classification) {
                 def version = projectFile.name
                 def projectName = "xenit:${flavor}-${version}"
 
-                include projectName
-                project(":${projectName}").projectDir = file("xenit/${flavor}/${version}")
-                println "included $projectName"
+                if (new File("$projectFile/overload.gradle").exists()) {
+                    include projectName
+                    project(":${projectName}").projectDir = file("xenit/${flavor}/${version}")
+                    println "included $projectName"
+                }
             }
 }
 
