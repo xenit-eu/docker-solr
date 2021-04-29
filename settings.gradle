@@ -24,6 +24,7 @@ def includeSubprojectPerVersion(flavor,classification) {
                 def version = projectFile.name
                 def projectName = "upstream:${flavor}-${version}"
 
+                // exclude directories left behind when a subproject was renamed
                 if (new File("$projectFile/overload.gradle").exists()) {
                     include projectName
                     project(":${projectName}").projectDir = file("upstream/${flavor}/${version}")
