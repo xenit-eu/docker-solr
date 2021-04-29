@@ -14,10 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [#41]: https://github.com/xenit-eu/docker-solr/pull/41
 
 ### Fixed
-* [DOCKER-382] Jetty temp folder is a volume
+* [DOCKER-382] Jetty temp folder is a volume [#45]
 * [DOCKER-383] Make it possible to mount a custom log4j.properties file for solr6 [#46]
 
 [#46]: https://github.com/xenit-eu/docker-solr/pull/46
+[#45]: https://github.com/xenit-eu/docker-solr/pull/45
 
 ## [v2.0.0] - 2021-03-22 Xenit specific images with telemetry
 
