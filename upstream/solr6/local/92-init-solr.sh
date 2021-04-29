@@ -30,8 +30,6 @@ CONFIG_FILE_SOLR_START="$SOLR_INSTALL_HOME/solr.in.sh"
 CUSTOM_SCHEMA=${CUSTOM_SCHEMA:-'false'}
 CUSTOM_RESOURCES=${CUSTOM_RESOURCES:-'false'}
 
-sed -i 's/log4j.rootLogger=INFO, file, CONSOLE/log4j.rootLogger=ERROR, CONSOLE/' "$SOLR_INSTALL_HOME/logs/log4j.properties"
-
 SSL_TRUST_STORE=${SSL_TRUST_STORE:-'ssl.repo.client.truststore'}
 SSL_TRUST_STORE_PASSWORD=${SSL_TRUST_STORE_PASSWORD:-'kT9X6oe68t'}
 
