@@ -109,6 +109,17 @@ function makeConfigs {
         setOption 'alfresco.suggestable.property.2' '{http://www.alfresco.org/model/content/1.0}description' "$SHARED_PROPERTIES"
         setOption 'alfresco.suggestable.property.3' '{http://www.alfresco.org/model/content/1.0}content' "$SHARED_PROPERTIES"
     fi
+
+    # Load envvars starting with SHARED_ and put them in shared.properties
+    for i in $(env)
+    do
+      if [[ "$i" = SHARED_* ]]
+      then
+            key="$(echo "$i" | cut -d '=' -f 1 | cut -d '_' -f 2-)"
+            value="$(echo "$i" | cut -d '=' -f 2-)"
+            setOption "$key" "$value" "$SHARED_PROPERTIES"
+      fi
+    done
     
     for coreName in "${DEFAULT_CORES[@]}"
     do
