@@ -1,4 +1,5 @@
 # Solr in Docker
+
 Alfresco-specific solr docker images, compatible with Alfresco versions higher than 4.2.
 
 ## Images created
@@ -36,14 +37,14 @@ If sharding is involved, then a valid license file which allows clustering is ne
 There are several environment variables available to tweak the behaviour. The variables are read by an init script which further replaces them in the relevant files. Such relevant files include:
 
 * solrcore.properties
+* shared.properties
 * schema.xml
 * server.xml (ports, ssl-related properties for tomcat-based images)
 * solr.in.sh (ports, ssl-related properties, paths for jetty-based images)
 
-solrcore.properties can be set via a generic mechanism by setting environment variables of the form
-GLOBAL_WORKSPACE\_\<parameter\> for workspace store,
-GLOBAL_ARCHIVE\_<\parameter\> for archive store,
-GLOBAL\_\<parameter\> for all cores.
+`solrcore.properties` can be set via a generic mechanism by setting environment variables of the form GLOBAL_WORKSPACE\_\<parameter\> for workspace store, GLOBAL_ARCHIVE\_<\parameter\> for archive store, GLOBAL\_\<parameter\> for all cores.
+
+`shared.properties` can be set via a generic mechanism by setting environment variables of the form SHARED\_\<parameter\>.
 
 A subset of the properties have also dedicated environment variables e.g. ALFRESCO_ENABLE_TRACKING. Generic variables take precedence.
 
@@ -73,8 +74,9 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | JETTY_PORT_SSL | |  | 8443 | solr6 only |
 | GLOBAL_WORKSPACE_\<variable\> | \<variable\> | | | for workspace core or shards |
 | GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
-| GLOBAL_ALL_\<variable\> | \<variable> | | | for all cores |
-| GLOBAL_<core>_\<variable\> | \<variable> | | | for specific core |
+| GLOBAL_ALL_\<variable\> | \<variable\> | | | for all cores |
+| GLOBAL_<core>_\<variable\> | \<variable\> | | | for specific core |
+| SHARED_\<variable\> | \<variable\> | | | for `shared.properties` (solr6 only) |
 | \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
 | \* SSL_KEY_STORE_PASSWORD | | | kT9X6oe68t | |
 | \* SSL_KEY_STORE_ALIAS | | | ssl.repo | alias of the repository cert in the keystore, to be used in the solr6 healthcheck script |
