@@ -110,6 +110,9 @@ function makeConfigs {
         setOption 'alfresco.suggestable.property.3' '{http://www.alfresco.org/model/content/1.0}content' "$SHARED_PROPERTIES"
     fi
 
+    # Setting cross locale property for consistent behaviour with older versions ( =< 1.4.0)
+    setOption 'alfresco.cross.locale.property.2' '{http://www.alfresco.org/model/content/1.0}description' "$SHARED_PROPERTIES"
+
     # Load envvars starting with SHARED_ and put them in shared.properties
     for i in $(env)
     do
