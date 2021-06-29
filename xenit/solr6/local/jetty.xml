@@ -139,18 +139,19 @@
   <!-- =========================================================== -->
   <!-- Configure Request Log                                       -->
   <!-- =========================================================== -->
-  <!--
   <Ref id="Handlers">
     <Call name="addHandler">
       <Arg>
         <New id="RequestLog" class="org.eclipse.jetty.server.handler.RequestLogHandler">
           <Set name="requestLog">
             <New id="RequestLogImpl" class="org.eclipse.jetty.server.NCSARequestLog">
+              <!-- This logs to stderr by default when filename is not set
               <Set name="filename">
                  logs/request.yyyy_mm_dd.log
               </Set>
               <Set name="filenameDateFormat">yyyy_MM_dd</Set>
               <Set name="retainDays">90</Set>
+              -->
               <Set name="append">true</Set>
               <Set name="extended">false</Set>
               <Set name="logCookies">false</Set>
@@ -161,7 +162,6 @@
       </Arg>
     </Call>
   </Ref>
-  -->
 
   <!-- =========================================================== -->
   <!-- extra options                                               -->
