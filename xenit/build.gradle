@@ -14,7 +14,7 @@ subprojects {
     ext {
         alfredTelemetryVersion = '0.6.0'
         actuatorsVersion = '0.0.2'
-        solrBackupVersion = '0.0.1-SNAPSHOT'
+        solrBackupVersion = '0.0.2-SNAPSHOT'
     }
 
     dependencies {
@@ -62,19 +62,22 @@ subprojects {
                     "eu.xenit.prometheus.params":"wt: ['dummy']"
             ])
         } else if("solr6".equals(upstreamProject.solr.flavor)) {
+            // telemetry
             environmentVariable 'METRICS_JETTY_ENABLED', 'true'
             smartCopy "${project.projectDir}/../local/solrconfig_insight.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig_insight.xml"
             smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
             smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
             smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
-            smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
-            smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
-            smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh","/docker-entrypoint.d/")
-            smartCopy("${project.projectDir}/../local/solr.xml","/opt/alfresco-search-services/solrhome/solr.xml")
             label([
                     "eu.xenit.prometheus.metrics-path":"/solr/alfresco/metrics",
                     "eu.xenit.prometheus.params":"wt: ['dummy']"
             ])
+            // actuators
+            smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
+            // backup
+            smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
+            smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh","/docker-entrypoint.d/")
+            smartCopy("${project.projectDir}/../local/solr.xml","/opt/alfresco-search-services/solrhome/solr.xml")
         }
     }
 
