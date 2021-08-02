@@ -64,7 +64,7 @@ VOLUME ${SOLR_INSTALL_HOME}/data ${SOLR_INSTALL_HOME}/logs ${SOLR_INSTALL_HOME}/
 
 WORKDIR ${SOLR_INSTALL_HOME}
 
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 --start-period=20s CMD ${SOLR_INSTALL_HOME}/healthcheck.sh || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 --start-period=20s CMD ${SOLR_INSTALL_HOME}/healthcheck.sh || exit 1
 
 CMD ["${SOLR_INSTALL_HOME}/startup.sh"]
 
