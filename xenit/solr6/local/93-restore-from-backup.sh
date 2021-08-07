@@ -25,7 +25,7 @@ else
             RESTORE_BACKUP_NAME=`curl -s -L -XGET -u ${BACKUP_USERNAME}:${BACKUP_PASSWORD} "http://${BACKUP_ENDPOINT}/${BACKUP_BUCKET}/success?domain=${BACKUP_DOMAIN}" | tail -1 | cut -d '.' -f 2`
         fi
         echo "RESTORE_BACKUP_NAME=${RESTORE_BACKUP_NAME}"
-        if [ ${RESTORE_BACKUP_NAME} != "snapshot"* ]
+        if [[ ! ${RESTORE_BACKUP_NAME} == "20"* ]]
         then
            echo "Could not find a valid snapshot to restore from, exiting"
         else
