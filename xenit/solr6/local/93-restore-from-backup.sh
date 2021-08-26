@@ -12,7 +12,6 @@ else
     if [ -d "${SOLR_DATA_ROOT}/index/alfresco/index" -a `du -s "${SOLR_DATA_ROOT}/index/alfresco/index" | cut -f 1` -gt 100 ]
     then
         echo "Index folder existing, skipping backup restore"
-        ls -ltr "${SOLR_DATA_ROOT}/index/alfresco/index"
     else
         setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
         echo "*************** starting solr without tracking **************************"
