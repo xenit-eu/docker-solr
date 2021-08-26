@@ -6,7 +6,7 @@ echo "Solr restore from backup start"
 
 if [ -z ${RESTORE_FROM_BACKUP} ]
 then
-    echo "The index should not be restored from backup, exiting"
+    echo "No index backup restore requested, exiting"
 else
     # if data folder is empty restore from backup
     if [ -d "${SOLR_DATA_ROOT}/index/alfresco/index" -a `du -s "${SOLR_DATA_ROOT}/index/alfresco/index" | cut -f 1` -gt 100 ]
