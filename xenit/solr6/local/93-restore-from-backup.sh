@@ -13,41 +13,66 @@ else
     then
         echo "Index folder existing, skipping backup restore"
     else
-        setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
-        echo "*************** starting solr without tracking **************************"
-        gosu "${user}" "${SOLR_INSTALL_HOME}/solr/bin/solr" start -m "${JAVA_XMX}" -p "${PORT}" -h "${SOLR_HOST}" -s "${SOLR_DIR_ROOT}" -a "${JAVA_OPTS}"
-        sleep 30
-        echo "*************** solr without tracking started **************************"
-        # get the name of latest snapshot to be restored from the backup
         if [ -z ${RESTORE_BACKUP_NAME} ]
         then
             restorename=""
         else
             restorename="&name=${RESTORE_BACKUP_NAME}"
         fi
-
+	
         if [ $ALFRESCO_SSL != none ]
         then
-	        echo "Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
-	        curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+            echo "*************** Starting solr without tracking **************************"
+            setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
 
+            gosu "${user}" "${SOLR_INSTALL_HOME}/solr/bin/solr" start -m "${JAVA_XMX}" -p "${PORT}" -h "${SOLR_HOST}" -s "${SOLR_DIR_ROOT}" -a "${JAVA_OPTS}"
+	    STATUS=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" -o /dev/null -I -w '%{http_code}' https://localhost:${PORT}/solr/alfresco/admin/ping)
+	    echo "STATUS=$STATUS"
+	    while [ "$STATUS" -ne '200' ]
+	    do
+		sleep 5
+		STATUS=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" -o /dev/null -I -w '%{http_code}' https://localhost:${PORT}/solr/alfresco/admin/ping)
+		echo "STATUS=$STATUS"		
+	    done
+            echo "*************** Solr without tracking started **************************"
+
+	    
+	    echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+	    curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+	    
+	    restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
+	    
+	    # wait until restore is complete
+	    while [ "\"In Progress\"" = ${restorestatus} ]
+	    do
+	        echo "restorestatus=$restorestatus"
 	        restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
-
-	        # wait until restore is complete
-	        while [ "\"In Progress\"" = ${restorestatus} ]
-	        do
-	            echo "restorestatus=$restorestatus"
-	            restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
-	            sleep 5
-	        done
-	        if [  "\"success\"" = ${restorestatus} ]
-	        then
+	        sleep 5
+	    done
+	    if [  "\"success\"" = ${restorestatus} ]
+	    then
                 echo "Restore successful"
             else
                 echo "Restore was not successful"
-	        fi
+	    fi
+	    echo "*************** Restore finished **************************"	    
         else
-            echo "Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+            echo "*************** Starting solr without tracking **************************"
+            setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
+	    
+            gosu "${user}" "${SOLR_INSTALL_HOME}/solr/bin/solr" start -m "${JAVA_XMX}" -p "${PORT}" -h "${SOLR_HOST}" -s "${SOLR_DIR_ROOT}" -a "${JAVA_OPTS}"
+	    STATUS=$(curl -s -o /dev/null -I -w '%{http_code}' http://localhost:${PORT}/solr/alfresco/admin/ping)
+	    echo "STATUS=$STATUS"
+	    while [ "$STATUS" -ne '200' ]
+	    do
+		sleep 5
+		STATUS=$(curl -s -o /dev/null -I -w '%{http_code}' http://localhost:${PORT}/solr/alfresco/admin/ping)
+		echo "STATUS=$STATUS"
+	    done
+            echo "*************** Solr without tracking started **************************"
+
+	    
+            echo "**************** Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
             curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
             restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
             # wait until restore is complete
@@ -57,20 +82,21 @@ else
                 restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
                 sleep 5
             done
-        	if [  "\"success\"" = ${restorestatus} ]
+            if [  "\"success\"" = ${restorestatus} ]
             then
-                   echo "Restore successful"
+                echo "Restore successful"
             else
-                   echo "Restore was not successful"
-            fi
+                echo "Restore was not successful"
+	    fi
+	    echo "*************** Restore finished **************************"
         fi
-
-        # stop solr
+	
+        echo "*************** Stopping solr without tracking **************************"
         gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr stop
         sleep 30
-
-        setOption enable.alfresco.tracking true "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
+	setOption enable.alfresco.tracking true "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
+	echo "*************** Solr without tracking stopped **************************"	    
     fi
  fi
 
-echo "Solr restore from backup done"
+echo "Solr restore from backup end"
