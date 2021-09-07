@@ -2,7 +2,7 @@
 
 When using this backup/restore mechanism, Solr's replication handler is using Caringo Swarm as the storage layer for the backups. The implementation of the new backend repository is [here](https://github.com/xenit-eu/solr-backup).
 
-Taking a backup is trigerred by a [custom image](https://bitbucket.org/xenit/docker-solrbackup/src/master/), via a [central scheduler](https://github.com/crazy-max/swarm-cronjob). Cron expression is specified via container labels. Depending on an environment variable, backup can be taken only on first instance of solr service. 
+Taking a backup is outside the scope of this image.
 
 Restore is done via an init script in solr image, which checks the need of restore (variable + existence of index), starts solr without tracking, does the restore and restarts solr with tracking enabled. Snapshot's name can be specified via a variable or detected as the latest snapshot in the bucket.
 
