@@ -9,7 +9,7 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
 
 * [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
-* [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
+* [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) and [custom solr backup/restore](https://github.com/xenit-eu/solr-backup) installed
 
 ## Supported Tags
 
@@ -158,6 +158,8 @@ Parameters for the backup (location, maximum number of backups to keep) are set 
 By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
 
 In the case of a sharded setup, backup needs to be done manually.
+
+A custom backup/restore mechanism to Caringo Swarm has been included in xenit-specific images and is described [here](./Backup.md).
 
 ## FAQ
 

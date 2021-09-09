@@ -9,3 +9,9 @@ services:
       - 8080
     environment:
     - ALFRESCO_SSL=none
+    # for restoring from backup, uncomment following variables
+    # - JAVA_OPTS_S3_ENDPOINT=-DBLOB_S3_ENDPOINT=<endpoint_s3_protocol>
+    # - JAVA_OPTS_S3_BUCKET_NAME=-DBLOB_S3_BUCKET_NAME=<bucket_name>
+    # - AWS_ACCESS_KEY_ID=<access_key>
+    # - AWS_SECRET_KEY=<secret_key>
+    # - RESTORE_FROM_BACKUP=true
