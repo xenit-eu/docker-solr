@@ -13,12 +13,7 @@ Restore is done via an init script in solr image, which checks the need of resto
 | Variable                    | Default                           | Comments                               |
 | --------------------------- | --------------------------------- | -------------------------------------- |
 | RESTORE_FROM_BACKUP         |                                   | Whether to attempt a restore from backup at startup |
-| RESTORE_BACKUP_NAME         |                                   | If provided, restores from that specific snapshot. If not provided, it is inferred from the "success" file |
-| BACKUP_USERNAME             |                                   | Caringo Swarm username |
-| BACKUP_PASSWORD             |                                   | Caringo Swarm password |
-| BACKUP_ENDPOINT             |                                   | Caringo Swarm endpoint |
-| BACKUP_DOMAIN               |                                   | Caringo Swarm domain |
-| BACKUP_BUCKET               |                                   | Caringo Swarm bucket |
+| RESTORE_BACKUP_NAME         |                                   | If provided, restores from that specific snapshot. If not provided, it's the last snapshot from the bucket. |
 | JAVA_OPTS_S3_ENDPOINT       |                                   | Caringo Swarm S3 endpoint |
 | JAVA_OPTS_S3_BUCKET_NAME    |                                   | Caringo Swarm S3 bucket |
 | AWS_ACCESS_KEY_ID           |                                   | Caringo Swarm S3 access key |
