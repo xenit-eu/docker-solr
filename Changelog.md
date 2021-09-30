@@ -7,15 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
-* [ALFREDOPS-784] Released version of solr-backup [#53]
 * [ALFREDOPS-780] Solr telemetry including backup metrics [#52]
 * [ALFREDOPS-769] Backup-restore functionality [#50]
 * [DOCKER-371] Alfresco search services 2.0.1 [#40]
 * [DOCKER-374] Readiness endpoint for solr [#41]
 * Write jetty access logs to stderr [#49]
 
-[#53]: https://github.com/xenit-eu/docker-solr/pull/53
-[#52]: https://github.com/xenit-eu/docker-solr/pull/52
+[#51]: https://github.com/xenit-eu/docker-solr/pull/52
 [#50]: https://github.com/xenit-eu/docker-solr/pull/50
 
 [#40]: https://github.com/xenit-eu/docker-solr/pull/40	
