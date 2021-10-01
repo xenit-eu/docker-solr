@@ -37,8 +37,8 @@ else
             echo "*************** Solr without tracking started **************************"
 
 	    
-	    echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
-	    curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+	    echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=s3:///${restorename}"
+	    curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=s3:///${restorename}"
 	    
 	    restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
 	    
@@ -72,8 +72,8 @@ else
             echo "*************** Solr without tracking started **************************"
 
 	    
-            echo "**************** Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
-            curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=swarm:///${restorename}"
+            echo "**************** Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=s3:///${restorename}"
+            curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=swarm&location=s3:///${restorename}"
             restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
             # wait until restore is complete
             while [ "\"In Progress\"" = ${restorestatus} ]
