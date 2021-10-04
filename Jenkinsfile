@@ -17,14 +17,6 @@ pipeline {
 
         stage("Build Docker Image") {
 	    parallel {
-		stage('Version solr1') {
-		    environment {
-			VERSIONS_TO_BUILD = "solr1"
-		    }
-		    steps {
-			sh "./gradlew -Penterprise buildDockerImage"
-		    }
-		}
 		stage('Version solr4') {
 		    environment {
 			VERSIONS_TO_BUILD = "solr4"
@@ -46,19 +38,6 @@ pipeline {
 
         stage("Integration Tests") {
 	    parallel {
-		stage('Version solr1') {
-		    environment {
-			VERSIONS_TO_BUILD = "solr1"
-		    }
-		    steps {
-			sh "./gradlew -Penterprise integrationTests --info"
-		    }
-		    post {
-			always {
-			    sh "./gradlew -Penterprise composeDownAll"
-			}
-		    }
-		}
 		stage('Version solr4') {
 		    environment {
 			VERSIONS_TO_BUILD = "solr4"
