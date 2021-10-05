@@ -4,7 +4,6 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 
 ## Images created
 
-* [`alfresco-solr1`] = solr1 images, using tomcat
 * [`alfresco-solr4`] = solr4 images, using tomcat
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
 
@@ -13,7 +12,7 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 
 ## Supported Tags
 
-* [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr1 and solr4
+* [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr4
 * [`:1.3.1`, `:1.4.0`] = version of the alfresco search services used for solr6
 
 ## Overview
@@ -155,7 +154,7 @@ to your build command.
 
 In the case of a non-sharded setup, solr index is backed-up via a scheduled job in Alfresco.
 Parameters for the backup (location, maximum number of backups to keep) are set on Alfresco's side and passed to solr via the scheduled job, which calls the replication handler from solr.
-By default they are /opt/alfresco/alf_data/solrBackup for solr1, /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
+By default they are /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfresco-search-services/data/solr6Backup for solr6.
 
 In the case of a sharded setup, backup needs to be done manually.
 

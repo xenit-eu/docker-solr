@@ -9,7 +9,7 @@
  */
 
 rootProject.name = 'docker-solr'
-// flavor is one of 'solr1','solr4','solr6'
+// flavor is one of 'solr4','solr6'
 // classification is one of 'community', 'enterprise'
 def includeSubprojectPerVersion(flavor,classification) {
     new File("$rootProject.projectDir/upstream")
@@ -61,11 +61,5 @@ if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD"
     includeSubprojectPerVersion("solr4","community")
     if(hasProperty("enterprise")) {
         includeSubprojectPerVersion("solr4","enterprise")
-    }
-}
-if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr1")) {
-    includeSubprojectPerVersion("solr1","community")
-    if(hasProperty("enterprise")) {
-        includeSubprojectPerVersion("solr1","enterprise")
     }
 }

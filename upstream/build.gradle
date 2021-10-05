@@ -151,10 +151,7 @@ subprojects {
     dockerCompose {
         def composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
-        if("solr1".equals(project.solr.flavor))
-            environment.put 'INDEX', "solr"
-        else
-            environment.put 'INDEX', project.solr.flavor
+        environment.put 'INDEX', project.solr.flavor
 
         isRequiredBy(project.tasks.integrationTestDefault)
 
