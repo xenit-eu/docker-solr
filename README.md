@@ -57,6 +57,7 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
+| SOLR_BACKUP_DIR | solr.backup.dir | | /opt/alfresco-search-services/data/solr6Backup | solr6 ASS v2* only |
 | ALFRESCO_SOLR_SUGGESTER_ENABLED                     | solr.suggester.enabled |                                                              | true                                                | needs also changes to schema.xml, otherwise not correct. |
 | ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED                     |                            |                                                              |                                                          | changes schema.xml |
 | ALFRESCO_HOST        | alfresco.host              |                                                              | alfresco |  |

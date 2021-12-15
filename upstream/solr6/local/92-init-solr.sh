@@ -148,7 +148,11 @@ function makeConfigs {
                 setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
                 setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
                 setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
-
+                # SOLR_BACKUP_DIR only usefull for ASS v2.* and up
+                if [ $SOLR_VERSION_MAJOR != "1" ]
+                then
+                    setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR" "$CONFIG_FILE_CORE"
+                fi
                 CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
                 if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
                 then
