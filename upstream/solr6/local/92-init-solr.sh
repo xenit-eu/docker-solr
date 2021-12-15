@@ -40,8 +40,8 @@ function setJavaOption {
 function setOption {
     if grep --quiet -e "$1\s*=" "$3"; then
         # replace option
-        sed -i "s#^\($1\s*=\s*\).*\$#\1$2#" $3
-	    sed -i "s#^\#\($1\s*=\s*\).*\$#\1$2#" $3
+        sed -i "s#^\s*\($1\s*=\s*\).*\$#\1$2#" $3
+	    sed -i "s#^\#\s*\($1\s*=\s*\).*\$#\1$2#" $3
         if (( $? )); then
             echo "setOption failed (replacing option $1=$2 in $3)"
             exit 1
