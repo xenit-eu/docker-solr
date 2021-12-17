@@ -148,8 +148,8 @@ function makeConfigs {
                 setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
                 setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
                 setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
-                # SOLR_BACKUP_DIR only usefull for ASS v2.* and up
-                if [ $SOLR_VERSION_MAJOR != "1" ]
+                # SOLR_BACKUP_DIR only useful for ASS v2.* and up
+                if [ $SOLR_VERSION_MAJOR != 1 ]
                 then
                     setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR" "$CONFIG_FILE_CORE"
                 fi
@@ -265,10 +265,10 @@ user="solr"
 # make sure backup folders exist and have the right permissions in case of mounts
 for coreName in "${DEFAULT_CORES[@]}"
 do
-    mkdir -p "${DIR_ROOT}/solr6Backup/$coreName"
-    if [[ $(stat -c %U "${DIR_ROOT}/solr6Backup/$coreName") != "$user" ]]
+    mkdir -p "${SOLR_BACKUP_DIR}/$coreName"
+    if [[ $(stat -c %U "${SOLR_BACKUP_DIR}/$coreName") != "$user" ]]
     then
-        chown -hR "$user":"$user" "${DIR_ROOT}/solr6Backup/$coreName"
+        chown -hR "$user":"$user" "${SOLR_BACKUP_DIR}/$coreName"
     fi
 done
 
