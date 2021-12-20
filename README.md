@@ -50,13 +50,14 @@ A subset of the properties have also dedicated environment variables e.g. ALFRES
 See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat) and - for Xenit-specific images - [`alfred-telemetry`](https://github.com/xenit-eu/alfred-telemetry/tree/master/alfred-telemetry-solr)
 
 | Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
-| --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------- |
+| --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------- |
 | TEMPLATE                  | alfresco.template |                                                              | rerank                                                   |  |
 | CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders <br> solr6 only |
 | CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host, separated by ";" <br> Example: alfresco-01;alfresco-02 <br> Leave default for non-sharded setup <br> solr6 only |
 | SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
 | SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
 | SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
+| SOLR_BACKUP_DIR | solr.backup.dir | | /opt/alfresco-search-services/data/solr6Backup |  |
 | ALFRESCO_SOLR_SUGGESTER_ENABLED                     | solr.suggester.enabled |                                                              | true                                                | needs also changes to schema.xml, otherwise not correct. |
 | ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED                     |                            |                                                              |                                                          | changes schema.xml |
 | ALFRESCO_HOST        | alfresco.host              |                                                              | alfresco |  |

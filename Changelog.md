@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [DOCKER-371] Alfresco search services 2.0.1 [#40]
 * [DOCKER-374] Readiness endpoint for solr [#41]
 * Write jetty access logs to stderr [#49]
+* [DOCKER-394] Introduced SOLR_BACKUP_DIR variable [#60]
 
 [#55]: https://github.com/xenit-eu/docker-solr/pull/55
 [#52]: https://github.com/xenit-eu/docker-solr/pull/52
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [#41]: https://github.com/xenit-eu/docker-solr/pull/41
 
 [#49]: https://github.com/xenit-eu/docker-solr/pull/49
+[#60]: https://github.com/xenit-eu/docker-solr/pull/60
 
 ### Fixed
 * [DOCKER-382] Jetty temp folder is a volume [#45]

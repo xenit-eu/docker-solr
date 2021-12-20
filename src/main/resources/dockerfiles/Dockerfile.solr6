@@ -24,7 +24,9 @@ ARG BUILD_DATE
 
 ENV ALFRESCO_SEARCH_SERVICES_VERSION=${SOLR_VERSION_MAJOR}.${SOLR_VERSION_MINOR}.${SOLR_VERSION_REV}
 ENV SOLR_INSTALL_HOME=/opt/alfresco-search-services
+ENV SOLR_BACKUP_DIR=/opt/alfresco-search-services/data/solr6Backup
 ENV BUILD_DATE=${BUILD_DATE}
+ENV SOLR_VERSION_MAJOR=${SOLR_VERSION_MAJOR}
 
 ENV GOSU_VERSION 1.9
 
@@ -37,7 +39,7 @@ RUN apt-get update && \
 	sed -i "s/rootLogger=WARN, file, CONSOLE/rootLogger=WARN, CONSOLE/g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
     sed -i "s/rootLogger=INFO, file, CONSOLE/rootLogger=ERROR, CONSOLE/" "$SOLR_INSTALL_HOME/logs/log4j.properties" && \
 	touch ${SOLR_INSTALL_HOME}/startup.sh && chmod +x ${SOLR_INSTALL_HOME}/startup.sh && \
-	mkdir -p ${SOLR_INSTALL_HOME}/data/solr6Backup/alfresco  ${SOLR_INSTALL_HOME}/data/solr6Backup/archive && \
+	mkdir -p ${SOLR_BACKUP_DIR}/alfresco  ${SOLR_BACKUP_DIR}/archive && \
 	mkdir -p ${SOLR_INSTALL_HOME}/temp && \
 	chown -hR solr ${SOLR_INSTALL_HOME} \
 # gosu

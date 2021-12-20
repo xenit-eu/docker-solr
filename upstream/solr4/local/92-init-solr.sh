@@ -151,10 +151,10 @@ user="tomcat"
 # make sure backup folders exist and have the right permissions in case of mounts
   for solrCoreName in alfresco archive
   do
-      mkdir -p "${DIR_ROOT}/solr4Backup/$solrCoreName"
-      if [[ $(stat -c %U "${DIR_ROOT}/solr4Backup/$solrCoreName") != "$user" ]]
+      mkdir -p "${SOLR_BACKUP_DIR}/$solrCoreName"
+      if [[ $(stat -c %U "${SOLR_BACKUP_DIR}/$solrCoreName") != "$user" ]]
 	  then
-	    chown -hR "$user":"$user" "${DIR_ROOT}/solr4Backup/$solrCoreName"
+	    chown -hR "$user":"$user" "${SOLR_BACKUP_DIR}/$solrCoreName"
 	  fi
   done
 
