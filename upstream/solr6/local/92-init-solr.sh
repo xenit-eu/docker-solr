@@ -9,6 +9,7 @@ echo "Solr init start"
 
 SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
+SOLR_BACKUP_DIR=${SOLR_BACKUP_DIR:-'/opt/alfresco-search-services/data/solr6Backup'}
 SOLR_HOST=${SOLR_HOST:-'solr'}
 
 CORES_TO_TRACK=${CORES_TO_TRACK:-"alfresco;archive"}
@@ -148,10 +149,15 @@ function makeConfigs {
                 setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
                 setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
                 setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
-                # SOLR_BACKUP_DIR only useful for ASS v2.* and up
-                if [ $SOLR_VERSION_MAJOR != 1 ]
+                # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
+                if [ $SOLR_VERSION_MAJOR = 2 -a $SOLR_VERSION_REV != 0 -a $SOLR_VERSION_REV != 1 ]
                 then
-                    setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR" "$CONFIG_FILE_CORE"
+                    if [ $coreAlfrescoName != $coreName ]
+		    then
+			setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName" "$CONFIG_FILE_CORE"
+ 	            else
+			setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"			   
+		    fi
                 fi
                 CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
                 if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
@@ -192,6 +198,11 @@ function makeConfigs {
             setGlobalOptions "$CONFIG_FILE_CORE" archive
             escapeFile "$CONFIG_FILE_CORE"
 
+            # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
+            if [ $SOLR_VERSION_MAJOR = 2 -a $SOLR_VERSION_REV != 0 -a $SOLR_VERSION_REV != 1 ]
+            then
+                setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+            fi
             if [ $CUSTOM_SCHEMA = true ]
             then
                 cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml

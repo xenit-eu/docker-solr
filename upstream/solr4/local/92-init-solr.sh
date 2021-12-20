@@ -10,6 +10,7 @@ echo "Solr init start"
 
 SOLR_DATA_ROOT=${SOLR_DATA_ROOT:-'/opt/alfresco/alf_data/solr4'}
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco/alf_data'}
+SOLR_BACKUP_DIR=${SOLR_BACKUP_DIR:-'/opt/alfresco/alf_data/solr4Backup'}
 
 CONFIG_FILE_SOLR_WORKSPACE=$SOLR_DIR_ROOT'/workspace-SpacesStore/conf/solrcore.properties'
 CONFIG_FILE_SOLR_ARCHIVE=$SOLR_DIR_ROOT'/archive-SpacesStore/conf/solrcore.properties'
