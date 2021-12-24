@@ -150,14 +150,11 @@ function makeConfigs {
                 setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
                 setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
                 # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
-                if [ $SOLR_VERSION_MAJOR = 2 -a $SOLR_VERSION_REV != 0 -a $SOLR_VERSION_REV != 1 ]
+                if [ $coreAlfrescoName != $coreName ]
                 then
-                    if [ $coreAlfrescoName != $coreName ]
-		    then
-			setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName" "$CONFIG_FILE_CORE"
- 	            else
-			setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"			   
-		    fi
+                    setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName" "$CONFIG_FILE_CORE"
+                else
+                    setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
                 fi
                 CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
                 if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
