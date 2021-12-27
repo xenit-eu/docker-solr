@@ -196,10 +196,8 @@ function makeConfigs {
             escapeFile "$CONFIG_FILE_CORE"
 
             # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
-            if [ $SOLR_VERSION_MAJOR = 2 -a $SOLR_VERSION_REV != 0 -a $SOLR_VERSION_REV != 1 ]
-            then
-                setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
-            fi
+            setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+
             if [ $CUSTOM_SCHEMA = true ]
             then
                 cp "$SOLR_INSTALL_HOME/schema.xml" $newCore/conf/schema.xml
