@@ -91,11 +91,7 @@ Besides the docker-compose files used in the tests, there are other example file
 
 ## Support & Collaboration
 
-These images are updated via pull requests to the [xenit-eu/docker-solr/](https://github.com/xenit-eu/docker-solr/) Github-repository.
-
-**Maintained by:**
-
-Roxana Angheluta <roxana.angheluta@xenit.eu>
+These images are updated via pull requests to the [xenit-eu/docker-solr](https://github.com/xenit-eu/docker-solr/) Github-repository.
 
 ## Monitoring
 
