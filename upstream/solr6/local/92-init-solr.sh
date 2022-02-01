@@ -269,7 +269,7 @@ makeConfigs
 
 user="solr"
 # make sure backup folders exist and have the right permissions in case of mounts
-for coreName in "${DEFAULT_CORES[@]}"
+for coreName in "${DEFAULT_CORES_ALFRESCO[@]}"
 do
     mkdir -p "${SOLR_BACKUP_DIR}/$coreName"
     if [[ $(stat -c %U "${SOLR_BACKUP_DIR}/$coreName") != "$user" ]]
