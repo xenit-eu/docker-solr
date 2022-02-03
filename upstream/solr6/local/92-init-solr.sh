@@ -98,6 +98,18 @@ function createCoreStatically {
     setOption 'alfresco.secureComms' "$ALFRESCO_SSL" "$CONFIG_FILE_CORE"
 }
 
+function createBackupDir {
+  user=solr
+  backupDir="$1"
+
+  echo "Creating Solr backup directory in $backupDir "
+  mkdir -p "$backupDir"
+  if [[ $(stat -c %U "$backupDir") != "$user" ]]
+  then
+      chown -hR "$user":"$user" "$backupDir"
+  fi
+}
+
 function makeConfigs {
     SHARED_PROPERTIES=${SOLR_DIR_ROOT}/conf/shared.properties
     setOption 'solr.host' "$SOLR_HOST" "$SHARED_PROPERTIES"
@@ -153,8 +165,10 @@ function makeConfigs {
                 if [ $coreAlfrescoName != $coreName ]
                 then
                     setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName" "$CONFIG_FILE_CORE"
+                    createBackupDir "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName"
                 else
                     setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+                    createBackupDir "$SOLR_BACKUP_DIR/$coreName"
                 fi
                 CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
                 if [ $ALFRESCO_SOLR_SUGGESTER_ENABLED = true ]
@@ -197,6 +211,7 @@ function makeConfigs {
 
             # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
             setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+            createBackupDir "$SOLR_BACKUP_DIR/$coreName"
 
             if [ $CUSTOM_SCHEMA = true ]
             then
@@ -266,18 +281,6 @@ fi
 JAVA_OPTS="${JAVA_OPTS} -Djava.io.tmpdir=${SOLR_INSTALL_HOME}/temp"
 
 makeConfigs
-
-user="solr"
-# make sure backup folders exist and have the right permissions in case of mounts
-for coreName in "${DEFAULT_CORES_ALFRESCO[@]}"
-do
-    mkdir -p "${SOLR_BACKUP_DIR}/$coreName"
-    if [[ $(stat -c %U "${SOLR_BACKUP_DIR}/$coreName") != "$user" ]]
-    then
-        chown -hR "$user":"$user" "${SOLR_BACKUP_DIR}/$coreName"
-    fi
-done
-
 
 # fix permissions for whole data folder in case of mounts
 if [[ $(stat -c %U "${SOLR_DATA_ROOT}") != "$user" ]]
