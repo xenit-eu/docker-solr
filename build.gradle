@@ -12,8 +12,14 @@ def calcTags(version) {
         "${version.major}.${version.minor}".toString()
     ]
 
+    if (version.maint) {
+        tags += "${version.major}.${version.minor}.${version.rev}.${version.maint}".toString()
+    }
     if (version.label) {
         tags += "${version.major}.${version.minor}.${version.rev}.${version.label}".toString()
+        if (version.maint) {
+            tags += "${version.major}.${version.minor}.${version.rev}.${version.maint}.${version.label}".toString()
+        }
     }
     // For non-master/non-release builds, change the tags to contain branch and build number
     def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"

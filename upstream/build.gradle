@@ -47,25 +47,15 @@ subprojects {
 
     buildDockerImage {
         def date = new Date().getTime().toString()
-
+        buildArgs = [
+                'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
+                'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
+                'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
+                'SOLR_FLAVOR'       : "${project.solr.flavor}",
+                'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds
+        ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
         if (project.solr.version.maint)
-            buildArgs = [
-                    'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
-                    'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
-                    'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
-                    'SOLR_VERSION_MAINT': "${project.solr.version.maint}",
-                    'SOLR_FLAVOR'       : "${project.solr.flavor}",
-                    'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds
-            ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
-        else
-            buildArgs = [
-                    'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
-                    'SOLR_VERSION_MINOR': "${project.solr.version.minor}",
-                    'SOLR_VERSION_REV'  : "${project.solr.version.rev}",
-                    'SOLR_FLAVOR'       : "${project.solr.flavor}",
-                    'BUILD_DATE'        : date.substring(0,date.length()-3)  // do not consider milliseconds
-            ] << (project.hasProperty('extraBuildArgs')?project.extraBuildArgs:[:])
-
+            buildArgs.put('SOLR_VERSION_MAINT', "${project.solr.version.maint}")
         doFirst {
             println buildArgs.get()
         }
