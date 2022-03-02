@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [#57]: https://github.com/xenit-eu/docker-solr/pull/57	
 	
 ### Added
+* [DOCKER-404] Alfresco search services 2.0.2.2 [#64]
 * [ALFREDOPS-784] Released version of solr-backup [#55]
 * [ALFREDOPS-780] Solr telemetry including backup metrics [#52]
 * [ALFREDOPS-769] Backup-restore functionality [#50]
