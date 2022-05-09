@@ -5,11 +5,10 @@ services:
     image: ${DOCKER_IMAGE}
     restart: unless-stopped
     ports:
-    - 8080
+    - 8443
     hostname: solr1
     environment:
     - SOLR_HOST=solr1
-    - ALFRESCO_SSL=none
     - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false
     - ARCHIVE_INDEX_CONTENT=false
     - ALFRESCO_INDEX_CONTENT=false
@@ -24,11 +23,10 @@ services:
     image: ${DOCKER_IMAGE}
     restart: unless-stopped
     ports:
-    - 8080
+    - 8443
     hostname: solr2
     environment:
     - SOLR_HOST=solr2
-    - ALFRESCO_SSL=none
     - ARCHIVE_ENABLE_ALFRESCO_TRACKING=false
     - ARCHIVE_INDEX_CONTENT=false
     - ALFRESCO_INDEX_CONTENT=false

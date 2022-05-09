@@ -99,6 +99,8 @@ subprojects {
         doFirst {
             dockerCompose.exposeAsSystemProperties(integrationTestDefault)
             systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
+            systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
         }
     }
 
@@ -112,6 +114,8 @@ subprojects {
         doFirst {
             dockerCompose.sharded.exposeAsSystemProperties(integrationTestSharded)
             systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
+            systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
         }
     }
 
@@ -138,6 +142,8 @@ subprojects {
         doFirst {
             dockerCompose.mounts.exposeAsSystemProperties(integrationTestMounts)
             systemProperty("flavor", "${project.solr.flavor}")
+            systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
+            systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
         }
     }
 
@@ -152,6 +158,7 @@ subprojects {
         def composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', project.alfrescoimage
         environment.put 'INDEX', project.solr.flavor
+        environment.put 'use_ssl', true
 
         isRequiredBy(project.tasks.integrationTestDefault)
 
@@ -160,6 +167,8 @@ subprojects {
 
         sharded {
             isRequiredBy(project.tasks.integrationTestSharded)
+
+            environment.put 'use_ssl', true
 
             if(project.hasProperty("license"))
                 environment.put 'LICENSE', project.license
@@ -171,12 +180,16 @@ subprojects {
         nonSsl {
             isRequiredBy(project.tasks.integrationTestNonSsl)
 
+            environment.put 'use_ssl', false
+
             useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
                                "$composeDir/docker-compose-db.yml"];
         }
 
         mounts {
             isRequiredBy(project.tasks.integrationTestMounts)
+
+            environment.put 'use_ssl', true
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr-with-mounts.yml",
                                "$composeDir/docker-compose-db.yml"];

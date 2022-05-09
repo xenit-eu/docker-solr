@@ -15,6 +15,16 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.KeyManagementException;
+import io.restassured.config.SSLConfig;
+import io.restassured.config.RestAssuredConfig;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import java.io.FileInputStream;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 public class SolrSmokeTests {
     static RequestSpecification spec;
@@ -24,9 +34,45 @@ public class SolrSmokeTests {
     static RequestSpecification specActuators;
     static boolean telemetry = false;
     static boolean actuators = false;
+    static boolean use_ssl = false;
+
+    private static KeyStore loadKeyStore(String path, char[] password, String storeType) {
+      KeyStore keyStore;
+      try {
+        keyStore = KeyStore.getInstance(storeType);
+        keyStore.load(new FileInputStream(path), password);
+      } catch (Exception ex) {
+        throw new RuntimeException("Error while extracting the keystore", ex);
+      }
+      return keyStore;
+    }
+
+    private static RestAssuredConfig ssl_config(
+        String keyStorePath,
+        String keyStorePass,
+        String keyStoreType,
+        String trustStorePath,
+        String trustStorePass,
+        String trustStoreType)
+        throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
+            KeyManagementException {
+
+      KeyStore keyStore = loadKeyStore(keyStorePath, keyStorePass.toCharArray(), keyStoreType);
+      SSLSocketFactory clientAuthFactory = new SSLSocketFactory(keyStore, keyStorePass);
+      if (null != trustStorePath) {
+        KeyStore trustStore = loadKeyStore(trustStorePath, trustStorePass.toCharArray(), trustStoreType);
+        clientAuthFactory = new SSLSocketFactory(keyStore, keyStorePass, trustStore);
+      }
+      clientAuthFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
+
+      SSLConfig sslConfig = RestAssuredConfig.config().getSSLConfig().with().sslSocketFactory(clientAuthFactory);
+      return RestAssured.config().sslConfig(sslConfig);
+    }
 
     @BeforeClass
-    public static void setup() {
+    public static void setup()
+        throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
+            KeyManagementException {
 
         String basePath = "/alfresco";
         String basePathSolr = "solr/admin/cores";
@@ -34,40 +80,57 @@ public class SolrSmokeTests {
         telemetry = Boolean.valueOf(System.getProperty("telemetry"));
         String basePathSolrActuators = "solr/alfresco/xenit/actuators/readiness";
         actuators = Boolean.valueOf(System.getProperty("actuators"));
+        use_ssl = false;
         if("solr4".equals(System.getProperty("flavor"))) {
             basePathSolr = "solr4/admin/cores";
             basePathSolrTelemetry = "solr4/alfresco/metrics";
             basePathSolrActuators = "solr4/alfresco/xenit/actuators/readiness";
-	}
+        }
         String host = System.getProperty("alfresco.host");
         String solrHost = System.getProperty("solr.host");
         String solr1 = System.getProperty("solr1.host");
         String solr2 = System.getProperty("solr2.host");
         int port = Integer.parseInt(System.getProperty("alfresco.tcp.8080"));
-        int solrPort = 0;
-	try {
-	    solrPort = Integer.parseInt(System.getProperty("solr.tcp.8080"));
-	} catch(NumberFormatException e) {
-	    System.out.println("Solr port 8080 is not exposed, probably ssl is enabled");
-	}
-        int portShardedSolr1 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr1.tcp.8080")):-1);
-        int portShardedSolr2 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr2.tcp.8080")):-1);
+        int solrPort;
+    	if (System.getProperty("solr.tcp.8080") == null) {
+    	    solrPort = Integer.parseInt(System.getProperty("solr.tcp.8443"));
+            use_ssl = true;
+        } else {
+            solrPort = Integer.parseInt(System.getProperty("solr.tcp.8080"));
+    	}
+        int portShardedSolr1 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr1.tcp.8443")):-1);
+        int portShardedSolr2 = ((solr2!=null)?Integer.parseInt(System.getProperty("solr2.tcp.8443")):-1);
 
         System.out.println("basePath=" + basePath + " and basePathSolr=" + basePathSolr +
                 " and host=" + host + " and solr1=" + solr1 + " and solr2=" + solr2 +
                 " and port=" + port + " and portShardedSolr1=" + portShardedSolr1 +
                 " and portShardedSolr2=" + portShardedSolr2 + " and telemetry=" + telemetry + " and actuators=" + actuators);
 
-        String baseURI = "http://" + host;
-        String baseURISolr = "http://" + solrHost;
-        String baseURIShardedSolr1 = "http://" + solr1;
-        String baseURIShardedSolr2 = "http://" + solr2;
+        String protocol = "http://";
+        // Alfresco is always http
+        String baseURI = protocol + host;
+        if (use_ssl) {
+            protocol = "https://";
+        }
+        String baseURISolr = protocol + solrHost;
+        String baseURIShardedSolr1 = protocol + solr1;
+        String baseURIShardedSolr2 = protocol + solr2;
 
         PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
         authScheme.setUserName("admin");
         authScheme.setPassword("admin");
         RestAssured.defaultParser = Parser.JSON;
 
+        if (use_ssl) {
+            RestAssured.config = ssl_config(
+                System.getProperty("keystore"),
+                "kT9X6oe68t",
+                "JCEKS",
+                System.getProperty("truststore"),
+                "kT9X6oe68t",
+                "JCEKS"
+            );
+        }
         spec = new RequestSpecBuilder()
                 .setBaseUri(baseURI)
                 .setPort(port)
@@ -100,10 +163,11 @@ public class SolrSmokeTests {
                     .setBaseUri(baseURISolr)
                     .setPort(solrPort)
                     .setBasePath(basePathSolrTelemetry)
-                    .addParam("wt","dummy")
+                    .addParam("wt","dummy")                    
                     .build();
             System.out.println("baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrTelemetry);
         }
+
         if(actuators) {
             specActuators = new RequestSpecBuilder()
                     .setBaseUri(baseURISolr)

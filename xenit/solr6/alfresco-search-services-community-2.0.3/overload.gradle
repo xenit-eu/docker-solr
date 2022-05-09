@@ -1,5 +1,10 @@
 ext {
   tests = true
+  // since s.s. 2.0.3 SSL is required
+  tests_use_ssl = true
+  composeFiles = ["$composeDir/docker-compose-alfresco.yml",
+                     "$composeDir/docker-compose-solr.yml",
+                     "$composeDir/docker-compose-db.yml"];
 }
 dependencies {
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
