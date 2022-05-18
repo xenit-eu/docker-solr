@@ -1,14 +1,16 @@
 version: '3'
 
 services:
- alfresco:
-   image: ${ALFRESCO_IMAGE}
-   ports:
-   - 8080
-   restart: unless-stopped
-   environment:
-   - INDEX
-   - GLOBAL_legacy.transform.service.enabled=false
-   - GLOBAL_local.transform.service.enabled=false
-   - GLOBAL_transform.service.enabled=false
-
+  alfresco:
+    image: ${ALFRESCO_IMAGE}
+    ports:
+    - 8080
+    # - 8000:8000
+    restart: unless-stopped
+    environment:
+    # - DEBUG=true
+    - INDEX
+    - GLOBAL_legacy.transform.service.enabled=false
+    - GLOBAL_local.transform.service.enabled=false
+    - GLOBAL_transform.service.enabled=false
+    - GLOBAL_solr.http.socket.timeout=0
