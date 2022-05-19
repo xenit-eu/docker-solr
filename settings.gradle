@@ -57,9 +57,3 @@ if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD"
         includeSubprojectPerVersion("solr6","enterprise")
     }
 }
-if(System.getenv("VERSIONS_TO_BUILD")==null || System.getenv("VERSIONS_TO_BUILD").equals("solr4")) {
-    includeSubprojectPerVersion("solr4","community")
-    if(hasProperty("enterprise")) {
-        includeSubprojectPerVersion("solr4","enterprise")
-    }
-}
