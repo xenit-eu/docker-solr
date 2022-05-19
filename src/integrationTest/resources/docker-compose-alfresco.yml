@@ -11,4 +11,5 @@ services:
    - GLOBAL_legacy.transform.service.enabled=false
    - GLOBAL_local.transform.service.enabled=false
    - GLOBAL_transform.service.enabled=false
+   - GLOBAL_solr.http.socket.timeout=0
 
