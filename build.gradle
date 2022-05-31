@@ -45,6 +45,15 @@ def calcRepository(flavor,enterprise,customized) {
 subprojects {
     apply plugin: 'java'
 
+    // use java 8 for tests to fix "javax.net.ssl.SSLHandshakeException: PKIX path validation failed: java.security.cert.CertPathValidatorException: Algorithm constraints check failed on signature algorithm: SHA1withRSA"
+    plugins.withType(JavaBasePlugin) {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(8)
+            }
+        }
+    }
+
     repositories {
         mavenCentral()
         maven {
