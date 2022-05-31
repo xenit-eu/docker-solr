@@ -15,6 +15,12 @@ subprojects {
         alfredTelemetryVersion = '0.7.2-SNAPSHOT'
         actuatorsVersion = '0.0.2'
         solrBackupVersion = '0.0.3'
+        composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
+        // atm test without ssl enabled
+        tests_use_ssl = false
+        composeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
+                           "$composeDir/docker-compose-solr-non-ssl.yml",
+                           "$composeDir/docker-compose-db.yml"];
     }
 
     dependencies {
@@ -93,6 +99,9 @@ subprojects {
             systemProperty("flavor", "${upstreamProject.solr.flavor}")
             systemProperty("telemetry", true)
             systemProperty("actuators", true)
+            systemProperty("use_ssl", tests_use_ssl)
+            systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
+            systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
         }
     }
 
@@ -101,16 +110,12 @@ subprojects {
     }
 
     dockerCompose {
-        def composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         environment.put 'ALFRESCO_IMAGE', upstreamProject.alfrescoimage
         environment.put 'INDEX', upstreamProject.solr.flavor
 
         isRequiredBy(project.tasks.integrationTestXenitEndpoints)
 
-        // atm test without ssl enabled
-        useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
-                           "$composeDir/docker-compose-solr-non-ssl.yml",
-                           "$composeDir/docker-compose-db.yml"];
+        useComposeFiles = composeFiles
     }
 
     task composeDownAll {

@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-       version: [solr4, solr6]
+       version: [solr6]
        branch: [master]       
     steps:
     - uses: actions/checkout@v2
