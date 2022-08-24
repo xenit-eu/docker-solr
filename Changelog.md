@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 * [DOCKER-391] Deprecate solr1 [#57]
 [#57]: https://github.com/xenit-eu/docker-solr/pull/57	
-	
+* [DOCKER-411] Delete security.json which enforces SSL to be used.
+[#67]: https://github.com/xenit-eu/docker-solr/pull/67
+
 ### Added
 * [DOCKER-404] Alfresco search services 2.0.2.2 [#64]
 * [ALFREDOPS-784] Released version of solr-backup [#55]
