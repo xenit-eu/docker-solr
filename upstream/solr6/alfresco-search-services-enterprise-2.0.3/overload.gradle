@@ -11,6 +11,7 @@ ext {
 //    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2'
     alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2.19'
     tests = true
+    testsShardedNonSsl = true
 }
 dependencies {
     runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.3', ext: 'zip'
