@@ -275,6 +275,15 @@ then
     setJavaOption 'ssl-truststore.aliases' "-Dssl-truststore.aliases=ssl-alfresco-ca,ssl-repo-client"
     setJavaOption 'ssl-truststore.ssl-alfresco-ca.password' "-Dssl-truststore.ssl-alfresco-ca.password=$SSL_TRUST_STORE_PASSWORD"
     setJavaOption 'ssl-truststore.ssl-repo-client.password' "-Dssl-truststore.ssl-repo-client.password=$SSL_TRUST_STORE_PASSWORD"
+else
+    SECURITY_FILE=${SOLR_INSTALL_HOME}/solrhome/security.json
+    if [ -f "$SECURITY_FILE" ]; then
+	      cat $SECURITY_FILE | jq 'map(del(.authentication))' > $SECURITY_FILE
+        if [ ! -s $SECURITY_FILE ];
+        then
+        	echo "{}" > $SECURITY_FILE
+        fi
+    fi
 fi
 
 # set tmp folder

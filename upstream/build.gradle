@@ -66,6 +66,10 @@ subprojects {
             shardedComposeUp.dependsOn(buildDockerImage)
         else
             shardedComposeUp.enabled=false
+        if (project.hasProperty('testsShardedNonSsl') && project.testsShardedNonSsl)
+            shardedNonSslComposeUp.dependsOn(buildDockerImage)
+        else
+            shardedNonSslComposeUp.enabled=false
         if (project.hasProperty('testsNonSsl') && project.testsNonSsl)
             nonSslComposeUp.dependsOn(buildDockerImage)
         else
@@ -80,6 +84,8 @@ subprojects {
             doLast {
                 if (project.hasProperty('testsSharded'))
                     dockerCompose.sharded.environment.put 'DOCKER_IMAGE', getImageId().get()
+                if (project.hasProperty('testsShardedNonSsl'))
+                    dockerCompose.shardedNonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
                 if (project.hasProperty('testsNonSsl'))
                     dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
                 if (project.hasProperty('testsMounts'))
@@ -119,6 +125,19 @@ subprojects {
         }
     }
 
+    task integrationTestShardedNonSsl(type: Test, group: "verification") {
+        enabled = (project.hasProperty('testsShardedNonSsl') && project.testsShardedNonSsl)
+
+        testClassesDirs = sourceSets.integrationTest.output.classesDirs
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        outputs.upToDateWhen { false }
+
+        doFirst {
+            dockerCompose.shardedNonSsl.exposeAsSystemProperties(integrationTestShardedNonSsl)
+            systemProperty("flavor", "${project.solr.flavor}")
+        }
+    }
+
     task integrationTestNonSsl(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsNonSsl') && project.testsNonSsl)
 
@@ -150,6 +169,7 @@ subprojects {
     task integrationTests(type: Test, group: "verification") {
         dependsOn integrationTestDefault
         dependsOn integrationTestSharded
+        dependsOn integrationTestShardedNonSsl
         dependsOn integrationTestNonSsl
         dependsOn integrationTestMounts
     }
@@ -174,6 +194,18 @@ subprojects {
                 environment.put 'LICENSE', project.license
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded.yml", "$composeDir/docker-compose-solr-sharded.yml",
+                               "$composeDir/docker-compose-db.yml"];
+        }
+
+        shardedNonSsl {
+            isRequiredBy(project.tasks.integrationTestShardedNonSsl)
+
+            environment.put 'use_ssl', false
+
+            if(project.hasProperty("license"))
+                environment.put 'LICENSE', project.license
+
+            useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded-non-ssl.yml", "$composeDir/docker-compose-solr-sharded-non-ssl.yml",
                                "$composeDir/docker-compose-db.yml"];
         }
 

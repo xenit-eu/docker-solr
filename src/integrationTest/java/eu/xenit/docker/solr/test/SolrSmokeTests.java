@@ -80,7 +80,8 @@ public class SolrSmokeTests {
         telemetry = Boolean.valueOf(System.getProperty("telemetry"));
         String basePathSolrActuators = "solr/alfresco/xenit/actuators/readiness";
         actuators = Boolean.valueOf(System.getProperty("actuators"));
-        use_ssl = false;
+
+        use_ssl = (System.getProperty("use_ssl") != null)? Boolean.parseBoolean(System.getProperty("use_ssl")) : false;
         if("solr4".equals(System.getProperty("flavor"))) {
             basePathSolr = "solr4/admin/cores";
             basePathSolrTelemetry = "solr4/alfresco/metrics";
@@ -92,14 +93,27 @@ public class SolrSmokeTests {
         String solr2 = System.getProperty("solr2.host");
         int port = Integer.parseInt(System.getProperty("alfresco.tcp.8080"));
         int solrPort;
-    	if (System.getProperty("solr.tcp.8080") == null) {
-    	    solrPort = Integer.parseInt(System.getProperty("solr.tcp.8443"));
-            use_ssl = true;
+        int portShardedSolr1 = -1;
+        int portShardedSolr2 = -1;
+
+        if (solr1 == null) {
+            if (System.getProperty("solr.tcp.8080") == null) {
+                solrPort = Integer.parseInt(System.getProperty("solr.tcp.8443"));
+                use_ssl = true;
+            } else {
+                solrPort = Integer.parseInt(System.getProperty("solr.tcp.8080"));
+            }
         } else {
-            solrPort = Integer.parseInt(System.getProperty("solr.tcp.8080"));
-    	}
-        int portShardedSolr1 = ((solr1!=null)?Integer.parseInt(System.getProperty("solr1.tcp.8443")):-1);
-        int portShardedSolr2 = ((solr2!=null)?Integer.parseInt(System.getProperty("solr2.tcp.8443")):-1);
+            if (use_ssl) {
+                portShardedSolr1 = Integer.parseInt(System.getProperty("solr1.tcp.8443"));
+                portShardedSolr2 = Integer.parseInt(System.getProperty("solr2.tcp.8443"));
+            } else {
+                portShardedSolr1 = Integer.parseInt(System.getProperty("solr1.tcp.8080"));
+                portShardedSolr2 = Integer.parseInt(System.getProperty("solr2.tcp.8080"));
+            }
+
+            solrPort = portShardedSolr1;
+        }
 
         System.out.println("basePath=" + basePath + " and basePathSolr=" + basePathSolr +
                 " and host=" + host + " and solr1=" + solr1 + " and solr2=" + solr2 +
