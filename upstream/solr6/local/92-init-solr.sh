@@ -278,7 +278,7 @@ then
 else
     SECURITY_FILE=${SOLR_INSTALL_HOME}/solrhome/security.json
     if [ -f "$SECURITY_FILE" ]; then
-	      cat $SECURITY_FILE | jq 'map(del(.authentication))' > $SECURITY_FILE
+	      cat $SECURITY_FILE | jq 'del(.authentication)' > $SECURITY_FILE
         if [ ! -s $SECURITY_FILE ];
         then
         	echo "{}" > $SECURITY_FILE
