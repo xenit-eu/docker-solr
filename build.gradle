@@ -4,12 +4,20 @@ plugins {
 }
 
 import java.util.stream.Collectors
-
+allprojects {
+    copyPropertyValueIfExists('eu_xenit_artifactory_username', 'eu.xenit.artifactory.username')
+    copyPropertyValueIfExists('eu_xenit_artifactory_password', 'eu.xenit.artifactory.password')
+}
+def copyPropertyValueIfExists(sourcePropertyName, targetPropertyName) {
+    if (project.hasProperty(sourcePropertyName)) {
+        project.ext[targetPropertyName] = project.property(sourcePropertyName)
+    }
+}
 
 def calcTags(version) {
     def tags = [
-        "${version.major}.${version.minor}.${version.rev}".toString(),
-        "${version.major}.${version.minor}".toString()
+            "${version.major}.${version.minor}.${version.rev}".toString(),
+            "${version.major}.${version.minor}".toString()
     ]
 
     if (version.maint) {
@@ -23,20 +31,16 @@ def calcTags(version) {
     }
     // For non-master/non-release builds, change the tags to contain branch and build number
     def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"
-    if(isTestBuild) {
+    if (isTestBuild) {
         tags = tags.stream().map({ it + "-build-${ci.branch}-${ci.buildNumber}" }).collect(Collectors.toList());
     }
 
     return tags
 }
 
-def calcRepository(flavor,enterprise,customized) {
-    def repoName = project.properties.getOrDefault("repoName", "hub.xenit.eu")
-    if(repoName == "hub.xenit.eu") {
-        def namespace = (enterprise ? "alfresco-enterprise" : "public");
-        repoName += "/" + namespace
-    }
-    if(customized)
+def calcRepository(flavor, enterprise, customized) {
+    def repoName = (enterprise ? "docker.xenit.eu/private/alfresco-enterprise" : "docker.io/xenit")
+    if (customized)
         return "${repoName}/alfresco-${flavor}-xenit"
     else
         return "${repoName}/alfresco-${flavor}"
@@ -74,7 +78,7 @@ subprojects {
 
         // This private repository provides Xenit with Alfresco enterprise artefacts.
         // External developers should replace it with their own library repository.
-        if(project.hasProperty('eu.xenit.artifactory.username') && project.hasProperty('eu.xenit.artifactory.password')) {
+        if (project.hasProperty('eu.xenit.artifactory.username') && project.hasProperty('eu.xenit.artifactory.password')) {
             maven {
                 name 'Xenit artifactory release local'
                 url 'https://artifactory.xenit.eu/artifactory/libs-release'
@@ -108,7 +112,7 @@ subprojects {
             }
         }
     }
-    
+
     configurations {
         runtime
         integrationTestCompile.extendsFrom testCompile

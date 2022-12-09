@@ -4,15 +4,13 @@ Alfresco-specific solr docker images, compatible with Alfresco versions higher t
 
 ## Images created
 
-* [`alfresco-solr4`] = solr4 images, using tomcat
+
 * [`alfresco-solr6`] = solr6 images (alfresco search services), using jetty
 
-* [`alfresco-solr4-xenit`] = solr4 images with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) installed
 * [`alfresco-solr6-xenit`] = solr6 images (alfresco search services) with [alfred-telemetry-solr](https://github.com/xenit-eu/alfred-telemetry) and [custom solr backup/restore](https://github.com/xenit-eu/solr-backup) installed
 
 ## Supported Tags
 
-* [`:5.1,5`, `:5.2.5`] = minor, major, revision for solr4
 * [`:1.3.1`, `:1.4.0`] = version of the alfresco search services used for solr6
 
 ## Overview
@@ -49,39 +47,39 @@ A subset of the properties have also dedicated environment variables e.g. ALFRES
 
 See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat) and - for Xenit-specific images - [`alfred-telemetry`](https://github.com/xenit-eu/alfred-telemetry/tree/master/alfred-telemetry-solr)
 
-| Variable                    | solrcore.property variable | java variable                                                | Default                                                      | Comments |
-| --------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------- |
-| TEMPLATE                  | alfresco.template |                                                              | rerank                                                   |  |
-| CORES_TO_TRACK | | | alfresco;archive | loop over values to create config folders <br> solr6 only |
-| CORES_ALFRESCO | | | alfresco | in case of sharded setups, cores to be created on the current host, separated by ";" <br> Example: alfresco-01;alfresco-02 <br> Leave default for non-sharded setup <br> solr6 only |
-| SOLR_DATA_DIR | | | /opt/alfresco-search-services/data/index | solr6 only |
-| SOLR_MODEL_DIR | | | /opt/alfresco-search-services/data/model | solr6 only |
-| SOLR_CONTENT_DIR | | | /opt/alfresco-search-services/data/contentstore | solr6 only |
-| SOLR_BACKUP_DIR | solr.backup.dir | | /opt/alfresco-search-services/data/solr6Backup |  |
-| ALFRESCO_SOLR_SUGGESTER_ENABLED                     | solr.suggester.enabled |                                                              | true                                                | needs also changes to schema.xml, otherwise not correct. |
-| ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED                     |                            |                                                              |                                                          | changes schema.xml |
-| ALFRESCO_HOST        | alfresco.host              |                                                              | alfresco |  |
-| ALFRESCO_PORT    | alfresco.port          |                                                              | 8080 |  |
-| ALFRESCO_PORT_SSL | alfresco.port.ssl      |                                                              | 8443 |  |
-| ALFRESCO_SSL | alfresco.secureComms | | https | changes also server.xml for tomcat-based images and solr.in.sh for jetty-based images |
-| ALFRESCO_ENABLE_TRACKING | enable.alfresco.tracking    |                                                              | true | in the workspace core or shard |
-| ALFRESCO_INDEX_CONTENT | alfresco.index.transformContent |                                                              | true | in the workspace core or shard |
-| ALFRESCO_CORE_POOL_SIZE | alfresco.corePoolSize |  | 8 |  |
-| ALFRESCO_DO_PERMISSION_CHECKS | alfresco.doPermissionChecks |  | true | post filtering of results still happens on Alfresco side |
-| ARCHIVE_ENABLE_TRACKING | enable.alfresco.tracking |  | true | in the archive core |
-| ARCHIVE_INDEX_CONTENT | alfresco.index.transformContent |                                                              | true | in the archive core |
-| JETTY_PORT | |  | 8080 | solr6 only |
-| JETTY_PORT_SSL | |  | 8443 | solr6 only |
-| GLOBAL_WORKSPACE_\<variable\> | \<variable\> | | | for workspace core or shards |
-| GLOBAL_ARCHIVE_\<variable\> | \<variable\> | | | for archive core |
-| GLOBAL_ALL_\<variable\> | \<variable\> | | | for all cores |
-| GLOBAL_<core>_\<variable\> | \<variable\> | | | for specific core |
-| SHARED_\<variable\> | \<variable\> | | | for `shared.properties` (solr6 only) |
-| \* SSL_KEY_STORE | | | ssl.repo.client.keystore for solr6, ssl.keystore for solr4|  |
-| \* SSL_KEY_STORE_PASSWORD | | | kT9X6oe68t | |
-| \* SSL_KEY_STORE_ALIAS | | | ssl.repo | alias of the repository cert in the keystore, to be used in the solr6 healthcheck script |
-| \* SSL_TRUST_STORE | | | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 | |
-| \* SSL_TRUST_STORE_PASSWORD | | | kT9X6oe68t | |
+| Variable                                   | solrcore.property variable      | java variable | Default                                                        | Comments                                                                                                                                                                            |
+|--------------------------------------------|---------------------------------|---------------|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| TEMPLATE                                   | alfresco.template               |               | rerank                                                         |                                                                                                                                                                                     |
+| CORES_TO_TRACK                             |                                 |               | alfresco;archive                                               | loop over values to create config folders <br> solr6 only                                                                                                                           |
+| CORES_ALFRESCO                             |                                 |               | alfresco                                                       | in case of sharded setups, cores to be created on the current host, separated by ";" <br> Example: alfresco-01;alfresco-02 <br> Leave default for non-sharded setup <br> solr6 only |
+| SOLR_DATA_DIR                              |                                 |               | /opt/alfresco-search-services/data/index                       | solr6 only                                                                                                                                                                          |
+| SOLR_MODEL_DIR                             |                                 |               | /opt/alfresco-search-services/data/model                       | solr6 only                                                                                                                                                                          |
+| SOLR_CONTENT_DIR                           |                                 |               | /opt/alfresco-search-services/data/contentstore                | solr6 only                                                                                                                                                                          |
+| SOLR_BACKUP_DIR                            | solr.backup.dir                 |               | /opt/alfresco-search-services/data/solr6Backup                 |                                                                                                                                                                                     |
+| ALFRESCO_SOLR_SUGGESTER_ENABLED            | solr.suggester.enabled          |               | true                                                           | needs also changes to schema.xml, otherwise not correct.                                                                                                                            |
+| ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED |                                 |               |                                                                | changes schema.xml                                                                                                                                                                  |
+| ALFRESCO_HOST                              | alfresco.host                   |               | alfresco                                                       |                                                                                                                                                                                     |
+| ALFRESCO_PORT                              | alfresco.port                   |               | 8080                                                           |                                                                                                                                                                                     |
+| ALFRESCO_PORT_SSL                          | alfresco.port.ssl               |               | 8443                                                           |                                                                                                                                                                                     |
+| ALFRESCO_SSL                               | alfresco.secureComms            |               | https                                                          | changes also server.xml for tomcat-based images and solr.in.sh for jetty-based images                                                                                               |
+| ALFRESCO_ENABLE_TRACKING                   | enable.alfresco.tracking        |               | true                                                           | in the workspace core or shard                                                                                                                                                      |
+| ALFRESCO_INDEX_CONTENT                     | alfresco.index.transformContent |               | true                                                           | in the workspace core or shard                                                                                                                                                      |
+| ALFRESCO_CORE_POOL_SIZE                    | alfresco.corePoolSize           |               | 8                                                              |                                                                                                                                                                                     |
+| ALFRESCO_DO_PERMISSION_CHECKS              | alfresco.doPermissionChecks     |               | true                                                           | post filtering of results still happens on Alfresco side                                                                                                                            |
+| ARCHIVE_ENABLE_TRACKING                    | enable.alfresco.tracking        |               | true                                                           | in the archive core                                                                                                                                                                 |
+| ARCHIVE_INDEX_CONTENT                      | alfresco.index.transformContent |               | true                                                           | in the archive core                                                                                                                                                                 |
+| JETTY_PORT                                 |                                 |               | 8080                                                           | solr6 only                                                                                                                                                                          |
+| JETTY_PORT_SSL                             |                                 |               | 8443                                                           | solr6 only                                                                                                                                                                          |
+| GLOBAL_WORKSPACE_\<variable\>              | \<variable\>                    |               |                                                                | for workspace core or shards                                                                                                                                                        |
+| GLOBAL_ARCHIVE_\<variable\>                | \<variable\>                    |               |                                                                | for archive core                                                                                                                                                                    |
+| GLOBAL_ALL_\<variable\>                    | \<variable\>                    |               |                                                                | for all cores                                                                                                                                                                       |
+| GLOBAL_<core>_\<variable\>                 | \<variable\>                    |               |                                                                | for specific core                                                                                                                                                                   |
+| SHARED_\<variable\>                        | \<variable\>                    |               |                                                                | for `shared.properties` (solr6 only)                                                                                                                                                |
+| \* SSL_KEY_STORE                           |                                 |               | ssl.repo.client.keystore for solr6, ssl.keystore for solr4     |                                                                                                                                                                                     |
+| \* SSL_KEY_STORE_PASSWORD                  |                                 |               | kT9X6oe68t                                                     |                                                                                                                                                                                     |
+| \* SSL_KEY_STORE_ALIAS                     |                                 |               | ssl.repo                                                       | alias of the repository cert in the keystore, to be used in the solr6 healthcheck script                                                                                            |
+| \* SSL_TRUST_STORE                         |                                 |               | ssl.repo.client.truststore for solr6, ssl.truststore for solr4 |                                                                                                                                                                                     |
+| \* SSL_TRUST_STORE_PASSWORD                |                                 |               | kT9X6oe68t                                                     |                                                                                                                                                                                     |
 
 \* = tested for solr6
 
