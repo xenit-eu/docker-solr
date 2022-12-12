@@ -21,6 +21,11 @@ jobs:
           java-version: 1.11
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
+      - name: Add license
+        run: |
+          touch ./src/integrationTest/resources/license61/license.lic
+          echo ${{secrets.ALFRESCO_LICENSE61}} > ./src/integrationTest/resources/license61/license.lic
+          chmod 666 ./src/integrationTest/resources/license61/license.lic
       - name: Login to Docker
         run: |
           echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
