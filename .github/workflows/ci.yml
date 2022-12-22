@@ -28,7 +28,7 @@ jobs:
           chmod 666 ./src/integrationTest/resources/license61/license.lic
       - name: Login to Docker
         run: |
-          echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
+          echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login private.docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
       - name: Run integration tests
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
@@ -54,7 +54,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Login to Docker
         run: |
-          echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
+          echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login private.docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
       - name: Publish docker images
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
