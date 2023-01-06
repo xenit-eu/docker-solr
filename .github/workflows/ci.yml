@@ -52,9 +52,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Login to Docker
+      - name: Login to CloudSmith
         run: |
           echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login private.docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
+      - name: Login to Docker hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login docker.io --username "${{ secrets.DOCKER_USER }}" --password-stdin
       - name: Publish docker images
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
