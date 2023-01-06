@@ -8,8 +8,8 @@ ext {
             flavor: 'solr6'
     ]
 // default integrationTests (using SSL) is failing when using ACS >= 6.2.1, fallback to 6.2.0
-//    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2'
-    alfrescoimage ='hub.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2.19'
+//    alfrescoimage ='private.docker.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2.19'
+    alfrescoimage ='private.docker.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2'
     tests = true
     testsShardedNonSsl = true
 }

@@ -12,15 +12,15 @@ subprojects {
     }
 
     ext {
-        alfredTelemetryVersion = '0.7.2-SNAPSHOT'
+        alfredTelemetryVersion = '0.9.2'
         actuatorsVersion = '0.0.2'
         solrBackupVersion = '0.0.3'
         composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         // atm test without ssl enabled
         tests_use_ssl = false
         composeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
-                           "$composeDir/docker-compose-solr-non-ssl.yml",
-                           "$composeDir/docker-compose-db.yml"];
+                        "$composeDir/docker-compose-solr-non-ssl.yml",
+                        "$composeDir/docker-compose-db.yml"];
     }
 
     dependencies {
@@ -46,7 +46,7 @@ subprojects {
     dockerFile {
         dockerBuild {
             def enterprise = upstreamProject.alfrescoimage.contains("enterprise")
-            repository = [calcRepository(upstreamProject.solr.flavor,enterprise,true)].get(0)
+            repository = [calcRepository(upstreamProject.solr.flavor, enterprise, true)].get(0)
             tags = calcTags(upstreamProject.solr.version)
         }
     }
@@ -55,36 +55,25 @@ subprojects {
     createDockerFile {
         from(upstreamImage.getImageId().map({ new From(it) }))
         // micrometer handler init script
-        smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh","/docker-entrypoint.d/")
+        smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh", "/docker-entrypoint.d/")
         // jmx needs to be enabled
         environmentVariable 'JMX_ENABLED', 'true'
-        if("solr4".equals(upstreamProject.solr.flavor)) {
-            environmentVariable 'METRICS_TOMCAT_ENABLED', 'true'
-            smartCopy("${project.projectDir}/../local/solrconfig.xml","/opt/alfresco/solr4/workspace-SpacesStore/conf/solrconfig.xml")
-            smartCopy files(configurations.telemetry.files), "/opt/alfresco/solr4/lib/"
-            smartCopy files(configurations.actuators.files), "/opt/alfresco/solr4/lib/"
-            label([
-                    "eu.xenit.prometheus.metrics-path":"/solr4/alfresco/metrics",
-                    "eu.xenit.prometheus.params":"wt: ['dummy']"
-            ])
-        } else if("solr6".equals(upstreamProject.solr.flavor)) {
-            // telemetry
-            environmentVariable 'METRICS_JETTY_ENABLED', 'true'
-            smartCopy "${project.projectDir}/../local/solrconfig_insight.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig_insight.xml"
-            smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
-            smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
-            smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
-            label([
-                    "eu.xenit.prometheus.metrics-path":"/solr/alfresco/metrics",
-                    "eu.xenit.prometheus.params":"wt: ['dummy']"
-            ])
-            // actuators
-            smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
-            // backup
-            smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
-            smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh","/docker-entrypoint.d/")
-            smartCopy("${project.projectDir}/../local/solr.xml","/opt/alfresco-search-services/solrhome/solr.xml")
-        }
+        // telemetry
+        environmentVariable 'METRICS_JETTY_ENABLED', 'true'
+        smartCopy "${project.projectDir}/../local/solrconfig_insight.xml", "/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrconfig_insight.xml"
+        smartCopy "${project.projectDir}/../local/jetty.xml", "/opt/alfresco-search-services/solr/server/etc/jetty.xml"
+        smartCopy "${project.projectDir}/../local/solr-jetty-context.xml", "/opt/alfresco-search-services/solr/server/contexts/solr-jetty-context.xml"
+        smartCopy files(configurations.telemetry.files), "/opt/alfresco-search-services/solrhome/lib/"
+        label([
+                "eu.xenit.prometheus.metrics-path": "/solr/alfresco/metrics",
+                "eu.xenit.prometheus.params"      : "wt: ['dummy']"
+        ])
+        // actuators
+        smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
+        // backup
+        smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
+        smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh", "/docker-entrypoint.d/")
+        smartCopy("${project.projectDir}/../local/solr.xml", "/opt/alfresco-search-services/solrhome/solr.xml")
     }
 
     task integrationTestXenitEndpoints(type: Test, group: "verification") {

@@ -11,5 +11,5 @@ services:
     - SOLR_HOST=solr1
     - INDEX
     - SOLR_SSL=none
-    - ENABLE_CLUSTERING=true
-    - DYNAMIC_SHARD_REGISTRATION=true    
+    - GLOBAL_alfresco.cluster.enabled=true
+    - GLOBAL_solr.useDynamicShardRegistration=true
