@@ -58,6 +58,4 @@ jobs:
       - name: Publish docker images
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: ./gradlew pushDockerImage
