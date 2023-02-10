@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+* [DOCKER-426] upgrade solr from 2.0.3 to 2.0.6 [#74]
+
+  [#74]: https://github.com/xenit-eu/docker-solr/pull/74
 
 ### Removed
 * [DOCKER-391] Deprecate solr1 [#57]
+
 [#57]: https://github.com/xenit-eu/docker-solr/pull/57	
 	
 ### Added
@@ -22,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [DOCKER-394] Introduced SOLR_BACKUP_DIR variable [#60]
 
 [#55]: https://github.com/xenit-eu/docker-solr/pull/55
+[#64]: https://github.com/xenit-eu/docker-solr/pull/64
 [#52]: https://github.com/xenit-eu/docker-solr/pull/52
 [#50]: https://github.com/xenit-eu/docker-solr/pull/50
 
