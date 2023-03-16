@@ -1,30 +1,30 @@
 package eu.xenit.docker.solr.test;
 
+import io.restassured.RestAssured;
+import io.restassured.authentication.PreemptiveBasicAuthScheme;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.SSLConfig;
+import io.restassured.parsing.Parser;
+import io.restassured.specification.RequestSpecification;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.FileInputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
-
-import io.restassured.RestAssured;
-import io.restassured.authentication.PreemptiveBasicAuthScheme;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.parsing.Parser;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.KeyManagementException;
-import io.restassured.config.SSLConfig;
-import io.restassured.config.RestAssuredConfig;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import java.io.FileInputStream;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 public class SolrSmokeTests {
 
