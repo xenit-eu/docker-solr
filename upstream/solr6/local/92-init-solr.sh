@@ -150,12 +150,12 @@ function makeConfigs {
         setOption 'alfresco.corePoolSize' "${ALFRESCO_CORE_POOL_SIZE:-8}" "$CONFIG_FILE_CORE"
         setOption 'alfresco.doPermissionChecks' "${ALFRESCO_DO_PERMISSION_CHECKS:-true}" "$CONFIG_FILE_CORE"
         setOption 'solr.suggester.enabled' "$ALFRESCO_SOLR_SUGGESTER_ENABLED" "$CONFIG_FILE_CORE"
-        # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
+        # SOLR_BACKUP_DIR only useful for ASS v2.0.6* and up
         if [ $coreAlfrescoName != $coreName ]; then
-          setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName" "$CONFIG_FILE_CORE"
+          setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
           createBackupDir "$SOLR_BACKUP_DIR/$coreName/$coreAlfrescoName"
         else
-          setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+          setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR" "$CONFIG_FILE_CORE"
           createBackupDir "$SOLR_BACKUP_DIR/$coreName"
         fi
         CONFIG_FILE_SOLR_SCHEMA=$newCore/conf/schema.xml
@@ -192,8 +192,8 @@ function makeConfigs {
       setGlobalOptions "$CONFIG_FILE_CORE" archive
       escapeFile "$CONFIG_FILE_CORE"
 
-      # SOLR_BACKUP_DIR only useful for ASS v2.0.2* and up
-      setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR/$coreName" "$CONFIG_FILE_CORE"
+      # SOLR_BACKUP_DIR only useful for ASS v2.0.6* and up
+      setOption 'solr.backup.dir' "$SOLR_BACKUP_DIR" "$CONFIG_FILE_CORE"
       createBackupDir "$SOLR_BACKUP_DIR/$coreName"
 
       if [ $CUSTOM_SCHEMA = true ]; then
