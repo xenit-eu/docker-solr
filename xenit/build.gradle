@@ -7,6 +7,7 @@ subprojects {
 
     configurations {
         telemetry
+        loggings
         actuators
         backup
     }
@@ -24,6 +25,7 @@ subprojects {
     }
 
     dependencies {
+        loggings("eu.xenit.logging:json-logging:0.0.6")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         backup("eu.xenit.solr-backup:solr-backup:${solrBackupVersion}")
     }
@@ -55,6 +57,7 @@ subprojects {
     createDockerFile {
         from(upstreamImage.getImageId().map({ new From(it) }))
         // micrometer handler init script
+        smartCopy("${project.projectDir}/../local/94-init-solr-logging.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh", "/docker-entrypoint.d/")
         // jmx needs to be enabled
         environmentVariable 'JMX_ENABLED', 'true'
@@ -68,6 +71,8 @@ subprojects {
                 "eu.xenit.prometheus.metrics-path": "/solr/alfresco/metrics",
                 "eu.xenit.prometheus.params"      : "wt: ['dummy']"
         ])
+        // loggings
+        smartCopy files(configurations.loggings.files), "/opt/alfresco-search-services/solr/server/lib/ext/"
         // actuators
         smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
         // backup

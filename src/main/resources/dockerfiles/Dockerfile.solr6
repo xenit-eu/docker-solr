@@ -38,8 +38,6 @@ RUN apt-get update && \
     apt-get install -y unzip lsof less vim curl jq && \
 	groupadd solr -g 990 && \
 	useradd solr -u 990 -g 990 -d ${SOLR_INSTALL_HOME} -s /bin/bash && \
-	sed -i "s/log4j.appender.CONSOLE.layout.ConversionPattern=.*//g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
-	sed -i "s/log4j.appender.CONSOLE.layout=.*/log4j.appender.CONSOLE.layout=eu.xenit.logging.json.log4j.JsonFormatter\nlog4j.appender.CONSOLE.layout.Type=application\nlog4j.appender.CONSOLE.layout.Component=solr/g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
 	sed -i "s/rootLogger=WARN, file, CONSOLE/rootLogger=WARN, CONSOLE/g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
     sed -i "s/rootLogger=INFO, file, CONSOLE/rootLogger=ERROR, CONSOLE/" "$SOLR_INSTALL_HOME/logs/log4j.properties" && \
 	touch ${SOLR_INSTALL_HOME}/startup.sh && chmod +x ${SOLR_INSTALL_HOME}/startup.sh && \
