@@ -35,7 +35,7 @@ ENV GOSU_VERSION 1.9
 # SOLR installation & configuration
 USER root
 RUN apt-get update && \
-    apt-get install -y unzip lsof less vim curl jq && \
+    apt-get install -y unzip lsof less vim curl jq xmlstarlet && \
 	groupadd solr -g 990 && \
 	useradd solr -u 990 -g 990 -d ${SOLR_INSTALL_HOME} -s /bin/bash && \
 	sed -i "s/rootLogger=WARN, file, CONSOLE/rootLogger=WARN, CONSOLE/g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
