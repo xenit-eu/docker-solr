@@ -22,6 +22,10 @@ fi
 
 if [ $ACCESS_LOGGING = true ]; then
   echo "ACCESS_LOGGING is true"
+  xmlstarlet ed -L --delete '/Configure/Ref[@id="Handlers"]/Call[@name="addHandler"]/Arg/New[@id="RequestLog"]/Set[@name="requestLog"]/New[@id="RequestLogImpl"]' ${SOLR_INSTALL_HOME}/solr/server/etc/jetty.xml
+  xmlstarlet ed -L --subnode '/Configure/Ref[@id="Handlers"]/Call[@name="addHandler"]/Arg/New[@id="RequestLog"]/Set[@name="requestLog"]' -t elem -n 'New' -v "" ${SOLR_INSTALL_HOME}/solr/server/etc/jetty.xml
+  xmlstarlet ed -L --insert '/Configure/Ref[@id="Handlers"]/Call[@name="addHandler"]/Arg/New[@id="RequestLog"]/Set[@name="requestLog"]/New' -t attr -n 'id' -v 'RequestLogImpl' ${SOLR_INSTALL_HOME}/solr/server/etc/jetty.xml
+  xmlstarlet ed -L --insert '/Configure/Ref[@id="Handlers"]/Call[@name="addHandler"]/Arg/New[@id="RequestLog"]/Set[@name="requestLog"]/New[@id="RequestLogImpl"]' -t attr -n 'class' -v 'eu.xenit.logging.json.jetty.JettyAccessRequestLog' ${SOLR_INSTALL_HOME}/solr/server/etc/jetty.xml
 else
   echo "ACCESS_LOGGING is false"
 fi
