@@ -25,10 +25,7 @@ subprojects {
     }
 
     dependencies {
-        loggings("eu.xenit.logging:json-logging:0.0.7")
-        loggings("com.fasterxml.jackson.core:jackson-core:2.12.3")
-        loggings("com.fasterxml.jackson.core:jackson-annotations:2.12.3")
-        loggings("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+        loggings("eu.xenit.logging:json-logging:0.0.7:all")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         backup("eu.xenit.solr-backup:solr-backup:${solrBackupVersion}")
     }
