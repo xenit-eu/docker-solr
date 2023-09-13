@@ -4,15 +4,6 @@ plugins {
 }
 
 import java.util.stream.Collectors
-allprojects {
-    copyPropertyValueIfExists('eu_xenit_artifactory_username', 'eu.xenit.artifactory.username')
-    copyPropertyValueIfExists('eu_xenit_artifactory_password', 'eu.xenit.artifactory.password')
-}
-def copyPropertyValueIfExists(sourcePropertyName, targetPropertyName) {
-    if (project.hasProperty(sourcePropertyName)) {
-        project.ext[targetPropertyName] = project.property(sourcePropertyName)
-    }
-}
 
 def calcTags(version) {
     def tags = [
@@ -72,22 +63,18 @@ subprojects {
             }
         }
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
         }
-
-
-        // This private repository provides Xenit with Alfresco enterprise artefacts.
-        // External developers should replace it with their own library repository.
-        if (project.hasProperty('eu.xenit.artifactory.username') && project.hasProperty('eu.xenit.artifactory.password')) {
-            maven {
-                name 'Xenit artifactory release local'
-                url 'https://artifactory.xenit.eu/artifactory/libs-release'
-                credentials {
-                    username property("eu.xenit.artifactory.username")
-                    password property("eu.xenit.artifactory.password")
-                }
+        maven {
+            name "cloudsmith-private"
+            url = "https://repo.xenit.eu/basic/private/maven/"
+            credentials {
+                username = property("eu.xenit.cloudsmith.username")
+                password = property("eu.xenit.cloudsmith.password")
             }
         }
+
+
     }
 
     pluginManager.withPlugin('eu.xenit.docker-config') {
