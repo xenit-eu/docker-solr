@@ -23,7 +23,7 @@ def calcTags(version) {
     // For non-master/non-release builds, change the tags to contain branch and build number
     def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"
     if (isTestBuild) {
-        tags = tags.stream().map({ it + "-build-${ci.branch}-${ci.buildNumber}" }).collect(Collectors.toList());
+        tags = tags.stream().map({ it + "-build-${ci.buildNumber}" }).collect(Collectors.toList());
     }
 
     return tags
@@ -51,6 +51,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+
         maven {
             url 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
             metadataSources {
@@ -61,9 +62,6 @@ subprojects {
                 includeModule 'org.alfresco', 'alfresco-solr4-distribution'
                 includeModule 'org.alfresco', 'alfresco-search-services'
             }
-        }
-        maven {
-            url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
         }
         maven {
             name "cloudsmith-private"
