@@ -14,7 +14,7 @@ subprojects {
 
     ext {
         alfredTelemetryVersion = '0.9.3'
-        actuatorsVersion = '0.0.5'
+        actuatorsVersion = '0.0.6'
         solrBackupVersion = '0.0.4'
         composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         // atm test without ssl enabled
