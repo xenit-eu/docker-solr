@@ -5,8 +5,9 @@ on:
   schedule:
     - cron: '7 0 * * SUN'
 env:
-  ORG_GRADLE_PROJECT_eu_xenit_artifactory_username: ${{ secrets.XENIT_ARTIFACTORY_USERNAME }}
-  ORG_GRADLE_PROJECT_eu_xenit_artifactory_password: ${{ secrets.XENIT_ARTIFACTORY_PASSWORD }}
+  GRADLE_OPTS: >-
+    -Dorg.gradle.project.eu.xenit.cloudsmith.username=${{ secrets.CLOUDSMITH_USER }} 
+    -Dorg.gradle.project.eu.xenit.cloudsmith.password=${{ secrets.CLOUDSMITH_APIKEY }}
 jobs:
   integration-test:
     runs-on: ubuntu-latest

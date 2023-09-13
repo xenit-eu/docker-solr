@@ -4,15 +4,6 @@ plugins {
 }
 
 import java.util.stream.Collectors
-allprojects {
-    copyPropertyValueIfExists('eu_xenit_artifactory_username', 'eu.xenit.artifactory.username')
-    copyPropertyValueIfExists('eu_xenit_artifactory_password', 'eu.xenit.artifactory.password')
-}
-def copyPropertyValueIfExists(sourcePropertyName, targetPropertyName) {
-    if (project.hasProperty(sourcePropertyName)) {
-        project.ext[targetPropertyName] = project.property(sourcePropertyName)
-    }
-}
 
 def calcTags(version) {
     def tags = [
@@ -32,7 +23,7 @@ def calcTags(version) {
     // For non-master/non-release builds, change the tags to contain branch and build number
     def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"
     if (isTestBuild) {
-        tags = tags.stream().map({ it + "-build-${ci.branch}-${ci.buildNumber}" }).collect(Collectors.toList());
+        tags = tags.stream().map({ it + "-build-${ci.buildNumber}" }).collect(Collectors.toList());
     }
 
     return tags
@@ -60,6 +51,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+
         maven {
             url 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
             metadataSources {
@@ -72,22 +64,15 @@ subprojects {
             }
         }
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-
-
-        // This private repository provides Xenit with Alfresco enterprise artefacts.
-        // External developers should replace it with their own library repository.
-        if (project.hasProperty('eu.xenit.artifactory.username') && project.hasProperty('eu.xenit.artifactory.password')) {
-            maven {
-                name 'Xenit artifactory release local'
-                url 'https://artifactory.xenit.eu/artifactory/libs-release'
-                credentials {
-                    username property("eu.xenit.artifactory.username")
-                    password property("eu.xenit.artifactory.password")
-                }
+            name "cloudsmith-private"
+            url = "https://repo.xenit.eu/basic/private/maven/"
+            credentials {
+                username = property("eu.xenit.cloudsmith.username")
+                password = property("eu.xenit.cloudsmith.password")
             }
         }
+
+
     }
 
     pluginManager.withPlugin('eu.xenit.docker-config') {
