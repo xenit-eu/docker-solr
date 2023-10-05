@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+* [DOCKER-438] upgrade solr from 2.0.6 to 2.0.8.1 [#91]
 
 ### Fixed
 * [XM2C-91] fix backup for latest ass remove core from solr backup dir and move backup location outside of data [#76]
@@ -13,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#76]: https://github.com/xenit-eu/docker-solr/pull/76
 
 ### Added
+
 * [DOCKER-426] upgrade solr from 2.0.3 to 2.0.6 [#74]
 
   [#74]: https://github.com/xenit-eu/docker-solr/pull/74

@@ -8,14 +8,14 @@ def includeProject(String folder,String flavor, String version) {
 
 if (includeCommunity == 'true') {
     includeProject('upstream','solr6','alfresco-search-services-community-1.4.3.4')
-    includeProject('upstream','solr6','alfresco-search-services-community-2.0.6')
+    includeProject('upstream','solr6','alfresco-search-services-community-2.0.8.1')
     includeProject('xenit','solr6','alfresco-search-services-community-1.4.3.4')
-    includeProject('xenit','solr6','alfresco-search-services-community-2.0.6')
+    includeProject('xenit','solr6','alfresco-search-services-community-2.0.8.1')
 }
 
 if (includeEnterprise == 'true') {
     includeProject('upstream','solr6','alfresco-search-services-enterprise-1.4.3.4')
-    includeProject('upstream','solr6','alfresco-search-services-enterprise-2.0.6')
+    includeProject('upstream','solr6','alfresco-search-services-enterprise-2.0.8.1')
     includeProject('xenit','solr6','alfresco-search-services-enterprise-1.4.3.4')
-    includeProject('xenit','solr6','alfresco-search-services-enterprise-2.0.6')
+    includeProject('xenit','solr6','alfresco-search-services-enterprise-2.0.8.1')
 }
