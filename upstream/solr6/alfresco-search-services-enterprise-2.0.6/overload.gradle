@@ -14,5 +14,5 @@ ext {
     testsShardedNonSsl = true
 }
 dependencies {
-    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.6', ext: 'zip'
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.8.1', ext: 'zip'
 }
