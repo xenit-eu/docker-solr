@@ -1,0 +1,18 @@
+ext {
+    solr = [
+            version: [
+                    major: 2,
+                    minor: 0,
+                    rev: '6'
+            ],
+            flavor: 'solr6'
+    ]
+// default integrationTests (using SSL) is failing when using ACS >= 6.2.1, fallback to 6.2.0
+//    alfrescoimage ='private.docker.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2.19'
+    alfrescoimage ='private.docker.xenit.eu/alfresco-enterprise/alfresco-repository-enterprise:6.2.2'
+    tests = true
+    testsShardedNonSsl = true
+}
+dependencies {
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.6', ext: 'zip'
+}
