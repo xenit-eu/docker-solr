@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
+* [DOCKER-440] replace 2.0.8.1 with 2.0.8.2
+
+### Added
 * [DOCKER-438] DOCKER-438 add back solr 2.0.6  [#95]
 
 ### Added
@@ -26,8 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 * [DOCKER-391] Deprecate solr1 [#57]
 
-[#57]: https://github.com/xenit-eu/docker-solr/pull/57	
-	
+[#57]: https://github.com/xenit-eu/docker-solr/pull/57
+
 ### Added
 * [DOCKER-404] Alfresco search services 2.0.2.2 [#64]
 * [ALFREDOPS-784] Released version of solr-backup [#55]
@@ -43,7 +46,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [#52]: https://github.com/xenit-eu/docker-solr/pull/52
 [#50]: https://github.com/xenit-eu/docker-solr/pull/50
 
-[#40]: https://github.com/xenit-eu/docker-solr/pull/40	
+[#40]: https://github.com/xenit-eu/docker-solr/pull/40
 [#41]: https://github.com/xenit-eu/docker-solr/pull/41
 
 [#49]: https://github.com/xenit-eu/docker-solr/pull/49
@@ -71,7 +74,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [#39]: https://github.com/xenit-eu/docker-solr/pull/39
 [#37]: https://github.com/xenit-eu/docker-solr/pull/37
-	
+
 ## [v1.1.0] - 2020-12-14 New versions, refactorings
 ### Added
 * [DOCKER-360] Alfresco-search-services-2.0.0
