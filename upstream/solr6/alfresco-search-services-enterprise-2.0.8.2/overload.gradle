@@ -3,7 +3,7 @@ ext {
             version: [
                     major: 2,
                     minor: 0,
-                    rev: '8.1'
+                    rev: '8.2'
             ],
             flavor: 'solr6'
     ]
@@ -14,5 +14,5 @@ ext {
     testsShardedNonSsl = true
 }
 dependencies {
-    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.8.1', ext: 'zip'
+    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '2.0.8.2', ext: 'zip'
 }
