@@ -93,6 +93,9 @@ function createCoreStatically {
   setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_CORE"
   setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_CORE"
   setOption 'alfresco.secureComms' "$ALFRESCO_SSL" "$CONFIG_FILE_CORE"
+  if [ "$ALFRESCO_SSL" == "secret" ]; then
+    setOption 'alfresco.secureComms.secret' "$ALFRESCO_SECRET" "$CONFIG_FILE_CORE"
+  fi
 }
 
 function createBackupDir {
@@ -229,7 +232,7 @@ echo "export SOLR_SOLR_DATA_DIR=${SOLR_DATA_DIR:-$SOLR_DATA_ROOT/index}" >>"$CON
 echo "export SOLR_SOLR_MODEL_DIR=${SOLR_MODEL_DIR:-$SOLR_DATA_ROOT/model}" >>"$CONFIG_FILE_SOLR_START"
 echo "export SOLR_SOLR_CONTENT_DIR=${SOLR_CONTENT_DIR:-$SOLR_DATA_ROOT/contentstore}" >>"$CONFIG_FILE_SOLR_START"
 
-if [ $ALFRESCO_SSL != none ] && [ $ALFRESCO_SSL != secret ]; then
+if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
   cp -r ${SOLR_DIR_ROOT}/keystore/* ${SOLR_DIR_ROOT}/templates/${TEMPLATE}/conf/
 
   setOption 'SOLR_SSL_KEY_STORE_TYPE' "JCEKS" "$CONFIG_FILE_SOLR_START"
