@@ -12,6 +12,7 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         version:
           - solr6
@@ -27,8 +28,6 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 1.11
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
       - name: Add license
         run: |
           touch ./src/integrationTest/resources/license61/license.lic
@@ -37,15 +36,18 @@ jobs:
       - name: Login to Docker
         run: |
           echo "${{ secrets.CLOUDSMITH_APIKEY }}" | docker login private.docker.xenit.eu --username "${{ secrets.CLOUDSMITH_USER }}" --password-stdin
-      - name: Run integration tests
+      - name: Integration tests
+        uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c # v2
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        run: ./gradlew  ${{task}} --info
+        with:
+          cache-read-only: false
+          arguments: ${{ matrix.task }} --info
       - name: Upload Artifact
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: ${{task}}-result
+          name: ${{ matrix.task }}-result
           path: /home/runner/work/**/build/reports
           retention-days: 2
   publish:
@@ -67,12 +69,18 @@ jobs:
       # without supplying DOCKER_USER and DOCKER_PASSWORD. However, supplying those environment variables breaks
       # publishing to other repositories
       - name: Publish public docker images
+        uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c # v2
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        run: ./gradlew pushDockerImage -PincludeEnterprise=false
+        with:
+          cache-read-only: false
+          arguments: pushDockerImage -PincludeEnterprise=false
       - name: Publish private docker images
+        uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c # v2
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        run: ./gradlew pushDockerImage -PincludeCommunity=false
+        with:
+          cache-read-only: false
+          arguments: pushDockerImage -PincludeCommunity=false
