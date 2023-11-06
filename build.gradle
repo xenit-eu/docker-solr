@@ -30,7 +30,7 @@ def calcTags(version) {
 }
 
 def calcRepository(flavor, enterprise, customized) {
-    def repoName = (enterprise ? "sandbox.docker.xenit.eu/alfresco-enterprise" : "docker.io/xenit")
+    def repoName = (enterprise ? "private.docker.xenit.eu/alfresco-enterprise" : "docker.io/xenit")
     if (customized)
         return "${repoName}/alfresco-${flavor}-xenit"
     else
