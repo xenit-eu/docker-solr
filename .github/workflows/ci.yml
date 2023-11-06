@@ -15,6 +15,13 @@ jobs:
       matrix:
         version:
           - solr6
+        task:
+          - integrationTestDefault
+          - integrationTestSharded
+          - integrationTestShardedNonSsl
+          - integrationTestNonSsl
+          - integrationTestMounts
+          - integrationTestXenitEndpoints
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -33,12 +40,12 @@ jobs:
       - name: Run integration tests
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        run: ./gradlew  integrationTests --info
+        run: ./gradlew  ${{task}} --info
       - name: Upload Artifact
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: test-result
+          name: ${{task}}-result
           path: /home/runner/work/**/build/reports
           retention-days: 2
   publish:
