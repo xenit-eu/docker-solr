@@ -7,24 +7,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
-* [DOCKER-440] replace 2.0.8.1 with 2.0.8.2
-
-### Added
+* [DOCKER-441] improve solr backup documentation and add new env variable for backup and ALFRESCO_SECRET  [#97]
+* [DOCKER-440] replace 2.0.8.1 with 2.0.8.2  [#96]
 * [DOCKER-438] DOCKER-438 add back solr 2.0.6  [#95]
-
-### Added
 * [DOCKER-438] upgrade solr from 2.0.6 to 2.0.8.1 [#91]
+
+[#96]: https://github.com/xenit-eu/docker-solr/pull/97
+[#96]: https://github.com/xenit-eu/docker-solr/pull/96
+[#95]: https://github.com/xenit-eu/docker-solr/pull/95
+[#91]: https://github.com/xenit-eu/docker-solr/pull/91
+
 
 ### Fixed
 * [XM2C-91] fix backup for latest ass remove core from solr backup dir and move backup location outside of data [#76]
 
-  [#76]: https://github.com/xenit-eu/docker-solr/pull/76
+[#76]: https://github.com/xenit-eu/docker-solr/pull/76
 
 ### Added
 
 * [DOCKER-426] upgrade solr from 2.0.3 to 2.0.6 [#74]
 
-  [#74]: https://github.com/xenit-eu/docker-solr/pull/74
+[#74]: https://github.com/xenit-eu/docker-solr/pull/74
 
 ### Removed
 * [DOCKER-391] Deprecate solr1 [#57]

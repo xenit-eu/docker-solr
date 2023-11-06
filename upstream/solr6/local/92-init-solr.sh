@@ -93,8 +93,8 @@ function createCoreStatically {
   setOption 'alfresco.port' "${ALFRESCO_PORT:-8080}" "$CONFIG_FILE_CORE"
   setOption 'alfresco.port.ssl' "${ALFRESCO_PORT_SSL:-8443}" "$CONFIG_FILE_CORE"
   setOption 'alfresco.secureComms' "$ALFRESCO_SSL" "$CONFIG_FILE_CORE"
-  if [ "$ALFRESCO_SSL" == "secret" ] && [ -z ${ALFRESCO_SECRET} ]; then
-    setOption 'alfresco.secureComms.secret' "$ALFRESCO_SECRET" "$CONFIG_FILE_CORE"
+  if [ "$ALFRESCO_SSL" == "secret" ] && [[ -n ${ALFRESCO_SECRET} ]]; then
+    setJavaOption 'alfresco.secureComms.secret' "-Dalfresco.secureComms.secret=$ALFRESCO_SECRET"
   fi
 }
 
