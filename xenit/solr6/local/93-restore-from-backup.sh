@@ -88,18 +88,22 @@ echo "Solr restore from backup start"
 if [ -z "${RESTORE_FROM_BACKUP}" ]; then
   echo "No index backup restore requested, exiting"
 else
-  # Check if the directory exists
-  if [ -d "${SOLR_DATA_ROOT}/index/alfresco/index" ]; then
-    # Check if the directory size is greater than 100 kilobytes
-    if [ "$(du -s "${SOLR_DATA_ROOT}/index/alfresco/index" | cut -f 1)" -gt 100 ]; then
-      echo "Index folder exists and is sufficiently large, skipping backup restore"
+  # Check if the index properties file exists , it means previous restore already happened
+  if [ ! -e "${SOLR_DATA_ROOT}/index/alfresco/index.properties" ]; then
+    echo "index.properties file doesn't exists proceeding with further verification"
+    # Check if the directory exists
+    if [ -d "${SOLR_DATA_ROOT}/index/alfresco/index" ]; then
+      # Check if the directory size is greater than 100 kilobytes
+      if [ "$(du -s "${SOLR_DATA_ROOT}/index/alfresco/index" | cut -f 1)" -gt 100 ]; then
+        echo "Index folder exists and is sufficiently large, skipping backup restore"
+      else
+        startRestore
+      fi
     else
+      # Directory does not exist
+      echo "Index folder does not exist, proceeding with backup restore"
       startRestore
     fi
-  else
-    # Directory does not exist
-    echo "Index folder does not exist, proceeding with backup restore"
-    startRestore
   fi
 fi
 
