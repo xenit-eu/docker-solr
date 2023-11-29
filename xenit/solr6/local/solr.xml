@@ -10,7 +10,7 @@
             <str name="s3.secret.key">${S3_SECRET_KEY:}</str>
             <str name="s3.proxy.host">${S3_PROXY_HOST:}</str>
             <int name="s3.proxy.port">${S3_PROXY_PORT:0}</int>
-            <bool name="s3.path.style.access.enabled">${S3_PATH_STYLE_ACCESS_ENABLED:false}</bool>
+            <bool name="s3.path.style.access.enabled">${S3_PATH_STYLE_ACCESS_ENABLED:true}</bool>
         </repository>
     </backup>
 </solr>
