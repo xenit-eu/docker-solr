@@ -156,7 +156,7 @@ By default they are /opt/alfresco/alf_data/solr4Backup for solr4 and /opt/alfres
 
 In the case of a sharded setup, backup needs to be done manually.
 
-A custom backup/restore mechanism to Caringo Swarm has been included in xenit-specific images and is described [here](./Backup.md).
+A custom backup/restore mechanism to S3 has been included in xenit-specific images and is described [here](./Backup.md).
 
 ## FAQ
 
