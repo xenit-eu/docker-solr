@@ -29,6 +29,8 @@ if [ $ALFRESCO_SSL != none ] && [ $ALFRESCO_SSL != secret ]; then
     openssl pkcs12 -in "${SOLR_DIR_ROOT}/keystore/browser.p12" -out "${SOLR_DIR_ROOT}/keystore/browser.pem" -nodes -passin pass:alfresco
   fi
   echo "status=\$(curl -f -k -L -w %{http_code} -s -E ${SOLR_DIR_ROOT}/keystore/browser.pem -o /dev/null https://localhost:${PORT}/solr/${DEFAULT_CORES_ALFRESCO[0]}/admin/ping)" >>${SOLR_INSTALL_HOME}/healthcheck.sh
+elif [ $ALFRESCO_SSL == secret ]; then
+  echo "status=\$(curl -f -L -w %{http_code} -s -o /dev/null -H \"X-Alfresco-Search-Secret: \${ALFRESCO_SECRET}\" http://localhost:${PORT}/solr/${DEFAULT_CORES_ALFRESCO[0]}/admin/ping)" >>${SOLR_INSTALL_HOME}/healthcheck.sh
 else
   echo "status=\$(curl -f -L -w %{http_code} -s -o /dev/null http://localhost:${PORT}/solr/${DEFAULT_CORES_ALFRESCO[0]}/admin/ping)" >>${SOLR_INSTALL_HOME}/healthcheck.sh
 fi
