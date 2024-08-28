@@ -43,9 +43,12 @@ There are several environment variables available to tweak the behaviour. The va
 
 `shared.properties` can be set via a generic mechanism by setting environment variables of the form SHARED\_\<parameter\>.
 
-A subset of the properties have also dedicated environment variables e.g. ALFRESCO_ENABLE_TRACKING. Generic variables take precedence.
+A subset of the properties have also dedicated environment variables e.g. ALFRESCO_ENABLE_TRACKING. Generic variables
+take precedence.
 
-See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk) and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat) and - for Xenit-specific images - [`alfred-telemetry`](https://github.com/xenit-eu/alfred-telemetry/tree/master/alfred-telemetry-solr)
+See also environment variables from lower layers: [`docker-openjdk`](https://github.com/xenit-eu/docker-openjdk)
+and [`docker-tomcat`](https://github.com/xenit-eu/docker-tomcat) and - for Xenit-specific
+images - [`alfred-telemetry`](https://github.com/xenit-eu/alfred-telemetry/tree/master/alfred-telemetry-solr)
 
 | Variable                                   | solrcore.property variable      | java variable | Default                                                        | Comments                                                                                                                                                                            |
 |--------------------------------------------|---------------------------------|---------------|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -83,6 +86,7 @@ See also environment variables from lower layers: [`docker-openjdk`](https://git
 | \* SSL_TRUST_STORE_PASSWORD                |                                 |               | kT9X6oe68t                                                     |                                                                                                                                                                                     |
 | JSON_LOGGING                               |                                 |               | false                                                          | if true, sets the application logs in JSON format                                                                                                                                   |
 | ACCESS_LOGGING                             |                                 |               | false                                                          | if true, sets the access logs in JSON format                                                                                                                                        |
+| RESTORE_FROM_BACKUP                        |                                 |               | empty(false)                                                   | if true, starts the process of restoring from s3 backup                                                                                                                             |
 
 \* = tested for solr6
 

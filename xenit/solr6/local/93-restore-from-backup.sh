@@ -85,7 +85,7 @@ set -e
 
 echo "Solr restore from backup start"
 
-if [ -z "${RESTORE_FROM_BACKUP}" ]; then
+if [ -z "${RESTORE_FROM_BACKUP}" ] || [ "${RESTORE_FROM_BACKUP}" != "true" ]; then
   echo "No index backup restore requested, exiting"
 else
   # Check if the index properties file exists , it means previous restore already happened
