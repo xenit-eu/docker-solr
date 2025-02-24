@@ -81,16 +81,20 @@ subprojects {
 
         // nested configurations do not get the DOCKER_IMAGE
         buildDockerImage {
-            doLast {
-                if (project.hasProperty('testsSharded'))
-                    dockerCompose.sharded.environment.put 'DOCKER_IMAGE', getImageId().get()
-                if (project.hasProperty('testsShardedNonSsl'))
-                    dockerCompose.shardedNonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
-                if (project.hasProperty('testsNonSsl'))
-                    dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', getImageId().get()
-                if (project.hasProperty('testsMounts'))
-                    dockerCompose.mounts.environment.put 'DOCKER_IMAGE', getImageId().get()
-            }
+            finalizedBy("setDockerImageEnvironment")
+        }
+    }
+
+    task setDockerImageEnvironment {
+        doLast {
+            if (project.hasProperty('testsSharded'))
+                dockerCompose.sharded.environment.put 'DOCKER_IMAGE', buildDockerImage.getImageId().get()
+            if (project.hasProperty('testsShardedNonSsl'))
+                dockerCompose.shardedNonSsl.environment.put 'DOCKER_IMAGE', buildDockerImage.getImageId().get()
+            if (project.hasProperty('testsNonSsl'))
+                dockerCompose.nonSsl.environment.put 'DOCKER_IMAGE', buildDockerImage.getImageId().get()
+            if (project.hasProperty('testsMounts'))
+                dockerCompose.mounts.environment.put 'DOCKER_IMAGE', buildDockerImage.getImageId().get()
         }
     }
 
