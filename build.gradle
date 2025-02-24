@@ -91,16 +91,16 @@ subprojects {
 
     configurations {
         runtime
-        integrationTestCompile.extendsFrom testCompile
-        integrationTestRuntime.extendsFrom testRuntime
+        integrationTestImplementation.extendsFrom testImplementation
+        integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
     }
 
     dependencies {
-        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.1'
-        integrationTestCompile group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
-        integrationTestCompile group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
-        integrationTestCompile group: 'junit', name: 'junit', version: '4.11'
+        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured', version: '3.0.1'
+        integrationTestImplementation group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
+        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
+        integrationTestImplementation group: 'junit', name: 'junit', version: '4.11'
 
-        integrationTestRuntime group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
+        integrationTestRuntimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
     }
 }
