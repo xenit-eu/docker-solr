@@ -14,6 +14,35 @@ echo "Solr init logging start - JSON_LOGGING=${JSON_LOGGING}; ACCESS_LOGGING=${A
 echo "Working directory is..."
 pwd
 
+# Section that allows the loggers to be configured using env. variables.
+## 1. If it does not yet exist, create a backup of the original log4j.properties file.
+##    reason: both this section, as well as the 'JSON_LOGGING' section below, apply changes to log4j.properties in a destructive manner.
+backup_file_exists=$(ls ${SOLR_INSTALL_HOME}/logs/log4j.properties.bak 2>/dev/null | wc -l)
+if [ $backup_file_exists -eq 0 ]; then
+  echo "Could not find a backup of the original log4j.properties file at ${SOLR_INSTALL_HOME}/logs/log4j.properties.bak. Creating one now..."
+  cp ${SOLR_INSTALL_HOME}/logs/log4j.properties ${SOLR_INSTALL_HOME}/logs/log4j.properties.bak
+fi
+## 2. Revert back to the original log4j.properties file.
+echo "Reverting ${SOLR_INSTALL_HOME}/logs/log4j.properties to the original state..."
+cp ${SOLR_INSTALL_HOME}/logs/log4j.properties.bak ${SOLR_INSTALL_HOME}/logs/log4j.properties
+## 3. Introduce a new section in the log4j.properties file that clearly states that these properties are set using env. variables.
+env_variables_properties_section_start="### 94-init-solr-logging.sh: this section is automatically configured using env. variables with the 'LOG_' prefix; do not modify this section manually! ###"
+env_variables_properties_section_stop="### 94-init-solr-logging.sh: end of automatically configured section ###"
+echo "${env_variables_properties_section_start}" >> ${SOLR_INSTALL_HOME}/logs/log4j.properties
+## 4. write the env. variables to the log4j.properties file.
+echo "Writing env. variables with the 'LOG_' prefix to ${SOLR_INSTALL_HOME}/logs/log4j.properties..."
+for var in $(env | grep '^LOG_'); do
+  var_without_log_prefix=${var#LOG_}
+
+  ## If the key already exists in the log4j.properties file, delete the original line.
+  var_key=${var_without_log_prefix%%=*}
+  sed -i "/${var_key}/d" ${SOLR_INSTALL_HOME}/logs/log4j.properties
+
+  echo "${var_without_log_prefix}" >> ${SOLR_INSTALL_HOME}/logs/log4j.properties
+done
+## 5. End the section.
+echo "${env_variables_properties_section_stop}" >> ${SOLR_INSTALL_HOME}/logs/log4j.properties
+
 # if JSON_LOGGING is true, we manipulate the layout of the logging
 if [ $JSON_LOGGING = true ]; then
   sed -i "s/log4j.appender.CONSOLE.layout.ConversionPattern=.*//g" ${SOLR_INSTALL_HOME}/logs/log4j.properties
