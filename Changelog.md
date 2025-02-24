@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 ### Added
+* [NYS2AWS-156] added support for customizing the `log4j.properties` file based upon `LOG_`-prefixed environmental variables. [#113]
 * [DOCKER-456] upgrade solr from 2.0.8.1 to 2.0.9.1 [#108]
 * [DOCKER-441] improve solr backup documentation and add new env variable for backup and ALFRESCO_SECRET  [#97]
 * [DOCKER-440] replace 2.0.8.1 with 2.0.8.2  [#96]
 * [DOCKER-438] DOCKER-438 add back solr 2.0.6  [#95]
 * [DOCKER-438] upgrade solr from 2.0.6 to 2.0.8.1 [#91]
 
+[#113]: https://github.com/xenit-eu/docker-solr/pull/113
 [#108]: https://github.com/xenit-eu/docker-solr/pull/108
 [#96]: https://github.com/xenit-eu/docker-solr/pull/97
 [#96]: https://github.com/xenit-eu/docker-solr/pull/96
