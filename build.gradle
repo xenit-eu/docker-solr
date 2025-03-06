@@ -101,6 +101,6 @@ subprojects {
         integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
         integrationTestImplementation group: 'junit', name: 'junit', version: '4.11'
 
-        integrationTestRuntimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
+        integrationTestRuntimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.9'
     }
 }
