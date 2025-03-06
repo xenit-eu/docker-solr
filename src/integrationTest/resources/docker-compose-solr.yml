@@ -12,6 +12,8 @@ services:
 #    - JMX_ENABLED=true
 #    - DEBUG=true
     - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
+    - LOG_log4j.logger.org.alfresco.solr.tracker.MetadataTracker=DEBUG
+    - LOG_log4j.appender.file.MaxFileSize=8MB
     # for restoring from backup, uncomment following variables
 #    - JAVA_OPTS_S3_ENDPOINT=-DS3_ENDPOINT=<endpoint_s3_protocol>
 #    - JAVA_OPTS_S3_REGION=-DS3_REGION=<bucket_s3_region>
