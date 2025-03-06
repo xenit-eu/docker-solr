@@ -96,7 +96,7 @@ subprojects {
     }
 
     dependencies {
-        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured', version: '3.0.1'
+        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
         integrationTestImplementation group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
         integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
         integrationTestImplementation group: 'junit', name: 'junit', version: '4.11'
