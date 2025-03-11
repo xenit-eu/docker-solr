@@ -83,25 +83,26 @@ subprojects {
 
         if (project.solrSourceSetOverride != null) {
             doFirst {
-                println("The source code of the alfresco-search-*.jar will be overridden with code from (${project.solrSourceSetOverride}).")
+                println("Note: the source code of the alfresco-search-*.jar will be overridden with code from (${project.solrSourceSetOverride}).")
             }
-            runCommand('apt-get update -y && apt-get install zip -y')
-            // Fail if the alfresco-search-*.jar is not found.
-            runCommand('if [ -z $(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar) ]; then echo "Error: Alfresco Search jar not found"; exit 1; fi')
-            // Unzip the alfresco-search-*.jar to /tmp/alfresco-search, so we can override the classes.
-            runCommand('mkdir -p /tmp/alfresco-search')
-            runCommand('cp /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar /tmp/alfresco-search/temp.jar')
-            runCommand('unzip -o /tmp/alfresco-search/temp.jar -d /tmp/alfresco-search')
-            runCommand('rm -f /tmp/alfresco-search/temp.jar')
-            // Override the classes in the alfresco-search-*.jar with the classes from the project. Custom source sets can be provided.
+
+            // 1. Copy the classes from the sourceSet to a temp directory.
             project.solrSourceSetOverride.classesDirs.each { classesDir ->
-                smartCopy(classesDir, "/tmp/alfresco-search/")
+                smartCopy(classesDir, "/tmp/alfresco-search-jar-source-override/")
             }
-            // Cleanup & copy the temp.jar to the original location.
-            // Do not clean up the /tmp/alfresco-search directory, as it can be used to double-check the actual classes in the jar.
-            runCommand('cd /tmp/alfresco-search && zip -r temp.jar *')
-            runCommand('cp /tmp/alfresco-search/temp.jar $(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar)')
-            runCommand('apt-get remove zip -y')
+
+            // 2. Copy the classes from the temp directory to the alfresco-search-*.jar.
+            // Find the JAR.
+            runCommand('alfresco_search_jar_location=$(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search*.jar) && ' +
+                        // Fail if the JAR is not found.
+                        'if [ -z "$alfresco_search_jar_location" ]; then echo "The alfresco-search-*.jar was not found."; exit 1; else echo "Found alfresco-search-*.jar at ($alfresco_search_jar_location)."; fi && ' +
+                        // Copy the classes from the temp directory to the JAR.
+                        'cd /tmp/alfresco-search-jar-source-override && ' +
+                        'for file in $(find /tmp/alfresco-search-jar-source-override -name "*.class"); do ' +
+                            'echo "Copying ($file) to ($alfresco_search_jar_location)."; ' +
+                            'jar uf "$alfresco_search_jar_location" "${file##/tmp/alfresco-search-jar-source-override/}"; ' +
+                        'done')
+            // Leave the adjusted classes in the temp directory. It gives a clear overview of the changes.
         }
     }
 
