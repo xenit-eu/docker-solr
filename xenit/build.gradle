@@ -21,7 +21,8 @@ subprojects {
         tests_use_ssl = false
         composeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
                         "$composeDir/docker-compose-solr-non-ssl.yml",
-                        "$composeDir/docker-compose-db.yml"];
+                        "$composeDir/docker-compose-db.yml"]
+        solrSourceSetOverride = null
     }
 
     dependencies {
@@ -79,6 +80,30 @@ subprojects {
         smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
         smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/solr.xml", "/opt/alfresco-search-services/solrhome/solr.xml")
+
+        if (project.solrSourceSetOverride != null) {
+            doFirst {
+                println("Note: the source code of the alfresco-search-*.jar will be overridden with code from (${project.solrSourceSetOverride}).")
+            }
+
+            // 1. Copy the classes from the sourceSet to a temp directory.
+            project.solrSourceSetOverride.classesDirs.each { classesDir ->
+                smartCopy(classesDir, "/tmp/alfresco-search-jar-source-override/")
+            }
+
+            // 2. Copy the classes from the temp directory to the alfresco-search-*.jar.
+            // Find the JAR.
+            runCommand('alfresco_search_jar_location=$(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search*.jar) && ' +
+                        // Fail if the JAR is not found.
+                        'if [ -z "$alfresco_search_jar_location" ]; then echo "The alfresco-search-*.jar was not found."; exit 1; else echo "Found alfresco-search-*.jar at ($alfresco_search_jar_location)."; fi && ' +
+                        // Copy the classes from the temp directory to the JAR.
+                        'cd /tmp/alfresco-search-jar-source-override && ' +
+                        'for file in $(find /tmp/alfresco-search-jar-source-override -name "*.class"); do ' +
+                            'echo "Copying ($file) to ($alfresco_search_jar_location)."; ' +
+                            'jar uf "$alfresco_search_jar_location" "${file##/tmp/alfresco-search-jar-source-override/}"; ' +
+                        'done')
+            // Leave the adjusted classes in the temp directory. It gives a clear overview of the changes.
+        }
     }
 
     task integrationTestXenitEndpoints(type: Test, group: "verification") {
