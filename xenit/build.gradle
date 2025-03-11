@@ -21,7 +21,8 @@ subprojects {
         tests_use_ssl = false
         composeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
                         "$composeDir/docker-compose-solr-non-ssl.yml",
-                        "$composeDir/docker-compose-db.yml"];
+                        "$composeDir/docker-compose-db.yml"]
+        solrSourceSetOverride = null
     }
 
     dependencies {
@@ -79,6 +80,29 @@ subprojects {
         smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
         smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/solr.xml", "/opt/alfresco-search-services/solrhome/solr.xml")
+
+        if (project.solrSourceSetOverride != null) {
+            doFirst {
+                println("The source code of the alfresco-search-*.jar will be overridden with code from (${project.solrSourceSetOverride}).")
+            }
+            runCommand('apt-get update -y && apt-get install zip -y')
+            // Fail if the alfresco-search-*.jar is not found.
+            runCommand('if [ -z $(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar) ]; then echo "Error: Alfresco Search jar not found"; exit 1; fi')
+            // Unzip the alfresco-search-*.jar to /tmp/alfresco-search, so we can override the classes.
+            runCommand('mkdir -p /tmp/alfresco-search')
+            runCommand('cp /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar /tmp/alfresco-search/temp.jar')
+            runCommand('unzip -o /tmp/alfresco-search/temp.jar -d /tmp/alfresco-search')
+            runCommand('rm -f /tmp/alfresco-search/temp.jar')
+            // Override the classes in the alfresco-search-*.jar with the classes from the project. Custom source sets can be provided.
+            project.solrSourceSetOverride.classesDirs.each { classesDir ->
+                smartCopy(classesDir, "/tmp/alfresco-search/")
+            }
+            // Cleanup & copy the temp.jar to the original location.
+            // Do not clean up the /tmp/alfresco-search directory, as it can be used to double-check the actual classes in the jar.
+            runCommand('cd /tmp/alfresco-search && zip -r temp.jar *')
+            runCommand('cp /tmp/alfresco-search/temp.jar $(ls /opt/alfresco-search-services/solr/server/solr-webapp/webapp/WEB-INF/lib/alfresco-search-*.jar)')
+            runCommand('apt-get remove zip -y')
+        }
     }
 
     task integrationTestXenitEndpoints(type: Test, group: "verification") {

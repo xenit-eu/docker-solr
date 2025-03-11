@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 ext {
     tests = true
     // since s.s. 2.0.3 SSL is required
@@ -5,7 +7,25 @@ ext {
     composeFiles = ["$composeDir/docker-compose-alfresco.yml",
                     "$composeDir/docker-compose-solr.yml",
                     "$composeDir/docker-compose-db.yml"];
+
+    solrSourceSetOverride = sourceSets.main.output
 }
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://artifacts.alfresco.com/nexus/content/groups/private'
+        credentials {
+            username project.property('org.alfresco.maven.nexus.username')
+            password project.property('org.alfresco.maven.nexus.password')
+        }
+    }
+}
+
+createDockerFile.dependsOn(compileJava)
+
 dependencies {
+    compileOnly 'org.alfresco:alfresco-search:2.0.9.1'
+    compileOnly 'org.apache.solr:solr-core:6.6.5-patched.11@jar'
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }
