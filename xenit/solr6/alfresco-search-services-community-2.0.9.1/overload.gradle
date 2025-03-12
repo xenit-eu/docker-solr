@@ -1,5 +1,11 @@
 apply plugin: 'java'
 
+// Compile everything for Java 11.
+compileJava {
+    sourceCompatibility = 11
+    targetCompatibility = 11
+}
+
 ext {
     tests = true
     // since s.s. 2.0.3 SSL is required
