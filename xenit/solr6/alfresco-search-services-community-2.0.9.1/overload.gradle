@@ -1,5 +1,11 @@
 apply plugin: 'java'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 ext {
     tests = true
     // since s.s. 2.0.3 SSL is required
