@@ -34,6 +34,9 @@ CUSTOM_RESOURCES=${CUSTOM_RESOURCES:-'false'}
 SSL_TRUST_STORE=${SSL_TRUST_STORE:-'ssl.repo.client.truststore'}
 SSL_TRUST_STORE_PASSWORD=${SSL_TRUST_STORE_PASSWORD:-'kT9X6oe68t'}
 
+SSL_KEY_STORE_ALIASSES=${SSL_KEY_STORE_ALIASSES:-'ssl-alfresco-ca,ssl-repo-client'}
+SSL_TRUST_STORE_ALIASSES=${SSL_TRUST_STORE_ALIASSES:-'ssl-alfresco-ca,ssl-repo-client'}
+
 function setJavaOption {
   JAVA_OPTS="$JAVA_OPTS $2"
 }
@@ -248,11 +251,11 @@ if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
   setOption 'SOLR_SOLR_PORT' "$PORT" "$CONFIG_FILE_SOLR_START"
 
   setJavaOption 'ssl-keystore.password' "-Dssl-keystore.password=$SSL_KEY_STORE_PASSWORD"
-  setJavaOption 'ssl-keystore.aliases' "-Dssl-keystore.aliases=ssl-alfresco-ca,ssl-repo-client"
+  setJavaOption 'ssl-keystore.aliases' "-Dssl-keystore.aliases=$SSL_KEY_STORE_ALIASSES"
   setJavaOption 'ssl-keystore.ssl-alfresco-ca.password' "-Dssl-keystore.ssl-alfresco-ca.password=$SSL_KEY_STORE_PASSWORD"
   setJavaOption 'ssl-keystore.ssl-repo-client.password' "-Dssl-keystore.ssl-repo-client.password=$SSL_KEY_STORE_PASSWORD"
   setJavaOption 'ssl-truststore.password' "-Dssl-truststore.password=$SSL_TRUST_STORE_PASSWORD"
-  setJavaOption 'ssl-truststore.aliases' "-Dssl-truststore.aliases=ssl-alfresco-ca,ssl-repo-client"
+  setJavaOption 'ssl-truststore.aliases' "-Dssl-truststore.aliases=$SSL_KEY_TRUST_ALIASSES"
   setJavaOption 'ssl-truststore.ssl-alfresco-ca.password' "-Dssl-truststore.ssl-alfresco-ca.password=$SSL_TRUST_STORE_PASSWORD"
   setJavaOption 'ssl-truststore.ssl-repo-client.password' "-Dssl-truststore.ssl-repo-client.password=$SSL_TRUST_STORE_PASSWORD"
 else
