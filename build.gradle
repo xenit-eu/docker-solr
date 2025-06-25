@@ -1,5 +1,5 @@
 plugins {
-    id "eu.xenit.docker" version "5.5.0" apply false
+    id "eu.xenit.docker" version "5.5.1" apply false
     id "be.vbgn.ci-detect" version "0.5.0"
 }
 
@@ -30,7 +30,7 @@ def calcTags(version) {
 }
 
 def calcRepository(flavor, enterprise, customized) {
-    def repoName = (enterprise ? "private.docker.xenit.eu/alfresco-enterprise" : "docker.io/xenit")
+    def repoName = (enterprise ? "docker.xenit.eu/alfresco-enterprise" : "docker.io/xenit")
     if (customized)
         return "${repoName}/alfresco-${flavor}-xenit"
     else
@@ -54,16 +54,14 @@ subprojects {
                 includeModule 'org.alfresco', 'alfresco-search-services'
             }
         }
+
         maven {
-            name "cloudsmith-private"
-            url = "https://repo.xenit.eu/basic/private/maven/"
+            url "https://dl.cloudsmith.io/basic/xenit/private/maven/"
             credentials {
-                username = property("eu.xenit.cloudsmith.username")
-                password = property("eu.xenit.cloudsmith.password")
+                username property("eu.xenit.cloudsmith.username")
+                password property("eu.xenit.cloudsmith.password")
             }
         }
-
-
     }
 
     pluginManager.withPlugin('eu.xenit.docker-config') {
