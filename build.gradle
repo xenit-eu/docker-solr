@@ -54,6 +54,14 @@ subprojects {
                 includeModule 'org.alfresco', 'alfresco-search-services'
             }
         }
+
+        maven {
+            url "https://dl.cloudsmith.io/basic/xenit/private/maven/"
+            credentials {
+                username property("eu.xenit.cloudsmith.username")
+                password property("eu.xenit.cloudsmith.password")
+            }
+        }
     }
 
     pluginManager.withPlugin('eu.xenit.docker-config') {

@@ -6,6 +6,8 @@ on:
     - cron: '7 0 * * SUN'
 env:
   GRADLE_OPTS: >-
+    -Dorg.gradle.project.eu.xenit.cloudsmith.username=${{ secrets.CLOUDSMITH_USER }} 
+    -Dorg.gradle.project.eu.xenit.cloudsmith.password=${{ secrets.CLOUDSMITH_APIKEY }}    
     -Dorg.gradle.project.org.alfresco.maven.nexus.username=${{ secrets.ALFRESCO_NEXUS_USERNAME }} 
     -Dorg.gradle.project.org.alfresco.maven.nexus.password=${{ secrets.ALFRESCO_NEXUS_PASSWORD }}
 jobs:
@@ -36,6 +38,9 @@ jobs:
           touch ./src/integrationTest/resources/license61/license.lic
           echo ${{secrets.ALFRESCO_LICENSE61}} > ./src/integrationTest/resources/license61/license.lic
           chmod 666 ./src/integrationTest/resources/license61/license.lic
+      - name: Login to Docker
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login docker.xenit.eu --username "${{ secrets.HARBOR_USER }}" --password-stdin
       - name: Integration tests
         uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c # v2
         env:
