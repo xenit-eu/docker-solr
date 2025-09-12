@@ -57,8 +57,8 @@ function startRestore {
 
     echo "*************** Solr without tracking started **************************"
 
-    echo "**************** Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${restorepath}${restorename}"
-    curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${restorepath}${restorename}"
+    echo "**************** Calling restore command curl -s ${restoreurl}"
+    curl -s "${restoreurl}"
     restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
     # wait until restore is complete
     while [ "\"In Progress\"" = ${restorestatus} ]; do
