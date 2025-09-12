@@ -14,7 +14,7 @@ services:
     - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
     - LOG_log4j.logger.org.alfresco.solr.tracker.MetadataTracker=DEBUG
     - LOG_log4j.appender.file.MaxFileSize=8MB
-    - JAVA_OPTS_MEMORY_TRACKING=-XX:+UseContainerSupport -Xlog:os+container=debug -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -Xss512k -XX:MaxMetaspaceSize=256M -XX:CompressedClassSpaceSize=32M -XX:ProfiledCodeHeapSize=128M -XX:NonProfiledCodeHeapSize=128M -XX:NonNMethodCodeHeapSize=32M -XX:ReservedCodeCacheSize=288M -XX:MaxDirectMemorySize=64m
+#    - JAVA_OPTS_MEMORY_TRACKING=-XX:+UseContainerSupport -Xlog:os+container=debug -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -Xss512k -XX:MaxMetaspaceSize=256M -XX:CompressedClassSpaceSize=32M -XX:ProfiledCodeHeapSize=128M -XX:NonProfiledCodeHeapSize=128M -XX:NonNMethodCodeHeapSize=32M -XX:ReservedCodeCacheSize=288M -XX:MaxDirectMemorySize=64m
     # for restoring from backup, uncomment following variables
 #    - JAVA_OPTS_S3_ENDPOINT=-DS3_ENDPOINT=<endpoint_s3_protocol>
 #    - JAVA_OPTS_S3_REGION=-DS3_REGION=<bucket_s3_region>
