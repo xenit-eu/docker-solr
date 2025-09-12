@@ -23,9 +23,6 @@ TEMPLATE=${TEMPLATE:-'rerank'}
 ALFRESCO_SOLR_SUGGESTER_ENABLED=${ALFRESCO_SOLR_SUGGESTER_ENABLED:-'true'}
 ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED=${ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED:-'false'}
 
-JAVA_XMS=${JAVA_XMS:-'512M'}
-JAVA_XMX=${JAVA_XMX:-'2048M'}
-
 CONFIG_FILE_SOLR_START="$SOLR_INSTALL_HOME/solr.in.sh"
 
 CUSTOM_SCHEMA=${CUSTOM_SCHEMA:-'false'}
@@ -39,6 +36,11 @@ function setJavaOption {
 }
 
 function setOption {
+  if [[ -z "$3" ]]; then
+    echo "setOption failed (parameters: $1, $2, $3)"
+    exit 1
+  fi
+
   if grep --quiet -e "$1\s*=" "$3"; then
     # replace option
     sed -i "s#^\s*\($1\s*=\s*\).*\$#\1$2#" $3
@@ -64,8 +66,12 @@ function setGlobalOptions {
     envCoreName=$(echo $i | cut -d '=' -f 1 | cut -d '_' -f 2)
     if [[ $envCoreName = $coreName ]] || [[ $envCoreName = "ALL" ]] || [[ $envCoreName = "WORKSPACE" && $coreName =~ alfresco ]]; then
       key=$(echo $i | cut -d '=' -f 1 | cut -d '_' -f 3-)
-      value=$(echo $i | cut -d '=' -f 2-)
-      setOption $key $value "$file"
+      if [[ -z "$key" ]]; then
+        echo "Skipping env. variable ($i), since the resulting key is empty."
+      else
+        value=$(echo $i | cut -d '=' -f 2-)
+        setOption $key $value "$file"
+      fi
     fi
   done
 }
@@ -277,6 +283,12 @@ fi
 # fix permissions for config folders
 chown -R "$user":"$user" "${SOLR_DIR_ROOT}"
 
-echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -m ${JAVA_XMX} -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a \"${JAVA_OPTS}\"" >"${SOLR_INSTALL_HOME}/startup.sh"
+if [[ -n ${JAVA_XMX} ]]; then
+  echo "Found the (JAVA_XMX) environment variable; falling back to the default Solr bootup command."
+  echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -m ${JAVA_XMX} -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a \"${JAVA_OPTS}\"" >"${SOLR_INSTALL_HOME}/startup.sh"
+else
+  echo "Could not find the (JAVA_XMX) environment variable; falling back to the Solr bootup command without -m parameter. Make sure to specify the memory settings via JAVA_OPTS."
+  echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a \"${JAVA_OPTS}\"" >"${SOLR_INSTALL_HOME}/startup.sh"
+fi
 
 echo "Solr init done"

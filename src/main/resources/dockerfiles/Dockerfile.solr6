@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=docker.io/xenit/openjdk:alfresco-6.1-ubuntu
+ARG BASE_IMAGE=eclipse-temurin:11.0.27_6-jdk-focal
 FROM	alpine:latest AS build-stage-solr6
 
 ARG SOLR_VERSION_MAJOR
@@ -58,7 +58,8 @@ RUN apt-get update && \
     && touch ${SOLR_INSTALL_HOME}/healthcheck.sh \
     && chmod +x ${SOLR_INSTALL_HOME}/healthcheck.sh
 
-COPY 	91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
+COPY 	80-java-opts.sh 89-check-validity.sh 91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
+COPY    docker-entrypoint.sh /docker-entrypoint.sh
 
 # add the keystore
 ADD keystore ${SOLR_INSTALL_HOME}/solrhome/keystore
@@ -69,5 +70,5 @@ WORKDIR ${SOLR_INSTALL_HOME}
 
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 --start-period=20s CMD ${SOLR_INSTALL_HOME}/healthcheck.sh || exit 1
 
-CMD ["${SOLR_INSTALL_HOME}/startup.sh"]
+CMD ["/bin/bash", "-c", "/docker-entrypoint.sh && ./startup.sh"]
 
