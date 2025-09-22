@@ -2,9 +2,9 @@
 
 function startRestore {
   if [ -z "${RESTORE_BACKUP_NAME}" ]; then
-    restorename=""
+    restoreurl="https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
   else
-    restorename="&name=${RESTORE_BACKUP_NAME}"
+    restoreurl="https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${RESTORE_BACKUP_PATH}&name=${RESTORE_BACKUP_NAME}"
   fi
 
   echo "*************** Starting solr without tracking **************************"
@@ -25,8 +25,8 @@ function startRestore {
 
     echo "*************** Solr without tracking started **************************"
 
-    echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///${restorename}"
-    curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///${restorename}"
+    echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem ${restoreurl}"
+    curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "${restoreurl}"
 
     restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
 
@@ -57,8 +57,8 @@ function startRestore {
 
     echo "*************** Solr without tracking started **************************"
 
-    echo "**************** Calling restore command curl -s http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///${restorename}"
-    curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///${restorename}"
+    echo "**************** Calling restore command curl -s ${restoreurl}"
+    curl -s "${restoreurl}"
     restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
     # wait until restore is complete
     while [ "\"In Progress\"" = ${restorestatus} ]; do
