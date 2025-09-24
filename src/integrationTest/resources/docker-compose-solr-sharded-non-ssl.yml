@@ -19,6 +19,13 @@ services:
     - GLOBAL_ALL_shard.count=3
     - GLOBAL_alfresco-0_shard.instance=0
     - GLOBAL_alfresco-1_shard.instance=1
+    - S3_ENDPOINT=http://localstack:4566
+    - S3_REGION=us-east-1
+    - S3_BUCKET_NAME=bucket
+    - S3_ACCESS_KEY=access_key
+    - S3_SECRET_KEY=secret_key
+    - S3_PATH_STYLE_ACCESS_ENABLED=true
+    - RESTORE_FROM_BACKUP=false
 
   solr2:
     image: ${DOCKER_IMAGE}
@@ -37,3 +44,10 @@ services:
     - GLOBAL_ALL_shard.method=DB_ID
     - GLOBAL_ALL_shard.count=3    
     - GLOBAL_alfresco-2_shard.instance=2
+    - S3_ENDPOINT=http://localstack:4566
+    - S3_REGION=us-east-1
+    - S3_BUCKET_NAME=bucket
+    - S3_ACCESS_KEY=access_key
+    - S3_SECRET_KEY=secret_key
+    - S3_PATH_STYLE_ACCESS_ENABLED=true
+    - RESTORE_FROM_BACKUP=false

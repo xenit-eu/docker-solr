@@ -4,6 +4,7 @@ ext {
     tests_use_ssl = true
     composeFiles = ["$composeDir/docker-compose-alfresco.yml",
                     "$composeDir/docker-compose-solr.yml",
+                    "$composeDir/docker-compose-localstack.yml",
                     "$composeDir/docker-compose-db.yml"];
 }
 dependencies {
