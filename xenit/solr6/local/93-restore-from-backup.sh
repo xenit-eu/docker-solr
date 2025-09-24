@@ -8,9 +8,14 @@ function startRestore {
   fi
   if [ -z "${RESTORE_BACKUP_NAME}" ]; then
     restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
+    restorestatusurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json"
   else
     restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${RESTORE_BACKUP_PATH}&name=${RESTORE_BACKUP_NAME}"
+    restorestatusurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json"
   fi
+
+  echo "*************** SOLR restore url: ${restoreurl} **************************"
+  echo "*************** SOLR restore status url: ${restorestatusurl} **************************"
 
   echo "*************** Starting solr without tracking **************************"
   setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
@@ -33,13 +38,13 @@ function startRestore {
     echo "************** Calling restore command curl -s -k -E ${SOLR_DIR_ROOT}/keystore/browser.pem ${restoreurl}"
     curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "${restoreurl}"
 
-    restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
+    restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" ${restorestatusurl} | jq .restorestatus.status)
 
     # wait until restore is complete
     while [ "\"In Progress\"" = ${restorestatus} ]; do
       sleep 5
       echo "restorestatus=$restorestatus"
-      restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" "https://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
+      restorestatus=$(curl -s -k -E "${SOLR_DIR_ROOT}/keystore/browser.pem" ${restorestatusurl}| jq .restorestatus.status)
     done
     if [ "\"success\"" = ${restorestatus} ]; then
       echo "Restore successful"
@@ -64,12 +69,12 @@ function startRestore {
 
     echo "**************** Calling restore command curl -s ${restoreurl}"
     curl -s "${restoreurl}"
-    restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
+    restorestatus=$(curl -s ${restorestatusurl} | jq .restorestatus.status)
     # wait until restore is complete
     while [ "\"In Progress\"" = ${restorestatus} ]; do
       sleep 5
       echo "restorestatus=$restorestatus"
-      restorestatus=$(curl -s "http://localhost:${PORT}/solr/alfresco/replication?command=restorestatus&wt=json" | jq .restorestatus.status)
+      restorestatus=$(curl -s ${restorestatusurl} | jq .restorestatus.status)
     done
     if [ "\"success\"" = ${restorestatus} ]; then
       echo "Restore successful"
