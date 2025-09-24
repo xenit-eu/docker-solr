@@ -56,6 +56,14 @@ subprojects {
         }
 
         maven {
+            url 'https://artifacts.alfresco.com/nexus/content/groups/private'
+            credentials {
+                username project.property('org.alfresco.maven.nexus.username')
+                password project.property('org.alfresco.maven.nexus.password')
+            }
+        }
+
+        maven {
             url "https://dl.cloudsmith.io/basic/xenit/private/maven/"
             credentials {
                 username property("eu.xenit.cloudsmith.username")
@@ -91,14 +99,28 @@ subprojects {
         runtime
         integrationTestImplementation.extendsFrom testImplementation
         integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+        backupJar
     }
 
+    tasks.withType(Test) {
+        useJUnitPlatform()
+    }
     dependencies {
-        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
-        integrationTestImplementation group: 'io.rest-assured', name: 'json-path', version: '3.0.1'
-        integrationTestImplementation group: 'io.rest-assured', name: 'rest-assured-common', version: '3.0.1'
-        integrationTestImplementation group: 'junit', name: 'junit', version: '4.13.2'
+        backupJar project(path: ":solr-backup")
 
-        integrationTestRuntimeOnly group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.9'
+        integrationTestImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+        integrationTestImplementation "io.rest-assured:json-path:${restAssuredVersion}"
+        integrationTestImplementation "io.rest-assured:rest-assured-common:${restAssuredVersion}"
+        integrationTestImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
+        integrationTestImplementation "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
+        integrationTestImplementation "org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}"
+        integrationTestImplementation "org.awaitility:awaitility:${awaitablityVersion}"
+
+        integrationTestImplementation platform("com.amazonaws:aws-java-sdk-bom:${amazonVersion}")
+
+        integrationTestImplementation('com.amazonaws:aws-java-sdk-core')
+        integrationTestImplementation('com.amazonaws:aws-java-sdk-s3')
+        integrationTestImplementation("com.amazonaws:aws-java-sdk-sts")
+        integrationTestRuntimeOnly "org.glassfish.jaxb:jaxb-runtime:${jaxBVersion}"
     }
 }
