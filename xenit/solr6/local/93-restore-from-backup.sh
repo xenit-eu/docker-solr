@@ -1,10 +1,15 @@
 #!/bin/bash
 
 function startRestore {
-  if [ -z "${RESTORE_BACKUP_NAME}" ]; then
-    restoreurl="https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
+  if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
+    protocol = "https"
   else
-    restoreurl="https://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${RESTORE_BACKUP_PATH}&name=${RESTORE_BACKUP_NAME}"
+    protocol = "http"
+  fi
+  if [ -z "${RESTORE_BACKUP_NAME}" ]; then
+    restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
+  else
+    restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=${RESTORE_BACKUP_PATH}&name=${RESTORE_BACKUP_NAME}"
   fi
 
   echo "*************** Starting solr without tracking **************************"
