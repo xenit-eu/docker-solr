@@ -1,10 +1,9 @@
 #!/bin/bash
 
 function startRestore {
+  protocol="http"
   if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
     protocol="https"
-  else
-    protocol="http"
   fi
   if [ -z "${RESTORE_BACKUP_NAME}" ]; then
     restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
