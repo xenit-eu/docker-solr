@@ -2,9 +2,9 @@
 
 function startRestore {
   if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
-    protocol = "https"
+    protocol="https"
   else
-    protocol = "http"
+    protocol="http"
   fi
   if [ -z "${RESTORE_BACKUP_NAME}" ]; then
     restoreurl="${protocol}://localhost:${PORT}/solr/alfresco/replication?command=restore&repository=s3&location=s3:///"
