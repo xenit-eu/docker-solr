@@ -1,5 +1,5 @@
-ARG BASE_IMAGE=docker.io/xenit/openjdk:alfresco-6.1-ubuntu
-FROM	alpine:latest AS build-stage-solr6
+ARG BASE_IMAGE=docker.io/xenit/openjdk:alfresco-6.1-ubuntu@sha256:d49df9fb6638b816e979445cff3997122b63a7a81c1864788827ac6ad1964d37
+FROM	alpine:latest@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1 AS build-stage-solr6
 
 ARG SOLR_VERSION_MAJOR
 ARG SOLR_VERSION_MINOR
