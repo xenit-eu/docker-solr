@@ -29,6 +29,7 @@ subprojects {
         loggings("eu.xenit.logging:json-logging:0.0.7:all")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         backup("eu.xenit.solr-backup:solr-backup:${solrBackupVersion}")
+        implementation("javax.xml.bind:jaxb-api:2.3.1")
     }
 
     if (new File("${project.projectDir}/overload.gradle").exists())
