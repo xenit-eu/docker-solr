@@ -44,7 +44,7 @@ subprojects {
         mavenCentral()
 
         maven {
-            url 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
+            url = 'https://artifacts.alfresco.com/nexus/content/repositories/public/'
             metadataSources {
                 artifact()
             }
@@ -56,10 +56,10 @@ subprojects {
         }
 
         maven {
-            url "https://dl.cloudsmith.io/basic/xenit/private/maven/"
+            url = "https://dl.cloudsmith.io/basic/xenit/private/maven/"
             credentials {
-                username property("eu.xenit.cloudsmith.username")
-                password property("eu.xenit.cloudsmith.password")
+                username = property("eu.xenit.cloudsmith.username")
+                password = property("eu.xenit.cloudsmith.password")
             }
         }
     }
