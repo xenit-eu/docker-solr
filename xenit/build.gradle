@@ -26,7 +26,7 @@ subprojects {
     }
 
     dependencies {
-        loggings("eu.xenit.logging:json-logging:0.0.7:all")
+        loggings("eu.xenit.logging:json-logging:0.0.11")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         backup("eu.xenit.solr-backup:solr-backup:${solrBackupVersion}")
     }

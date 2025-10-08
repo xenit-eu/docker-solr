@@ -20,10 +20,10 @@ ext {
 repositories {
     mavenCentral()
     maven {
-        url 'https://artifacts.alfresco.com/nexus/content/groups/private'
+        url = 'https://artifacts.alfresco.com/nexus/content/groups/private'
         credentials {
-            username project.property('org.alfresco.maven.nexus.username') ?: ''
-            password project.property('org.alfresco.maven.nexus.password') ?: ''
+            username = project.property('org.alfresco.maven.nexus.username') ?: ''
+            password = project.property('org.alfresco.maven.nexus.password') ?: ''
         }
     }
 }
@@ -32,6 +32,6 @@ createDockerFile.dependsOn(compileJava)
 
 dependencies {
     compileOnly 'org.alfresco:alfresco-search:2.0.9.1'
-    compileOnly 'org.apache.solr:solr-core:6.6.5-patched.11@jar'
+    compileOnly 'org.apache.solr:solr-core:6.6.6@jar'
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }
