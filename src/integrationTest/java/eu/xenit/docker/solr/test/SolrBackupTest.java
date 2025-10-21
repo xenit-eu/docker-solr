@@ -7,6 +7,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import io.restassured.RestAssured;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.builder.RequestSpecBuilder;
@@ -16,13 +17,22 @@ import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.security.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static java.lang.Thread.sleep;
@@ -38,9 +48,14 @@ public class SolrBackupTest {
     static RequestSpecification restoreFixedSnapshotRequestSpec;
     static RequestSpecification restoreStatusRequestSpec;
     static RequestSpecification restoreRequestSpec;
-
+    static String solr1;
+    static String baseURIShardedSolr1;
+    static String baseURISolr;
+    static int solrPort;
+    static int portShardedSolr1 = -1;
     static boolean use_ssl = false;
     static final String BUCKET = "bucket";
+    static final String basePathSolrBackup = "solr/alfresco/replication";
 
     private static KeyStore loadKeyStore(String path, char[] password, String storeType) {
         KeyStore keyStore;
@@ -84,18 +99,15 @@ public class SolrBackupTest {
 
         String basePath = "/alfresco";
         String basePathSolr = "solr/admin/cores";
-        String basePathSolrTelemetry = "solr/alfresco/metrics";
-        String basePathSolrActuators = "solr/alfresco/xenit/actuators/readiness";
 
         use_ssl = (System.getProperty("use_ssl") != null) ? Boolean.parseBoolean(System.getProperty("use_ssl")) : false;
 
         String host = System.getProperty("alfresco.host");
         String solrHost = System.getProperty("solr.host");
-        String solr1 = System.getProperty("solr1.host");
+        solr1 = System.getProperty("solr1.host");
         String solr2 = System.getProperty("solr2.host");
         int port = Integer.parseInt(System.getProperty("alfresco.tcp.8080"));
-        int solrPort;
-        int portShardedSolr1 = -1;
+        portShardedSolr1 = -1;
         int portShardedSolr2 = -1;
 
         if (solr1 == null) {
@@ -128,8 +140,8 @@ public class SolrBackupTest {
         if (use_ssl) {
             protocol = "https://";
         }
-        String baseURISolr = protocol + solrHost;
-        String baseURIShardedSolr1 = protocol + solr1;
+        baseURISolr = protocol + solrHost;
+        baseURIShardedSolr1 = protocol + solr1;
         String baseURIShardedSolr2 = protocol + solr2;
 
         PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
@@ -164,8 +176,6 @@ public class SolrBackupTest {
 
         System.out.println("basePath=" + basePath + " and host=" + host + " and port=" + port);
 
-        String basePathSolrBackup = "solr/alfresco/replication";
-
         if (use_ssl) {
             RestAssured.config = ssl_config(
                     System.getProperty("keystore"),
@@ -193,7 +203,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-//                    .addParam("location", "bucket")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -209,7 +219,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "bucket")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -218,14 +228,6 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restorestatus")
                     .addParam("wt", "json")
-                    .build();
-            restoreRequestSpec = new RequestSpecBuilder()
-                    .setBaseUri(baseURIShardedSolr1)
-                    .setPort(portShardedSolr1)
-                    .setBasePath(basePathSolrBackup)
-                    .addParam("command", "restore")
-                    .addParam("repository", "s3")
-                    .addParam("name", "snapshot")
                     .build();
         } else{
             backupRequestSpec = new RequestSpecBuilder()
@@ -235,7 +237,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-                    .addParam("location", "bucket")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -251,7 +253,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "bucket")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -260,14 +262,6 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restorestatus")
                     .addParam("wt", "json")
-                    .build();
-            restoreRequestSpec = new RequestSpecBuilder()
-                    .setBaseUri(baseURISolr)
-                    .setPort(solrPort)
-                    .setBasePath(basePathSolrBackup)
-                    .addParam("command", "restore")
-                    .addParam("repository", "s3")
-                    .addParam("name", "snapshot")
                     .build();
         }
         // wait for solr to track
@@ -312,7 +306,43 @@ public class SolrBackupTest {
 
     @Test
     @Order(2)
-    void testRestoreEndpoint() {
+    void testRestoreToLatestBackup() {
+        // SOLR in Standalone mode, there is no API command to list or fetch backups.
+        // Fetch all fileNames from our Localstack S3 bucket
+        // First wait 10 seconds so backups made in test 1 are available...
+        Awaitility.await()
+                .timeout(15, TimeUnit.SECONDS)
+                .pollDelay(8, TimeUnit.SECONDS)
+                .untilAsserted(() -> Assertions.assertTrue(true));
+        String lastSnapshotName = returnLastSnapshotName();
+        // Set assert to check if not null / empty.
+
+        System.out.println("Found latest snapshot: " + lastSnapshotName);
+
+
+        if (solr1 != null) {
+            restoreRequestSpec = new RequestSpecBuilder()
+                    .setBaseUri(baseURIShardedSolr1)
+                    .setPort(portShardedSolr1)
+                    .setBasePath(basePathSolrBackup)
+                    .addParam("command", "restore")
+                    .addParam("repository", "s3")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("name", lastSnapshotName)
+                    .build();
+        } else {
+            restoreRequestSpec = new RequestSpecBuilder()
+                    .setBaseUri(baseURISolr)
+                    .setPort(solrPort)
+                    .setBasePath(basePathSolrBackup)
+                    .addParam("command", "restore")
+                    .addParam("repository", "s3")
+                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("name", lastSnapshotName)
+                    .build();
+        }
+
+        System.out.println("Restore triggered, will wait maximum 3 minutes");
         given()
                 .spec(restoreRequestSpec)
                 .when()
@@ -360,6 +390,30 @@ public class SolrBackupTest {
                         .count() == count);
 
     }
+    String returnLastSnapshotName() {
+        List<S3ObjectSummary> snapshots = s3Client.listObjects(BUCKET)
+                        .getObjectSummaries()
+                        .stream()
+                        .filter(s3ObjectSummary -> s3ObjectSummary.getKey().contains("snapshot"))
+                        .collect(Collectors.toList());
+
+        snapshots.forEach(s3ObjectSummary -> System.out.println("Found snapshot: " + s3ObjectSummary.getKey()));
+
+        String latestSnapshot = null;
+        if (snapshots != null && !snapshots.isEmpty()) {
+            Optional<S3ObjectSummary> latestSnapshotOpt = snapshots.stream()
+                    // Sort using the lastModified date of each S3 object
+                    .max(Comparator.comparing(S3ObjectSummary::getLastModified));
+
+            if (latestSnapshotOpt.isPresent()) {
+                latestSnapshot = latestSnapshotOpt.get().getKey();
+            }
+        }
+
+        Pattern pattern = Pattern.compile("snapshot\\.(.*?)/");
+        Matcher matcher = pattern.matcher(latestSnapshot);
+        return matcher.find() ? matcher.group(1) : null;
+    }
     private void triggerBackupAndWaitForCompletion(int count, RequestSpecification solrBackupRequestSpec) {
         String status = given()
                 .spec(solrBackupRequestSpec)
@@ -388,7 +442,7 @@ public class SolrBackupTest {
                 });
     }
 
-        private static AmazonS3 createInternalClient(
+    private static AmazonS3 createInternalClient(
                 String region, String endpoint, String accessKey, String secretKey) {
         ClientConfiguration clientConfig = new ClientConfiguration().withProtocol(Protocol.HTTPS);
         AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig);

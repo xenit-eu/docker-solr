@@ -10,8 +10,9 @@ services:
    #   - 8000:8000
    #   - 5000:5000
    environment:
-#    - JMX_ENABLED=true
-#    - DEBUG=true
+    - DEBUG=true
+    - JMX_ENABLED=true
+    - JAVA_XMX=1024M
     - GLOBAL_WORKSPACE_solr.suggester.minSecsBetweenBuilds=3
     - LOG_log4j.logger.org.alfresco.solr.tracker.MetadataTracker=DEBUG
     - LOG_log4j.appender.file.MaxFileSize=8MB
@@ -22,7 +23,6 @@ services:
 #    - JAVA_OPTS_AWS_ACCESS_KEY_ID=-Daws.accessKeyId=<access_key>
 #    - JAVA_OPTS_AWS_SECRET_ACCESS_KEY=-Daws.secretKey=<secret_key>
 #    - ALFRESCO_SSL=secret
-    - JAVA_XMX=1024M
 #    - Dalfresco.secureComms.secret=mysolrsecret
 #    - ALFRESCO_SECRET=mysolrsecret
     - S3_ENDPOINT=http://localstack:4566
