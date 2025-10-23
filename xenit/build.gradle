@@ -32,7 +32,7 @@ subprojects {
     dependencies {
         backupJar project(path: ":solr-backup")
 
-        loggings("eu.xenit.logging:json-logging:0.0.7:all")
+        loggings("eu.xenit.logging:json-logging:0.0.11")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         implementation("javax.xml.bind:jaxb-api:2.3.1")
         implementation project(':solr-backup')
@@ -119,7 +119,6 @@ subprojects {
 
     task integrationTestXenitEndpoints(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
-
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
         outputs.upToDateWhen { false }
@@ -132,17 +131,12 @@ subprojects {
             systemProperty("use_ssl", tests_use_ssl)
             systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
             systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
-            // solrBackupTests can only run against V2 in SSL / SECRET.
-            if (project.name.contains('enterprise')) {
-                if (project.name.contains('-2')) {
-                    println("V2 logic applied to ${project.name}")
-                    include('**/SolrSmokeTests.class', '**/SolrBackupTest.class')
-                } else {
-                    include('**/SolrSmokeTests.class')
-                    println("V1 logic applied to ${project.name}")
-                }
+
+            if (project.name.contains('enterprise') && project.name.contains('-2')) {
+                println("V2 logic applied to ${project.name}")
+                include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
             } else {
-                include('**/SolrSmokeTests.class')
+                include(project.property('defaultIntegrationTest'))
             }
         }
     }

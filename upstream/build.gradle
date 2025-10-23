@@ -98,10 +98,9 @@ subprojects {
         }
     }
 
-
     task integrationTestDefault(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
-        include('**/SolrSmokeTests.class')
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -117,7 +116,7 @@ subprojects {
 
     task integrationTestSharded(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsSharded') && project.testsSharded)
-        include('**/SolrSmokeTests.class')
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -133,7 +132,7 @@ subprojects {
 
     task integrationTestShardedNonSsl(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsShardedNonSsl') && project.testsShardedNonSsl)
-        include('**/SolrSmokeTests.class')
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -147,7 +146,7 @@ subprojects {
 
     task integrationTestNonSsl(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsNonSsl') && project.testsNonSsl)
-        include('**/SolrSmokeTests.class')
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -161,7 +160,7 @@ subprojects {
 
     task integrationTestMounts(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsMounts') && project.testsMounts)
-        include('**/SolrSmokeTests.class')
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
