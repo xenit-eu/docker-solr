@@ -4,5 +4,12 @@
     "config:base",
     ":dependencyDashboard"
   ],
+  "packageRules": [
+    {
+      "matchDatasources":  ["maven"],
+      "matchPackageNames": [ "^.*rest-assured.*$" ],
+      "groupName": "Rest-Assured dependencies"
+    }
+  ],
   "pinDigests": true
 }
