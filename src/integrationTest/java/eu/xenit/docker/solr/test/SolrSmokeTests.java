@@ -9,8 +9,8 @@ import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.security.KeyManagementException;
@@ -23,8 +23,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SolrSmokeTests {
 
@@ -70,7 +69,7 @@ public class SolrSmokeTests {
         return RestAssured.config().sslConfig(sslConfig);
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setup()
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
             KeyManagementException {
@@ -191,7 +190,7 @@ public class SolrSmokeTests {
                     "baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrActuators);
         }
         // wait for solr to track
-        long sleepTime = 30000;
+        long sleepTime = 40000;
         try {
             sleep(sleepTime);
         } catch (InterruptedException e) {
@@ -223,7 +222,7 @@ public class SolrSmokeTests {
                 .toString();
 
         System.out.println("response=" + response);
-        assertThat(Integer.parseInt(response), greaterThan(0));
+        assertTrue(Integer.parseInt(response) > 0, "Response list.pagination.totalItems > 0");
     }
 
     @Test
@@ -256,9 +255,9 @@ public class SolrSmokeTests {
                     .statusCode(200)
                     .contentType(JSON)
                     .extract().path("status.alfresco-2.index.numDocs");
-            assertThat(docs0, greaterThan(50));
-            assertThat(docs1, greaterThan(50));
-            assertThat(docs2, greaterThan(50));
+            assertTrue(docs0 > 50, "docs0 is greater than 50");
+            assertTrue(docs1 > 50, "docs1 is greater than 50");
+            assertTrue(docs2 > 50, "docs2 is greater than 50");
         }
     }
 

@@ -98,9 +98,9 @@ subprojects {
         }
     }
 
-
     task integrationTestDefault(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -116,6 +116,7 @@ subprojects {
 
     task integrationTestSharded(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsSharded') && project.testsSharded)
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -131,6 +132,7 @@ subprojects {
 
     task integrationTestShardedNonSsl(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsShardedNonSsl') && project.testsShardedNonSsl)
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -144,6 +146,7 @@ subprojects {
 
     task integrationTestNonSsl(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsNonSsl') && project.testsNonSsl)
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -157,6 +160,7 @@ subprojects {
 
     task integrationTestMounts(type: Test, group: "verification") {
         enabled = (project.hasProperty('testsMounts') && project.testsMounts)
+        include(project.property('defaultIntegrationTest'))
 
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -187,7 +191,7 @@ subprojects {
         isRequiredBy(project.tasks.integrationTestDefault)
 
         useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr.yml",
-                           "$composeDir/docker-compose-db.yml"];
+                           "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
 
         sharded {
             isRequiredBy(project.tasks.integrationTestSharded)
@@ -198,7 +202,7 @@ subprojects {
                 environment.put 'LICENSE', project.license
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded.yml", "$composeDir/docker-compose-solr-sharded.yml",
-                               "$composeDir/docker-compose-db.yml"];
+                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
         }
 
         shardedNonSsl {
@@ -210,7 +214,7 @@ subprojects {
                 environment.put 'LICENSE', project.license
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-sharded-non-ssl.yml", "$composeDir/docker-compose-solr-sharded-non-ssl.yml",
-                               "$composeDir/docker-compose-db.yml"];
+                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
         }
 
         nonSsl {
@@ -219,7 +223,7 @@ subprojects {
             environment.put 'use_ssl', false
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml", "$composeDir/docker-compose-solr-non-ssl.yml",
-                               "$composeDir/docker-compose-db.yml"];
+                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
         }
 
         mounts {
@@ -228,7 +232,7 @@ subprojects {
             environment.put 'use_ssl', true
 
             useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr-with-mounts.yml",
-                               "$composeDir/docker-compose-db.yml"];
+                               "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
         }
     }
 

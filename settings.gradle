@@ -27,3 +27,7 @@ if (includeEnterprise == 'true') {
     includeProject('xenit','solr6','alfresco-search-services-enterprise-2.0.8.2')
     includeProject('xenit','solr6','alfresco-search-services-enterprise-2.0.9.1')
 }
+
+include ':solr-backup'
+
+include ':integration-tests'

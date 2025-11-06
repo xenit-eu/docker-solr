@@ -12,6 +12,7 @@ ext {
     tests_use_ssl = true
     composeFiles = ["$composeDir/docker-compose-alfresco.yml",
                     "$composeDir/docker-compose-solr.yml",
+                    "$composeDir/docker-compose-localstack.yml",
                     "$composeDir/docker-compose-db.yml"];
 
     solrSourceSetOverride = sourceSets.main.output
@@ -32,6 +33,6 @@ createDockerFile.dependsOn(compileJava)
 
 dependencies {
     compileOnly 'org.alfresco:alfresco-search:2.0.9.1'
-    compileOnly 'org.apache.solr:solr-core:6.6.5-patched.11@jar'
+    compileOnly 'org.apache.solr:solr-core:6.6.6@jar'
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }

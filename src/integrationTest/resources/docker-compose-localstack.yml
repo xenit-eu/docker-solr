@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:2.3.2
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=access_key
+      - AWS_SECRET_ACCESS_KEY=secret_key
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - ./aws:/etc/localstack/init/ready.d
+      - ./solr-snapshot:/backups

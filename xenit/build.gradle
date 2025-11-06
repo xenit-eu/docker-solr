@@ -15,20 +15,27 @@ subprojects {
     ext {
         alfredTelemetryVersion = '0.10.1'
         actuatorsVersion = '0.0.7'
-        solrBackupVersion = '0.0.11'
         composeDir = "${rootProject.projectDir}/src/integrationTest/resources";
         // atm test without ssl enabled
         tests_use_ssl = false
         composeFiles = ["$composeDir/docker-compose-alfresco-non-ssl.yml",
                         "$composeDir/docker-compose-solr-non-ssl.yml",
+                        "$composeDir/docker-compose-localstack.yml",
                         "$composeDir/docker-compose-db.yml"]
         solrSourceSetOverride = null
     }
 
+    configurations {
+        backupJar
+    }
+
     dependencies {
-        loggings("eu.xenit.logging:json-logging:0.0.7:all")
+        backupJar project(path: ":solr-backup")
+
+        loggings("eu.xenit.logging:json-logging:0.0.11")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
-        backup("eu.xenit.solr-backup:solr-backup:${solrBackupVersion}")
+        implementation("javax.xml.bind:jaxb-api:2.3.1")
+        implementation project(':solr-backup')
     }
 
     if (new File("${project.projectDir}/overload.gradle").exists())
@@ -57,6 +64,9 @@ subprojects {
 
     createDockerFile {
         from(upstreamImage.getImageId().map({ new From(it) }))
+
+        dependsOn(configurations.backupJar)
+
         // micrometer handler init script
         smartCopy("${project.projectDir}/../local/94-init-solr-logging.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/95-init-solr-micrometer-metrics.sh", "/docker-entrypoint.d/")
@@ -80,6 +90,7 @@ subprojects {
         smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
         smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/solr.xml", "/opt/alfresco-search-services/solrhome/solr.xml")
+        smartCopy configurations.backupJar, "/opt/alfresco-search-services/solrhome/lib/"
 
         if (project.solrSourceSetOverride != null) {
             doFirst {
@@ -108,7 +119,6 @@ subprojects {
 
     task integrationTestXenitEndpoints(type: Test, group: "verification") {
         enabled = (project.hasProperty('tests') && project.tests)
-
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
         outputs.upToDateWhen { false }
@@ -121,6 +131,13 @@ subprojects {
             systemProperty("use_ssl", tests_use_ssl)
             systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
             systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
+
+            if (project.name.contains('enterprise') && project.name.contains('-2')) {
+                println("V2 logic applied to ${project.name}")
+                include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
+            } else {
+                include(project.property('defaultIntegrationTest'))
+            }
         }
     }
 
