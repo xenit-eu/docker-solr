@@ -33,6 +33,6 @@ createDockerFile.dependsOn(compileJava)
 
 dependencies {
     compileOnly 'org.alfresco:alfresco-search:2.0.9.1'
-    compileOnly 'org.apache.solr:solr-core:6.6.6@jar'
+    compileOnly 'org.apache.solr:solr-core:9.10.0@jar'
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }
