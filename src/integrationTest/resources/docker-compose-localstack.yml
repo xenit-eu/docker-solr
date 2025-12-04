@@ -3,7 +3,7 @@ version: '3'
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:2.3.2
+    image: localstack/localstack:2.3.2@sha256:c396d899a3cdc038ba6bb82d54a40f12c037004b93c3e1efc4c821db60306f79
     ports:
       - "4566:4566"
     environment:
