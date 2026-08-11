@@ -31,7 +31,7 @@ subprojects {
 
     dependencies {
         backupJar project(path: ":solr-backup")
-        // TODO: If fails to build, try to add :0.0.11:all
+
         loggings("eu.xenit.logging:json-logging:0.0.11")
         actuators("eu.xenit.solr-actuators:solr-actuators:${actuatorsVersion}")
         implementation("javax.xml.bind:jaxb-api:2.3.1")
