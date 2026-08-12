@@ -4,5 +4,14 @@
     "config:base",
     ":dependencyDashboard"
   ],
-  "pinDigests": true
+  "pinDigests": true,
+  "packageRules": [
+    {
+      "description": "Each upstream/solr6/* directory pins one deliberate ASS release; bumping it would silently change which version that image builds",
+      "matchPackageNames": [
+        "org.alfresco:alfresco-search-services"
+      ],
+      "enabled": false
+    }
+  ]
 }
