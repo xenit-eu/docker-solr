@@ -6,6 +6,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
 import io.restassured.parsing.Parser;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -222,12 +223,24 @@ public class SolrSmokeTests {
         if (searchHits() <= 0) {
             return false;
         }
+        // These lag behind tracking: solr answers searches before the readiness probe flips to UP.
+        if (telemetry && !endpointServes(specTelemetry, "alfresco_nodes")) {
+            return false;
+        }
+        if (actuators && !endpointServes(specActuators, "UP")) {
+            return false;
+        }
         if (specShardedSolr1 == null) {
             return true;
         }
         return coreDocs(specShardedSolr1, "alfresco-0") > 50
                 && coreDocs(specShardedSolr1, "alfresco-1") > 50
                 && coreDocs(specShardedSolr2, "alfresco-2") > 50;
+    }
+
+    private static boolean endpointServes(RequestSpecification endpointSpec, String expected) {
+        Response response = given().spec(endpointSpec).when().get();
+        return response.statusCode() == 200 && response.asString().contains(expected);
     }
 
     private static int searchHits() {

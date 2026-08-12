@@ -288,6 +288,15 @@ public class SolrBackupTest {
                 .extract()
                 .body() // Extract the whole body
                 .asString(); // as a simple string
+        awaitRestoreSuccess();
+    }
+
+    /**
+     * Polls restorestatus until the restore succeeds. Solr does not retry a restore it has already
+     * given up on, so a "failed" status ends the wait immediately rather than burning the full
+     * timeout on a verdict that will not change.
+     */
+    private void awaitRestoreSuccess() {
         long startTime = System.currentTimeMillis();
         await().atMost(180, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS).until(() -> {
@@ -299,7 +308,13 @@ public class SolrBackupTest {
                             .statusCode(200)
                             .extract()
                             .path("restorestatus.status");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + "with status= " + status);
+                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + " with status= " + status);
+                    if ("failed".equals(status)) {
+                        throw new AssertionError(
+                                "Restore reported status=failed after "
+                                        + (System.currentTimeMillis() - startTime)
+                                        + "ms; check the solr container log for the cause");
+                    }
                     return "success".equals(status);
                 });
     }
@@ -342,7 +357,6 @@ public class SolrBackupTest {
                     .build();
         }
 
-        System.out.println("Restore triggered, will wait maximum 3 minutes");
         given()
                 .spec(restoreRequestSpec)
                 .when()
@@ -350,20 +364,7 @@ public class SolrBackupTest {
                 .then()
                 .statusCode(200);
         System.out.println("Restore triggered, will wait maximum 3 minutes");
-        long startTime = System.currentTimeMillis();
-        await().atMost(180, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS).until(() -> {
-                    String status = given()
-                            .spec(restoreStatusRequestSpec)
-                            .when()
-                            .get()
-                            .then()
-                            .statusCode(200)
-                            .extract()
-                            .path("restorestatus.status");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + "with status= " + status);
-                    return "success".equals(status);
-                });
+        awaitRestoreSuccess();
     }
     @Test
     @Order(1)
