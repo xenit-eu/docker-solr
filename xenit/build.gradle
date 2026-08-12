@@ -132,12 +132,11 @@ subprojects {
             systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
             systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
 
-            if (project.name.contains('enterprise') && project.name.contains('-2')) {
-                println("V2 logic applied to ${project.name}")
-                include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
-            } else {
-                include(project.property('defaultIntegrationTest'))
-            }
+            // Was gated on `enterprise && -2`, but the rationale given for that was "V2 in
+            // SSL / SECRET", which community 2.x satisfies too. Ungated to find out where the
+            // backup test actually works rather than where we assumed it does.
+            println("Including SolrBackupTest for ${project.name} (use_ssl=${tests_use_ssl})")
+            include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
         }
     }
 
