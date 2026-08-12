@@ -12,20 +12,28 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import org.awaitility.core.ConditionTimeoutException;
+
 import java.io.FileInputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static java.lang.Thread.sleep;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SolrSmokeTests {
+
+    private static final String SEARCH_URL = "/api/-default-/public/search/versions/1/search";
+    // simple json, no need for an additional library
+    // templates don't work with afts, fields to search into need to be specified
+    private static final String SEARCH_BODY = "{ \"query\": { \"query\": \"cm:name:xml*\" } }";
 
     static RequestSpecification spec;
     static RequestSpecification specShardedSolr1;
@@ -189,72 +197,86 @@ public class SolrSmokeTests {
             System.out.println(
                     "baseURISolr=" + baseURISolr + " and solrPort=" + solrPort + " and path=" + basePathSolrActuators);
         }
-        // wait for solr to track
-        long sleepTime = 40000;
+        awaitTracking();
+    }
+
+    /**
+     * Solr tracks Alfresco in the background, so the smoke tests only become meaningful once the
+     * first content has been indexed.
+     */
+    private static void awaitTracking() {
         try {
-            sleep(sleepTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            await().atMost(5, TimeUnit.MINUTES)
+                    .pollInterval(2, TimeUnit.SECONDS)
+                    // tracking has not started yet, so the endpoints may still error out
+                    .ignoreExceptions()
+                    .until(SolrSmokeTests::isTracked);
+        } catch (ConditionTimeoutException e) {
+            // Deliberately not failing here: the assertions below report what is actually
+            // missing, which beats a bare timeout.
+            System.out.println("Timed out waiting for Solr to track content, running tests anyway.");
         }
+    }
+
+    private static boolean isTracked() {
+        if (searchHits() <= 0) {
+            return false;
+        }
+        if (specShardedSolr1 == null) {
+            return true;
+        }
+        return coreDocs(specShardedSolr1, "alfresco-0") > 50
+                && coreDocs(specShardedSolr1, "alfresco-1") > 50
+                && coreDocs(specShardedSolr2, "alfresco-2") > 50;
+    }
+
+    private static int searchHits() {
+        Object totalItems = given()
+                .spec(spec)
+                .when()
+                .header("Content-Type", "application/json")
+                .body(SEARCH_BODY)
+                .post(SEARCH_URL)
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("list.pagination.totalItems");
+
+        return totalItems == null ? 0 : Integer.parseInt(totalItems.toString());
+    }
+
+    private static int coreDocs(RequestSpecification solrSpec, String core) {
+        Integer docs = given()
+                .spec(solrSpec)
+                .contentType("application/json")
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .contentType(JSON)
+                .extract().path("status." + core + ".index.numDocs");
+
+        // the core is absent from the status response until it has been created
+        return docs == null ? 0 : docs;
     }
 
     @Test
     public void testSearch() {
         String flavor = System.getProperty("flavor");
         System.out.println("flavor=" + flavor);
-        String response;
 
-        System.out.println("will use api call");
-        String urlSearch = "/api/-default-/public/search/versions/1/search";
-        // simple json, no need for an additional library
-        // templates don't work with afts, fields to search into need to be specified
-        String requestParams = "{ \"query\": { \"query\": \"cm:name:xml*\" } }";
-        response = given()
-                .spec(spec)
-                .when()
-                .header("Content-Type", "application/json")
-                .body(requestParams)
-                .post(urlSearch)
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("list.pagination.totalItems")
-                .toString();
+        int totalItems = searchHits();
 
-        System.out.println("response=" + response);
-        assertTrue(Integer.parseInt(response) > 0, "Response list.pagination.totalItems > 0");
+        System.out.println("response=" + totalItems);
+        assertTrue(totalItems > 0, "Response list.pagination.totalItems > 0");
     }
 
     @Test
     public void TestShards() {
         if (specShardedSolr1 != null) {
-            Integer docs0 = given()
-                    .spec(specShardedSolr1)
-                    .contentType("application/json")
-                    .when()
-                    .get()
-                    .then()
-                    .statusCode(200)
-                    .contentType(JSON)
-                    .extract().path("status.alfresco-0.index.numDocs");
-            Integer docs1 = given()
-                    .spec(specShardedSolr1)
-                    .contentType("application/json")
-                    .when()
-                    .get()
-                    .then()
-                    .statusCode(200)
-                    .contentType(JSON)
-                    .extract().path("status.alfresco-1.index.numDocs");
-            Integer docs2 = given()
-                    .spec(specShardedSolr2)
-                    .contentType("application/json")
-                    .when()
-                    .get()
-                    .then()
-                    .statusCode(200)
-                    .contentType(JSON)
-                    .extract().path("status.alfresco-2.index.numDocs");
+            int docs0 = coreDocs(specShardedSolr1, "alfresco-0");
+            int docs1 = coreDocs(specShardedSolr1, "alfresco-1");
+            int docs2 = coreDocs(specShardedSolr2, "alfresco-2");
             assertTrue(docs0 > 50, "docs0 is greater than 50");
             assertTrue(docs1 > 50, "docs1 is greater than 50");
             assertTrue(docs2 > 50, "docs2 is greater than 50");
