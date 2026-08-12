@@ -61,6 +61,10 @@ public class SolrBackupTest {
     static boolean use_ssl = false;
     static final String BUCKET = "bucket";
     static final String basePathSolrBackup = "solr/alfresco/replication";
+    // S3BackupRepository takes the bucket from S3_BUCKET_NAME and uses whatever follows s3:// as the
+    // key prefix verbatim, so spelling the bucket out here filed every snapshot under a stray
+    // "bucket/" key that nothing ever read back. Same triple-slash form as 93-restore-from-backup.sh.
+    static final String BACKUP_LOCATION = "s3:///opt/alfresco-search-services/data/solr6Backup/";
 
     private static KeyStore loadKeyStore(String path, char[] password, String storeType) {
         KeyStore keyStore;
@@ -208,7 +212,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -224,7 +228,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -242,7 +246,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -258,7 +262,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -347,7 +351,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", lastSnapshotName)
                     .build();
         } else {
@@ -357,7 +361,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", lastSnapshotName)
                     .build();
         }
