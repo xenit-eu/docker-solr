@@ -22,6 +22,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -216,6 +217,48 @@ public class SolrSmokeTests {
             // Deliberately not failing here: the assertions below report what is actually
             // missing, which beats a bare timeout.
             System.out.println("Timed out waiting for Solr to track content, running tests anyway.");
+            reportReadiness();
+        }
+    }
+
+    /**
+     * "Expected status code 200 but was 503" does not say which component is unhealthy, and by the
+     * time an assertion fails we no longer know which of the awaited conditions held. The readiness
+     * bodies usually name the culprit, so dump them once when the wait gives up.
+     */
+    private static void reportReadiness() {
+        System.out.println("  search hits: " + attempt(SolrSmokeTests::searchHits));
+        if (telemetry) {
+            System.out.println("  telemetry: " + probe(specTelemetry));
+        }
+        if (actuators) {
+            System.out.println("  actuators: " + probe(specActuators));
+        }
+        if (specShardedSolr1 != null) {
+            System.out.println("  alfresco-0 docs: " + attempt(() -> coreDocs(specShardedSolr1, "alfresco-0")));
+            System.out.println("  alfresco-1 docs: " + attempt(() -> coreDocs(specShardedSolr1, "alfresco-1")));
+            System.out.println("  alfresco-2 docs: " + attempt(() -> coreDocs(specShardedSolr2, "alfresco-2")));
+        }
+    }
+
+    private static String probe(RequestSpecification endpointSpec) {
+        try {
+            Response response = given().spec(endpointSpec).when().get();
+            String body = response.asString();
+            if (body != null && body.length() > 500) {
+                body = body.substring(0, 500) + " ...(truncated)";
+            }
+            return "HTTP " + response.statusCode() + " body=" + body;
+        } catch (Exception e) {
+            return "request failed: " + e;
+        }
+    }
+
+    private static String attempt(Supplier<Integer> value) {
+        try {
+            return String.valueOf(value.get());
+        } catch (Exception e) {
+            return "unavailable: " + e;
         }
     }
 

@@ -149,6 +149,10 @@ subprojects {
         environment.put 'ALFRESCO_IMAGE', upstreamProject.alfrescoimage
         environment.put 'INDEX', upstreamProject.solr.flavor
 
+        // composeDown deletes the containers, so a CI step can never reach `docker logs` afterwards.
+        // Capture while they run, under build/reports so the existing artifact upload picks it up.
+        captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs"))
+
         isRequiredBy(project.tasks.integrationTestXenitEndpoints)
 
         useComposeFiles = composeFiles
