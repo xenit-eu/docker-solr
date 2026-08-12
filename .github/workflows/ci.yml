@@ -18,13 +18,20 @@ jobs:
       matrix:
         version:
           - solr6
-        task:
-          - integrationTestDefault
-          - integrationTestSharded
-          - integrationTestShardedNonSsl
-          - integrationTestNonSsl
-          - integrationTestMounts
-          - integrationTestXenitEndpoints
+        # One runner per search-services version: every task for that version runs
+        # here, instead of one runner walking all versions for a single task.
+        assetVersion:
+          - alfresco-search-services-community-1.4.3.4
+          - alfresco-search-services-community-2.0.6
+          - alfresco-search-services-community-2.0.8.2
+          - alfresco-search-services-community-2.0.9.1
+          - alfresco-search-services-enterprise-1.4.3.4
+          - alfresco-search-services-enterprise-2.0.6
+          - alfresco-search-services-enterprise-2.0.8.2
+          - alfresco-search-services-enterprise-2.0.9.1
+    env:
+      UPSTREAM_PROJECT: ':upstream:${{ matrix.version }}-${{ matrix.assetVersion }}'
+      XENIT_PROJECT: ':xenit:${{ matrix.version }}-${{ matrix.assetVersion }}'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -47,12 +54,22 @@ jobs:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
         with:
           cache-read-only: false
-          arguments: ${{ matrix.task }} --info
+          # Single Gradle invocation so the upstream image is built once and reused
+          # by the xenit image. Tasks run sequentially, so the compose stacks (which
+          # share fixed container names) never overlap.
+          arguments: >-
+            ${{ env.UPSTREAM_PROJECT }}:integrationTestDefault
+            ${{ env.UPSTREAM_PROJECT }}:integrationTestSharded
+            ${{ env.UPSTREAM_PROJECT }}:integrationTestShardedNonSsl
+            ${{ env.UPSTREAM_PROJECT }}:integrationTestNonSsl
+            ${{ env.UPSTREAM_PROJECT }}:integrationTestMounts
+            ${{ env.XENIT_PROJECT }}:integrationTestXenitEndpoints
+            --info
       - name: Upload Artifact
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.task }}-result
+          name: ${{ matrix.version }}-${{ matrix.assetVersion }}-result
           path: /home/runner/work/**/build/reports
           retention-days: 2
   publish:
