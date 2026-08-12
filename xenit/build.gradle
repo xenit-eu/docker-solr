@@ -132,12 +132,7 @@ subprojects {
             systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
             systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
 
-            if (project.name.contains('enterprise') && project.name.contains('-2')) {
-                println("V2 logic applied to ${project.name}")
-                include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
-            } else {
-                include(project.property('defaultIntegrationTest'))
-            }
+            include(project.property('defaultIntegrationTest'), project.property('backupIntegrationTest'))
         }
     }
 
