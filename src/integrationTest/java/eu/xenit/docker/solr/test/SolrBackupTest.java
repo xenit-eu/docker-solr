@@ -20,8 +20,10 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.FileInputStream;
 import java.security.*;
@@ -39,6 +41,9 @@ import static java.lang.Thread.sleep;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// Without this the @Order annotations below do nothing, and the restore tests run before the
+// backup that is supposed to feed them.
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SolrBackupTest {
     static AmazonS3 s3Client;
     static RequestSpecification specShardedSolr1;
