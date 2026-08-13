@@ -18,6 +18,7 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -34,12 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
-import static java.lang.Thread.sleep;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -294,50 +295,44 @@ public class SolrBackupTest {
      * that window, and is usually quicker than the fixed 30s sleep this replaces.
      */
     private static void waitForIndexReady() {
-        long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
-        int previous = -1;
-        int stableRounds = 0;
-        while (System.currentTimeMillis() < deadline) {
-            int docs = totalDocs();
-            stableRounds = (docs > 0 && docs == previous) ? stableRounds + 1 : 0;
-            previous = docs;
-            if (stableRounds >= 2) {
-                System.out.println("Index settled at " + docs + " docs");
-                return;
-            }
-            try {
-                sleep(5000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
+        AtomicInteger previous = new AtomicInteger(-1);
+        try {
+            await().atMost(5, TimeUnit.MINUTES)
+                    .pollInterval(2, TimeUnit.SECONDS)
+                    // during() keeps this true for the whole window, so the count has to stay put
+                    // rather than merely match one earlier sample.
+                    .during(10, TimeUnit.SECONDS)
+                    // the cores are not necessarily serving yet
+                    .ignoreExceptions()
+                    .until(() -> {
+                        int docs = totalDocs();
+                        return docs > 0 && docs == previous.getAndSet(docs);
+                    });
+            System.out.println("Index settled at " + previous.get() + " docs");
+        } catch (ConditionTimeoutException e) {
+            // Not fatal: a failed backup now reports itself, which beats guessing here.
+            System.out.println("Index still moving after 5 minutes (last count " + previous.get()
+                    + "), backing up anyway");
         }
-        // Not fatal: the backup assertions below report the real problem better than a bare timeout.
-        System.out.println("Index still moving after 5 minutes (last count " + previous + "), backing up anyway");
     }
 
     private static int totalDocs() {
-        try {
-            Map<String, Map<String, Object>> status = given()
-                    .spec(coreStatusSpec)
-                    .when()
-                    .get()
-                    .then()
-                    .statusCode(200)
-                    .extract()
-                    .path("status");
-            if (status == null) {
-                return 0;
-            }
-            return status.values().stream()
-                    .map(core -> (Map<String, Object>) core.get("index"))
-                    .filter(index -> index != null && index.get("numDocs") != null)
-                    .mapToInt(index -> ((Number) index.get("numDocs")).intValue())
-                    .sum();
-        } catch (Exception e) {
-            // the cores are not necessarily serving yet
+        Map<String, Map<String, Object>> status = given()
+                .spec(coreStatusSpec)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("status");
+        if (status == null) {
             return 0;
         }
+        return status.values().stream()
+                .map(core -> (Map<String, Object>) core.get("index"))
+                .filter(index -> index != null && index.get("numDocs") != null)
+                .mapToInt(index -> ((Number) index.get("numDocs")).intValue())
+                .sum();
     }
 
     @Test
