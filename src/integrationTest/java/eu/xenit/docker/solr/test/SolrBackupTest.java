@@ -444,14 +444,25 @@ public class SolrBackupTest {
 
 
     void validateSnapshotCount(long count) {
-        await().atMost(180, TimeUnit.SECONDS)
-                .until(() -> s3Client.listObjects(BUCKET)
-                        .getObjectSummaries()
-                        .stream()
-                        .filter(s3ObjectSummary -> s3ObjectSummary.getSize() == 0
-                                && s3ObjectSummary.getKey().contains("snapshot"))
-                        .count() == count);
+        try {
+            await().atMost(180, TimeUnit.SECONDS).until(() -> snapshotMarkers().size() == count);
+        } catch (ConditionTimeoutException e) {
+            // The bare timeout says nothing about what is in the bucket, which is the only thing
+            // worth knowing here.
+            throw new AssertionError("Expected " + count + " snapshots, found " + snapshotMarkers().size()
+                    + ": " + snapshotMarkers(), e);
+        }
+    }
 
+    /** Solr writes a zero-size marker per snapshot directory; a synced fixture has none. */
+    private List<String> snapshotMarkers() {
+        return s3Client.listObjects(BUCKET)
+                .getObjectSummaries()
+                .stream()
+                .filter(s3ObjectSummary -> s3ObjectSummary.getSize() == 0
+                        && s3ObjectSummary.getKey().contains("snapshot"))
+                .map(S3ObjectSummary::getKey)
+                .collect(Collectors.toList());
     }
     String returnLastSnapshotName() {
         List<S3ObjectSummary> snapshots = s3Client.listObjects(BUCKET)
@@ -478,8 +489,11 @@ public class SolrBackupTest {
         return matcher.find() ? matcher.group(1) : null;
     }
     private void triggerBackupAndWaitForCompletion(int count, RequestSpecification solrBackupRequestSpec) {
+        // Unnamed backups report no snapshotName, so recognising "this backup has reported" needs the
+        // whole details record to change rather than any single field. Getting this wrong meant the
+        // wait returned on the previous backup's success and the restore tests then picked up a
+        // snapshot that was still uploading.
         Map<String, Object> before = backupDetails();
-        Object previousSnapshot = before == null ? null : before.get("snapshotName");
 
         String status = given()
                 .spec(solrBackupRequestSpec)
@@ -496,18 +510,15 @@ public class SolrBackupTest {
                 .pollInterval(1, TimeUnit.SECONDS)
                 .until(() -> {
                     Map<String, Object> backup = backupDetails();
-                    if (backup == null) {
+                    if (backup == null || backup.equals(before)) {
+                        // details still describes the previous backup
                         return false;
                     }
-                    Object snapshot = backup.get("snapshotName");
                     Object backupStatus = backup.get("status");
                     System.out.println("elapsed = " + (System.currentTimeMillis() - startTime)
-                            + " with status= " + backupStatus + " snapshot= " + snapshot);
-                    // details reports the most recent backup, which is still the previous one until
-                    // this trigger produces its own snapshot.
-                    if (previousSnapshot != null && previousSnapshot.equals(snapshot)) {
-                        return false;
-                    }
+                            + " with status= " + backupStatus
+                            + " completedAt= " + backup.get("snapshotCompletedAt")
+                            + " files= " + backup.get("fileCount"));
                     if ("failed".equals(backupStatus)) {
                         throw new AssertionError("Backup reported status=failed"
                                 + (backup.get("exception") == null ? "" : ": " + backup.get("exception"))
