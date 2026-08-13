@@ -120,12 +120,15 @@ subprojects {
     dependencies {
         backupJar project(path: ":solr-backup")
 
+        integrationTestImplementation platform("org.junit:junit-bom:${junitJupiterVersion}")
+
+        integrationTestImplementation "org.junit.jupiter:junit-jupiter"
+        integrationTestRuntimeOnly    "org.junit.jupiter:junit-jupiter-engine"
+        integrationTestRuntimeOnly    "org.junit.platform:junit-platform-launcher"
+
         integrationTestImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
         integrationTestImplementation "io.rest-assured:json-path:${restAssuredVersion}"
         integrationTestImplementation "io.rest-assured:rest-assured-common:${restAssuredVersion}"
-        integrationTestImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
-        integrationTestImplementation "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
-        integrationTestImplementation "org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}"
         integrationTestImplementation "org.awaitility:awaitility:${awaitablityVersion}"
 
         integrationTestImplementation platform("com.amazonaws:aws-java-sdk-bom:${amazonVersion}")
