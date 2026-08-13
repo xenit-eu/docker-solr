@@ -1,4 +1,5 @@
 import com.avast.gradle.dockercompose.tasks.ComposeDown
+import eu.xenit.solr.gradle.DockerImageNaming
 
 subprojects {
     apply plugin: 'eu.xenit.docker'
@@ -38,8 +39,8 @@ subprojects {
         dockerFile = file("$workingDir/Dockerfile")
         dockerBuild {
             def enterprise = project.alfrescoimage.contains("enterprise")
-            repository = [calcRepository(project.solr.flavor,enterprise,false)].get(0)
-            tags = calcTags(project.solr.version)
+            repository = DockerImageNaming.repository(project.solr.flavor, enterprise, false)
+            tags = DockerImageNaming.tags(project.solr.version)
             pull = true
             automaticTags = false
         }
