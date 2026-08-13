@@ -6,8 +6,10 @@ description = "Xenit backup"
 group = 'eu.xenit.solr-backup'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    // Runs inside built images, so this should be 11
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
     withJavadocJar()
     withSourcesJar()
 }
