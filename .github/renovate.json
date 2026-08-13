@@ -19,6 +19,12 @@
         "org.apache.solr:solr-core"
       ],
       "enabled": false
+    },
+    {
+      "description": "4.14.0 is the last LocalStack release that runs without a LOCALSTACK_AUTH_TOKEN. Later releases use calendar versioning (2026.03.0+) and require an account token.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["localstack/localstack"],
+      "enabled": false
     }
   ]
 }
