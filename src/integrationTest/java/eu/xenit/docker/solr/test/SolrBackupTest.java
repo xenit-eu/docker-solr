@@ -55,6 +55,7 @@ public class SolrBackupTest {
     static RequestSpecification restoreFixedSnapshotRequestSpec;
     static RequestSpecification restoreStatusRequestSpec;
     static RequestSpecification restoreRequestSpec;
+    static RequestSpecification coreStatusSpec;
     static String solr1;
     static String baseURIShardedSolr1;
     static String baseURISolr;
@@ -275,12 +276,67 @@ public class SolrBackupTest {
                     .addParam("wt", "json")
                     .build();
         }
-        // wait for solr to track
-        long sleepTime = 30000;
+        coreStatusSpec = new RequestSpecBuilder()
+                .setBaseUri(solr1 == null ? baseURISolr : baseURIShardedSolr1)
+                .setPort(solr1 == null ? solrPort : portShardedSolr1)
+                .setBasePath(basePathSolr)
+                .addParam("action", "STATUS")
+                .addParam("wt", "json")
+                .build();
+
+        waitForIndexReady();
+    }
+
+    /**
+     * Backing up while the trackers are still indexing races lucene: SnapShooter lists the index
+     * files, then a merge deletes one before the S3 copy reaches it and the snapshot dies with a
+     * NoSuchFileException. Waiting for the document count to stop moving keeps the backup out of
+     * that window, and is usually quicker than the fixed 30s sleep this replaces.
+     */
+    private static void waitForIndexReady() {
+        long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+        int previous = -1;
+        int stableRounds = 0;
+        while (System.currentTimeMillis() < deadline) {
+            int docs = totalDocs();
+            stableRounds = (docs > 0 && docs == previous) ? stableRounds + 1 : 0;
+            previous = docs;
+            if (stableRounds >= 2) {
+                System.out.println("Index settled at " + docs + " docs");
+                return;
+            }
+            try {
+                sleep(5000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+        // Not fatal: the backup assertions below report the real problem better than a bare timeout.
+        System.out.println("Index still moving after 5 minutes (last count " + previous + "), backing up anyway");
+    }
+
+    private static int totalDocs() {
         try {
-            sleep(sleepTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Map<String, Map<String, Object>> status = given()
+                    .spec(coreStatusSpec)
+                    .when()
+                    .get()
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .path("status");
+            if (status == null) {
+                return 0;
+            }
+            return status.values().stream()
+                    .map(core -> (Map<String, Object>) core.get("index"))
+                    .filter(index -> index != null && index.get("numDocs") != null)
+                    .mapToInt(index -> ((Number) index.get("numDocs")).intValue())
+                    .sum();
+        } catch (Exception e) {
+            // the cores are not necessarily serving yet
+            return 0;
         }
     }
 
