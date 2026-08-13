@@ -105,6 +105,18 @@ subprojects {
     tasks.withType(Test) {
         useJUnitPlatform()
     }
+
+    // Everything shipped into images needs to be java 11 (alfresco compatibility), but
+    // the integration tests themselves only do HTTP calls against these images, so they can be upgraded.
+    def integrationTestJava = JavaLanguageVersion.of(integrationTestJavaVersion as Integer)
+
+    tasks.named('compileIntegrationTestJava') {
+        javaCompiler = javaToolchains.compilerFor { languageVersion = integrationTestJava }
+    }
+
+    tasks.matching { it instanceof Test && it.name.startsWith('integrationTest') }.configureEach {
+        javaLauncher = javaToolchains.launcherFor { languageVersion = integrationTestJava }
+    }
     dependencies {
         backupJar project(path: ":solr-backup")
 
