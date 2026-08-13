@@ -52,22 +52,24 @@ jobs:
       - name: Login to Docker
         run: |
           echo '${{ secrets.HARBOR_PASSWORD }}' | docker login docker.xenit.eu --username '${{ secrets.HARBOR_USER }}' --password-stdin
-      - name: Integration tests
-        uses: gradle/gradle-build-action@v3
-        env:
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: false
-          # Single Gradle invocation so the upstream image is built once and reused
-          # by the xenit image. Tasks run sequentially, so the compose stacks (which
-          # share fixed container names) never overlap.
-          arguments: >-
-            ${{ env.UPSTREAM_PROJECT }}:integrationTestDefault
-            ${{ env.UPSTREAM_PROJECT }}:integrationTestSharded
-            ${{ env.UPSTREAM_PROJECT }}:integrationTestShardedNonSsl
-            ${{ env.UPSTREAM_PROJECT }}:integrationTestNonSsl
-            ${{ env.UPSTREAM_PROJECT }}:integrationTestMounts
-            ${{ env.XENIT_PROJECT }}:integrationTestXenitEndpoints
+      - name: Integration tests
+        env:
+          VERSIONS_TO_BUILD: ${{ matrix.version }}
+        # Single Gradle invocation so the upstream image is built once and reused
+        # by the xenit image. Tasks run sequentially, so the compose stacks (which
+        # share fixed container names) never overlap.
+        run: |
+          ./gradlew \
+            "${{ env.UPSTREAM_PROJECT }}:integrationTestDefault" \
+            "${{ env.UPSTREAM_PROJECT }}:integrationTestSharded" \
+            "${{ env.UPSTREAM_PROJECT }}:integrationTestShardedNonSsl" \
+            "${{ env.UPSTREAM_PROJECT }}:integrationTestNonSsl" \
+            "${{ env.UPSTREAM_PROJECT }}:integrationTestMounts" \
+            "${{ env.XENIT_PROJECT }}:integrationTestXenitEndpoints" \
             --info
       - name: Upload Artifact
         if: success() || failure()
@@ -93,7 +95,9 @@ jobs:
             11
             21
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
       - name: Login to docker repo
         run: |
           echo '${{ secrets.HARBOR_PASSWORD }}' | docker login docker.xenit.eu --username '${{ secrets.HARBOR_USER }}' --password-stdin
@@ -101,18 +105,12 @@ jobs:
       # without supplying DOCKER_USER and DOCKER_PASSWORD. However, supplying those environment variables breaks
       # publishing to other repositories
       - name: Publish public docker images
-        uses: gradle/gradle-build-action@v3
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        with:
-          cache-read-only: false
-          arguments: pushDockerImage -PincludeEnterprise=false
+        run: ./gradlew pushDockerImage -PincludeEnterprise=false
       - name: Publish private docker images
-        uses: gradle/gradle-build-action@v3
         env:
           VERSIONS_TO_BUILD: ${{ matrix.version }}
-        with:
-          cache-read-only: false
-          arguments: pushDockerImage -PincludeCommunity=false
+        run: ./gradlew pushDockerImage -PincludeCommunity=false
