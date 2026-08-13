@@ -11,22 +11,22 @@ subprojects {
 
     def workingDir = "$project.buildDir/dockerbuild"
 
-    task copyDockerfile(type: Copy) {
+    tasks.register('copyDockerfile', Copy) {
         from("$rootProject.projectDir/src/main/resources/dockerfiles/") {
             include "Dockerfile.${project.solr.flavor}"
             rename "Dockerfile.${project.solr.flavor}", 'Dockerfile'
         }
         into workingDir
     }
-    task copyGlobalResources(type: Copy) {
+    tasks.register('copyGlobalResources', Copy) {
         from "$rootProject.projectDir/src/main/resources/global"
         into workingDir
     }
-    task copyLocalResources(type: Copy) {
+    tasks.register('copyLocalResources', Copy) {
         from "$project.projectDir/../local"
         into workingDir
     }
-    task pullRuntimeDependencies(type: Copy) {
+    tasks.register('pullRuntimeDependencies', Copy) {
         from configurations.runtime
         into workingDir
     }
@@ -35,18 +35,15 @@ subprojects {
     buildDockerImage.dependsOn(copyLocalResources)
     buildDockerImage.dependsOn(pullRuntimeDependencies)
 
-    dockerFile {
+    dockerBuild {
         dockerFile = file("$workingDir/Dockerfile")
-        dockerBuild {
-            def enterprise = project.alfrescoimage.contains("enterprise")
-            repository = DockerImageNaming.repository(project.solr.flavor, enterprise, false)
-            tags = DockerImageNaming.tags(project.solr.version)
-            pull = true
-            automaticTags = false
-        }
+        def enterprise = project.alfrescoimage.contains("enterprise")
+        repositories = [DockerImageNaming.repository(project.solr.flavor, enterprise, false)]
+        tags = DockerImageNaming.tags(project.solr.version)
     }
 
     buildDockerImage {
+        pull = true
         def date = new Date().getTime().toString()
         buildArgs = [
                 'SOLR_VERSION_MAJOR': "${project.solr.version.major}",
@@ -86,7 +83,7 @@ subprojects {
         }
     }
 
-    task setDockerImageEnvironment {
+    tasks.register('setDockerImageEnvironment') {
         doLast {
             if (project.hasProperty('testsSharded'))
                 dockerCompose.sharded.environment.put 'DOCKER_IMAGE', buildDockerImage.getImageId().get()
@@ -99,7 +96,7 @@ subprojects {
         }
     }
 
-    task integrationTestDefault(type: Test, group: "verification") {
+    tasks.register('integrationTestDefault', Test) {
         enabled = (project.hasProperty('tests') && project.tests)
         include(project.property('defaultIntegrationTest'))
 
@@ -115,7 +112,7 @@ subprojects {
         }
     }
 
-    task integrationTestSharded(type: Test, group: "verification") {
+    tasks.register('integrationTestSharded', Test) {
         enabled = (project.hasProperty('testsSharded') && project.testsSharded)
         include(project.property('defaultIntegrationTest'))
 
@@ -131,7 +128,7 @@ subprojects {
         }
     }
 
-    task integrationTestShardedNonSsl(type: Test, group: "verification") {
+    tasks.register('integrationTestShardedNonSsl', Test) {
         enabled = (project.hasProperty('testsShardedNonSsl') && project.testsShardedNonSsl)
         include(project.property('defaultIntegrationTest'))
 
@@ -145,7 +142,7 @@ subprojects {
         }
     }
 
-    task integrationTestNonSsl(type: Test, group: "verification") {
+    tasks.register('integrationTestNonSsl', Test) {
         enabled = (project.hasProperty('testsNonSsl') && project.testsNonSsl)
         include(project.property('defaultIntegrationTest'))
 
@@ -159,7 +156,7 @@ subprojects {
         }
     }
 
-    task integrationTestMounts(type: Test, group: "verification") {
+    tasks.register('integrationTestMounts', Test) {
         enabled = (project.hasProperty('testsMounts') && project.testsMounts)
         include(project.property('defaultIntegrationTest'))
 
@@ -175,7 +172,7 @@ subprojects {
         }
     }
 
-    task integrationTests(type: Test, group: "verification") {
+    tasks.register('integrationTests', Test) {
         dependsOn integrationTestDefault
         dependsOn integrationTestSharded
         dependsOn integrationTestShardedNonSsl
@@ -249,7 +246,7 @@ subprojects {
         }
     }
 
-    task composeDownAll {
+    tasks.register('composeDownAll') {
         dependsOn project.tasks.withType(ComposeDown)
     }
 }
