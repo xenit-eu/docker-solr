@@ -1,3 +1,8 @@
+ext {
+    // Absent until now, which left this the one xenit project that started a stack and then ran
+    // nothing, since the compose tasks run regardless of whether the test task is enabled.
+    tests = true
+}
 dependencies {
     telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
 }

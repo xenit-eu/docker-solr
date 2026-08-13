@@ -132,12 +132,7 @@ subprojects {
             systemProperty("keystore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.keystore")
             systemProperty("truststore", "${rootProject.projectDir}/src/main/resources/global/keystore/ssl.repo.client.truststore")
 
-            if (project.name.contains('enterprise') && project.name.contains('-2')) {
-                println("V2 logic applied to ${project.name}")
-                include(project.property('defaultIntegrationTest'), project.property('v2IntegrationTest'))
-            } else {
-                include(project.property('defaultIntegrationTest'))
-            }
+            include(project.property('defaultIntegrationTest'), project.property('backupIntegrationTest'))
         }
     }
 
@@ -148,6 +143,10 @@ subprojects {
     dockerCompose {
         environment.put 'ALFRESCO_IMAGE', upstreamProject.alfrescoimage
         environment.put 'INDEX', upstreamProject.solr.flavor
+
+        // composeDown deletes the containers, so a CI step can never reach `docker logs` afterwards.
+        // Capture while they run, under build/reports so the existing artifact upload picks it up.
+        captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs"))
 
         isRequiredBy(project.tasks.integrationTestXenitEndpoints)
 

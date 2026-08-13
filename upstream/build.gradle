@@ -188,12 +188,18 @@ subprojects {
         environment.put 'INDEX', project.solr.flavor
         environment.put 'use_ssl', true
 
+        // composeDown deletes the containers, so a CI step can never reach `docker logs` afterwards.
+        // Capture while they run, under build/reports so the existing artifact upload picks it up.
+        captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs/default"))
+
         isRequiredBy(project.tasks.integrationTestDefault)
 
         useComposeFiles = ["$composeDir/docker-compose-alfresco.yml", "$composeDir/docker-compose-solr.yml",
                            "$composeDir/docker-compose-db.yml", "$composeDir/docker-compose-localstack.yml"];
 
         sharded {
+            captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs/sharded"))
+
             isRequiredBy(project.tasks.integrationTestSharded)
 
             environment.put 'use_ssl', true
@@ -206,6 +212,8 @@ subprojects {
         }
 
         shardedNonSsl {
+            captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs/shardedNonSsl"))
+
             isRequiredBy(project.tasks.integrationTestShardedNonSsl)
 
             environment.put 'use_ssl', false
@@ -218,6 +226,8 @@ subprojects {
         }
 
         nonSsl {
+            captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs/nonSsl"))
+
             isRequiredBy(project.tasks.integrationTestNonSsl)
 
             environment.put 'use_ssl', false
@@ -227,6 +237,8 @@ subprojects {
         }
 
         mounts {
+            captureContainersOutputToFiles.set(project.layout.buildDirectory.dir("reports/container-logs/mounts"))
+
             isRequiredBy(project.tasks.integrationTestMounts)
 
             environment.put 'use_ssl', true

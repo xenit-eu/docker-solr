@@ -4,5 +4,21 @@
     "config:base",
     ":dependencyDashboard"
   ],
-  "pinDigests": true
+  "pinDigests": true,
+  "packageRules": [
+    {
+      "description": "Each upstream/solr6/* directory pins one deliberate ASS release; bumping it would silently change which version that image builds",
+      "matchPackageNames": [
+        "org.alfresco:alfresco-search-services"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "This project deliberately builds images for solr v6, prevent renovate from updating to v10.x",
+      "matchPackageNames": [
+        "org.apache.solr:solr-core"
+      ],
+      "enabled": false
+    }
+  ]
 }

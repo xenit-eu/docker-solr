@@ -18,27 +18,35 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.FileInputStream;
 import java.security.*;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
-import static java.lang.Thread.sleep;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// Without this the @Order annotations below do nothing, and the restore tests run before the
+// backup that is supposed to feed them.
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SolrBackupTest {
     static AmazonS3 s3Client;
     static RequestSpecification specShardedSolr1;
@@ -48,6 +56,7 @@ public class SolrBackupTest {
     static RequestSpecification restoreFixedSnapshotRequestSpec;
     static RequestSpecification restoreStatusRequestSpec;
     static RequestSpecification restoreRequestSpec;
+    static RequestSpecification coreStatusSpec;
     static String solr1;
     static String baseURIShardedSolr1;
     static String baseURISolr;
@@ -56,6 +65,10 @@ public class SolrBackupTest {
     static boolean use_ssl = false;
     static final String BUCKET = "bucket";
     static final String basePathSolrBackup = "solr/alfresco/replication";
+    // S3BackupRepository takes the bucket from S3_BUCKET_NAME and uses whatever follows s3:// as the
+    // key prefix verbatim, so spelling the bucket out here filed every snapshot under a stray
+    // "bucket/" key that nothing ever read back. Same triple-slash form as 93-restore-from-backup.sh.
+    static final String BACKUP_LOCATION = "s3:///opt/alfresco-search-services/data/solr6Backup/";
 
     private static KeyStore loadKeyStore(String path, char[] password, String storeType) {
         KeyStore keyStore;
@@ -203,7 +216,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -219,7 +232,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -237,7 +250,7 @@ public class SolrBackupTest {
                     .addParam("command", "backup")
                     .addParam("repository", "s3")
                     .addParam("numberToKeep", "2")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("wt", "json")
                     .build();
             backupDetailsRequestSpec = new RequestSpecBuilder()
@@ -253,7 +266,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", "my-alfresco-backup-20251006")
                     .build();
             restoreStatusRequestSpec = new RequestSpecBuilder()
@@ -264,13 +277,62 @@ public class SolrBackupTest {
                     .addParam("wt", "json")
                     .build();
         }
-        // wait for solr to track
-        long sleepTime = 30000;
+        coreStatusSpec = new RequestSpecBuilder()
+                .setBaseUri(solr1 == null ? baseURISolr : baseURIShardedSolr1)
+                .setPort(solr1 == null ? solrPort : portShardedSolr1)
+                .setBasePath(basePathSolr)
+                .addParam("action", "STATUS")
+                .addParam("wt", "json")
+                .build();
+
+        waitForIndexReady();
+    }
+
+    /**
+     * Backing up while the trackers are still indexing races lucene: SnapShooter lists the index
+     * files, then a merge deletes one before the S3 copy reaches it and the snapshot dies with a
+     * NoSuchFileException. Waiting for the document count to stop moving keeps the backup out of
+     * that window, and is usually quicker than the fixed 30s sleep this replaces.
+     */
+    private static void waitForIndexReady() {
+        AtomicInteger previous = new AtomicInteger(-1);
         try {
-            sleep(sleepTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            await().atMost(5, TimeUnit.MINUTES)
+                    .pollInterval(2, TimeUnit.SECONDS)
+                    // during() keeps this true for the whole window, so the count has to stay put
+                    // rather than merely match one earlier sample.
+                    .during(10, TimeUnit.SECONDS)
+                    // the cores are not necessarily serving yet
+                    .ignoreExceptions()
+                    .until(() -> {
+                        int docs = totalDocs();
+                        return docs > 0 && docs == previous.getAndSet(docs);
+                    });
+            System.out.println("Index settled at " + previous.get() + " docs");
+        } catch (ConditionTimeoutException e) {
+            // Not fatal: a failed backup now reports itself, which beats guessing here.
+            System.out.println("Index still moving after 5 minutes (last count " + previous.get()
+                    + "), backing up anyway");
         }
+    }
+
+    private static int totalDocs() {
+        Map<String, Map<String, Object>> status = given()
+                .spec(coreStatusSpec)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("status");
+        if (status == null) {
+            return 0;
+        }
+        return status.values().stream()
+                .map(core -> (Map<String, Object>) core.get("index"))
+                .filter(index -> index != null && index.get("numDocs") != null)
+                .mapToInt(index -> ((Number) index.get("numDocs")).intValue())
+                .sum();
     }
 
     @Test
@@ -288,6 +350,15 @@ public class SolrBackupTest {
                 .extract()
                 .body() // Extract the whole body
                 .asString(); // as a simple string
+        awaitRestoreSuccess();
+    }
+
+    /**
+     * Polls restorestatus until the restore succeeds. Solr does not retry a restore it has already
+     * given up on, so a "failed" status ends the wait immediately rather than burning the full
+     * timeout on a verdict that will not change.
+     */
+    private void awaitRestoreSuccess() {
         long startTime = System.currentTimeMillis();
         await().atMost(180, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS).until(() -> {
@@ -299,7 +370,13 @@ public class SolrBackupTest {
                             .statusCode(200)
                             .extract()
                             .path("restorestatus.status");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + "with status= " + status);
+                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + " with status= " + status);
+                    if ("failed".equals(status)) {
+                        throw new AssertionError(
+                                "Restore reported status=failed after "
+                                        + (System.currentTimeMillis() - startTime)
+                                        + "ms; check the solr container log for the cause");
+                    }
                     return "success".equals(status);
                 });
     }
@@ -327,7 +404,7 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", lastSnapshotName)
                     .build();
         } else {
@@ -337,12 +414,11 @@ public class SolrBackupTest {
                     .setBasePath(basePathSolrBackup)
                     .addParam("command", "restore")
                     .addParam("repository", "s3")
-                    .addParam("location", "s3://bucket/opt/alfresco-search-services/data/solr6Backup/")
+                    .addParam("location", BACKUP_LOCATION)
                     .addParam("name", lastSnapshotName)
                     .build();
         }
 
-        System.out.println("Restore triggered, will wait maximum 3 minutes");
         given()
                 .spec(restoreRequestSpec)
                 .when()
@@ -350,20 +426,7 @@ public class SolrBackupTest {
                 .then()
                 .statusCode(200);
         System.out.println("Restore triggered, will wait maximum 3 minutes");
-        long startTime = System.currentTimeMillis();
-        await().atMost(180, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS).until(() -> {
-                    String status = given()
-                            .spec(restoreStatusRequestSpec)
-                            .when()
-                            .get()
-                            .then()
-                            .statusCode(200)
-                            .extract()
-                            .path("restorestatus.status");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime) + "with status= " + status);
-                    return "success".equals(status);
-                });
+        awaitRestoreSuccess();
     }
     @Test
     @Order(1)
@@ -415,6 +478,9 @@ public class SolrBackupTest {
         return matcher.find() ? matcher.group(1) : null;
     }
     private void triggerBackupAndWaitForCompletion(int count, RequestSpecification solrBackupRequestSpec) {
+        Map<String, Object> before = backupDetails();
+        Object previousSnapshot = before == null ? null : before.get("snapshotName");
+
         String status = given()
                 .spec(solrBackupRequestSpec)
                 .when()
@@ -429,17 +495,49 @@ public class SolrBackupTest {
         await().atMost(540, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .until(() -> {
-                    Object backup = given()
-                            .spec(backupDetailsRequestSpec)
-                            .when()
-                            .get()
-                            .then()
-                            .statusCode(200)
-                            .extract()
-                            .path("details.backup");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime));
-                    return backup != null;
+                    Map<String, Object> backup = backupDetails();
+                    if (backup == null) {
+                        return false;
+                    }
+                    Object snapshot = backup.get("snapshotName");
+                    Object backupStatus = backup.get("status");
+                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime)
+                            + " with status= " + backupStatus + " snapshot= " + snapshot);
+                    // details reports the most recent backup, which is still the previous one until
+                    // this trigger produces its own snapshot.
+                    if (previousSnapshot != null && previousSnapshot.equals(snapshot)) {
+                        return false;
+                    }
+                    if ("failed".equals(backupStatus)) {
+                        throw new AssertionError("Backup reported status=failed"
+                                + (backup.get("exception") == null ? "" : ": " + backup.get("exception"))
+                                + "; check the solr container log");
+                    }
+                    return "success".equals(backupStatus);
                 });
+    }
+
+    /**
+     * Solr serialises the backup details as a flat [key, value, key, value, ...] array, so the
+     * status is not reachable through a plain json path.
+     */
+    private Map<String, Object> backupDetails() {
+        List<Object> backup = given()
+                .spec(backupDetailsRequestSpec)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("details.backup");
+        if (backup == null) {
+            return null;
+        }
+        Map<String, Object> fields = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < backup.size(); i += 2) {
+            fields.put(String.valueOf(backup.get(i)), backup.get(i + 1));
+        }
+        return fields;
     }
 
     private static AmazonS3 createInternalClient(
