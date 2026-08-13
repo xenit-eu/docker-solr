@@ -1,5 +1,6 @@
 import com.avast.gradle.dockercompose.tasks.ComposeDown
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
+import eu.xenit.solr.gradle.DockerImageNaming
 
 subprojects {
     apply plugin: 'eu.xenit.docker'
@@ -53,12 +54,10 @@ subprojects {
         pull = false
     }
 
-    dockerFile {
-        dockerBuild {
-            def enterprise = upstreamProject.alfrescoimage.contains("enterprise")
-            repository = [calcRepository(upstreamProject.solr.flavor, enterprise, true)].get(0)
-            tags = calcTags(upstreamProject.solr.version)
-        }
+    dockerBuild {
+        def enterprise = upstreamProject.alfrescoimage.contains("enterprise")
+        repositories = [DockerImageNaming.repository(upstreamProject.solr.flavor, enterprise, true)]
+        tags = DockerImageNaming.tags(upstreamProject.solr.version)
     }
 
 
@@ -117,7 +116,7 @@ subprojects {
         }
     }
 
-    task integrationTestXenitEndpoints(type: Test, group: "verification") {
+    tasks.register('integrationTestXenitEndpoints', Test) {
         enabled = (project.hasProperty('tests') && project.tests)
         testClassesDirs = sourceSets.integrationTest.output.classesDirs
         classpath = sourceSets.integrationTest.runtimeClasspath
@@ -136,7 +135,7 @@ subprojects {
         }
     }
 
-    task integrationTests(type: Test, group: "verification") {
+    tasks.register('integrationTests', Test) {
         dependsOn integrationTestXenitEndpoints
     }
 
@@ -153,7 +152,7 @@ subprojects {
         useComposeFiles = composeFiles
     }
 
-    task composeDownAll {
+    tasks.register('composeDownAll') {
         dependsOn project.tasks.withType(ComposeDown)
     }
 }

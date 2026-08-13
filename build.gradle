@@ -1,40 +1,5 @@
 plugins {
-    id "eu.xenit.docker" version "5.5.1" apply false
-    id "be.vbgn.ci-detect" version "0.5.0"
-}
-
-import java.util.stream.Collectors
-
-def calcTags(version) {
-    def tags = [
-            "${version.major}.${version.minor}.${version.rev}".toString(),
-            "${version.major}.${version.minor}".toString()
-    ]
-
-    if (version.maint) {
-        tags += "${version.major}.${version.minor}.${version.rev}.${version.maint}".toString()
-    }
-    if (version.label) {
-        tags += "${version.major}.${version.minor}.${version.rev}.${version.label}".toString()
-        if (version.maint) {
-            tags += "${version.major}.${version.minor}.${version.rev}.${version.maint}.${version.label}".toString()
-        }
-    }
-    // For non-master/non-release builds, change the tags to contain branch and build number
-    def isTestBuild = ci.isCi() && ci.branch != "master" && ci.branch != "release"
-    if (isTestBuild) {
-        tags = tags.stream().map({ it + "-build-${ci.buildNumber}" }).collect(Collectors.toList());
-    }
-
-    return tags
-}
-
-def calcRepository(flavor, enterprise, customized) {
-    def repoName = (enterprise ? "docker.xenit.eu/alfresco-enterprise" : "docker.io/xenit")
-    if (customized)
-        return "${repoName}/alfresco-${flavor}-xenit"
-    else
-        return "${repoName}/alfresco-${flavor}"
+    id "eu.xenit.docker" version "${dockerPluginVersion}" apply false
 }
 
 subprojects {
