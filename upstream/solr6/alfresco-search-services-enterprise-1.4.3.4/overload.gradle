@@ -11,5 +11,5 @@ ext {
     tests = true
 }
 dependencies {
-    runtime group: 'org.alfresco', name: 'alfresco-search-services', version: '1.4.3.4', ext: 'zip'
+    runtime "org.alfresco:alfresco-search-services:1.4.3.4@zip"
 }

@@ -5,8 +5,8 @@ ext {
     composeFiles = ["$composeDir/docker-compose-alfresco.yml",
                     "$composeDir/docker-compose-solr.yml",
                     "$composeDir/docker-compose-localstack.yml",
-                    "$composeDir/docker-compose-db.yml"];
+                    "$composeDir/docker-compose-db.yml"]
 }
 dependencies {
-    telemetry group: 'eu.xenit.alfred.telemetry', name: 'alfred-telemetry-solr6', version: "${alfredTelemetryVersion}"
+    telemetry "eu.xenit.alfred.telemetry:alfred-telemetry-solr6:$alfredTelemetryVersion"
 }
