@@ -29,7 +29,9 @@ import java.io.FileInputStream;
 import java.security.*;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -425,6 +427,9 @@ public class SolrBackupTest {
         return matcher.find() ? matcher.group(1) : null;
     }
     private void triggerBackupAndWaitForCompletion(int count, RequestSpecification solrBackupRequestSpec) {
+        Map<String, Object> before = backupDetails();
+        Object previousSnapshot = before == null ? null : before.get("snapshotName");
+
         String status = given()
                 .spec(solrBackupRequestSpec)
                 .when()
@@ -439,17 +444,49 @@ public class SolrBackupTest {
         await().atMost(540, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .until(() -> {
-                    Object backup = given()
-                            .spec(backupDetailsRequestSpec)
-                            .when()
-                            .get()
-                            .then()
-                            .statusCode(200)
-                            .extract()
-                            .path("details.backup");
-                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime));
-                    return backup != null;
+                    Map<String, Object> backup = backupDetails();
+                    if (backup == null) {
+                        return false;
+                    }
+                    Object snapshot = backup.get("snapshotName");
+                    Object backupStatus = backup.get("status");
+                    System.out.println("elapsed = " + (System.currentTimeMillis() - startTime)
+                            + " with status= " + backupStatus + " snapshot= " + snapshot);
+                    // details reports the most recent backup, which is still the previous one until
+                    // this trigger produces its own snapshot.
+                    if (previousSnapshot != null && previousSnapshot.equals(snapshot)) {
+                        return false;
+                    }
+                    if ("failed".equals(backupStatus)) {
+                        throw new AssertionError("Backup reported status=failed"
+                                + (backup.get("exception") == null ? "" : ": " + backup.get("exception"))
+                                + "; check the solr container log");
+                    }
+                    return "success".equals(backupStatus);
                 });
+    }
+
+    /**
+     * Solr serialises the backup details as a flat [key, value, key, value, ...] array, so the
+     * status is not reachable through a plain json path.
+     */
+    private Map<String, Object> backupDetails() {
+        List<Object> backup = given()
+                .spec(backupDetailsRequestSpec)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("details.backup");
+        if (backup == null) {
+            return null;
+        }
+        Map<String, Object> fields = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < backup.size(); i += 2) {
+            fields.put(String.valueOf(backup.get(i)), backup.get(i + 1));
+        }
+        return fields;
     }
 
     private static AmazonS3 createInternalClient(
