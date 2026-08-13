@@ -12,6 +12,13 @@
         "org.alfresco:alfresco-search-services"
       ],
       "enabled": false
+    },
+    {
+      "description": "This project deliberately builds images for solr v6, prevent renovate from updating to v10.x",
+      "matchPackageNames": [
+        "org.apache.solr:solr-core"
+      ],
+      "enabled": false
     }
   ]
 }
