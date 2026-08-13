@@ -81,8 +81,6 @@ jobs:
         with:
           cache-read-only: false
       - name: Integration tests
-        env:
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         # Single Gradle invocation so the upstream image is built once and reused
         # by the xenit image. Tasks run sequentially, so the compose stacks (which
         # share fixed container names) never overlap.
@@ -132,9 +130,6 @@ jobs:
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         run: ./gradlew pushDockerImage -PincludeEnterprise=false
       - name: Publish private docker images
-        env:
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         run: ./gradlew pushDockerImage -PincludeCommunity=false
