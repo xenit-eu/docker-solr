@@ -19,7 +19,7 @@ function startRestore {
   echo "*************** Starting solr without tracking **************************"
   setOption enable.alfresco.tracking false "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
 
-  gosu "${user}" "${SOLR_INSTALL_HOME}/solr/bin/solr" start -m "${JAVA_XMX}" -p "${PORT}" -h "${SOLR_HOST}" -s "${SOLR_DIR_ROOT}" -a "${JAVA_OPTS}"
+  gosu "${SOLR_USER}" "${SOLR_INSTALL_HOME}/solr/bin/solr" start -m "${JAVA_XMX}" -p "${PORT}" -h "${SOLR_HOST}" -s "${SOLR_DIR_ROOT}" -a "${JAVA_OPTS}"
 
   if [ "$ALFRESCO_SSL" != "none" ] && [ "$ALFRESCO_SSL" != "secret" ]; then
     echo "*************** Waiting for solr to return 200 for /solr/alfresco/admin/ping **************************"
@@ -84,7 +84,7 @@ function startRestore {
   fi
 
   echo "*************** Stopping solr without tracking **************************"
-  gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr stop
+  gosu ${SOLR_USER} ${SOLR_INSTALL_HOME}/solr/bin/solr stop
   sleep 30
   setOption enable.alfresco.tracking true "${SOLR_DIR_ROOT}/alfresco/conf/solrcore.properties"
   echo "*************** Solr without tracking stopped **************************"
