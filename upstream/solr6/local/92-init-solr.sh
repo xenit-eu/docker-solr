@@ -7,32 +7,24 @@ set -e
 
 echo "Solr init start"
 
-SOLR_DATA_ROOT="$SOLR_INSTALL_HOME/data"
+# SOLR_DIR_ROOT, SOLR_DATA_ROOT, SOLR_HOST, PORT, JAVA_XMX, CORES_ALFRESCO, the SSL_*
+# settings and $SOLR_USER all come from solr-env.sh, sourced by 91-init-solr-env.sh.
+
 DIR_ROOT=${DIR_ROOT:-'/opt/alfresco-search-services/data'}
 SOLR_BACKUP_DIR=${SOLR_BACKUP_DIR:-'/opt/alfresco-search-services/data/solr6Backup'}
-SOLR_HOST=${SOLR_HOST:-'solr'}
 
 CORES_TO_TRACK=${CORES_TO_TRACK:-"alfresco;archive"}
 IFS=';' read -r -a DEFAULT_CORES <<<"$CORES_TO_TRACK"
-
-CORES_ALFRESCO=${CORES_ALFRESCO:-"alfresco"}
-IFS=';' read -r -a DEFAULT_CORES_ALFRESCO <<<"$CORES_ALFRESCO"
 
 TEMPLATE=${TEMPLATE:-'rerank'}
 
 ALFRESCO_SOLR_SUGGESTER_ENABLED=${ALFRESCO_SOLR_SUGGESTER_ENABLED:-'true'}
 ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED=${ALFRESCO_SOLR_FACETABLE_CATEGORIES_ENABLED:-'false'}
 
-JAVA_XMS=${JAVA_XMS:-'512M'}
-JAVA_XMX=${JAVA_XMX:-'2048M'}
-
 CONFIG_FILE_SOLR_START="$SOLR_INSTALL_HOME/solr.in.sh"
 
 CUSTOM_SCHEMA=${CUSTOM_SCHEMA:-'false'}
 CUSTOM_RESOURCES=${CUSTOM_RESOURCES:-'false'}
-
-SSL_TRUST_STORE=${SSL_TRUST_STORE:-'ssl.repo.client.truststore'}
-SSL_TRUST_STORE_PASSWORD=${SSL_TRUST_STORE_PASSWORD:-'kT9X6oe68t'}
 
 function setJavaOption {
   JAVA_OPTS="$JAVA_OPTS $2"
@@ -99,13 +91,12 @@ function createCoreStatically {
 }
 
 function createBackupDir {
-  user=solr
   backupDir="$1"
 
   echo "Creating Solr backup directory in $backupDir "
   mkdir -p "$backupDir"
-  if [[ $(stat -c %U "$backupDir") != "$user" ]]; then
-    chown -hR "$user":"$user" "$backupDir"
+  if [[ $(stat -c %U "$backupDir") != "$SOLR_USER" ]]; then
+    chown -hR "$SOLR_USER":"$SOLR_USER" "$backupDir"
   fi
 }
 
@@ -271,12 +262,14 @@ JAVA_OPTS="${JAVA_OPTS} -Djava.io.tmpdir=${SOLR_INSTALL_HOME}/temp"
 makeConfigs
 
 # fix permissions for whole data folder in case of mounts
-if [[ $(stat -c %U "${SOLR_DATA_ROOT}") != "$user" ]]; then
-  chown -R "$user":"$user" "${SOLR_DATA_ROOT}"
+if [[ $(stat -c %U "${SOLR_DATA_ROOT}") != "$SOLR_USER" ]]; then
+  chown -R "$SOLR_USER":"$SOLR_USER" "${SOLR_DATA_ROOT}"
 fi
 # fix permissions for config folders
-chown -R "$user":"$user" "${SOLR_DIR_ROOT}"
+chown -R "$SOLR_USER":"$SOLR_USER" "${SOLR_DIR_ROOT}"
 
-echo "exec gosu ${user} ${SOLR_INSTALL_HOME}/solr/bin/solr start -f -m ${JAVA_XMX} -p ${PORT} -h ${SOLR_HOST} -s ${SOLR_DIR_ROOT} -a \"${JAVA_OPTS}\"" >"${SOLR_INSTALL_HOME}/startup.sh"
+# startup.sh is baked into the image and runs as a child of the entrypoint, so JAVA_OPTS has
+# to be in the environment for it.
+export JAVA_OPTS
 
 echo "Solr init done"
