@@ -11,6 +11,30 @@ env:
     -Dorg.gradle.project.org.alfresco.maven.nexus.username=${{ secrets.ALFRESCO_NEXUS_USERNAME }} 
     -Dorg.gradle.project.org.alfresco.maven.nexus.password=${{ secrets.ALFRESCO_NEXUS_PASSWORD }}
 jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          # 11 compiles solr-backup itself, 21 its tests.
+          java-version: |
+            11
+            21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
+      - name: Unit tests
+        run: ./gradlew :solr-backup:test
+      - name: Upload Artifact
+        if: success() || failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: solr-backup-unit-test-result
+          path: solr-backup/build/reports
+          retention-days: 2
   integration-test:
     runs-on: ubuntu-latest
     strategy:
@@ -57,8 +81,6 @@ jobs:
         with:
           cache-read-only: false
       - name: Integration tests
-        env:
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         # Single Gradle invocation so the upstream image is built once and reused
         # by the xenit image. Tasks run sequentially, so the compose stacks (which
         # share fixed container names) never overlap.
@@ -79,7 +101,7 @@ jobs:
           path: /home/runner/work/**/build/reports
           retention-days: 2
   publish:
-    needs: [ integration-test ]
+    needs: [ unit-test, integration-test ]
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/heads/release') }}
     strategy:
@@ -108,9 +130,6 @@ jobs:
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         run: ./gradlew pushDockerImage -PincludeEnterprise=false
       - name: Publish private docker images
-        env:
-          VERSIONS_TO_BUILD: ${{ matrix.version }}
         run: ./gradlew pushDockerImage -PincludeCommunity=false

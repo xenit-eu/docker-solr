@@ -14,6 +14,18 @@ java {
     withSourcesJar()
 }
 
+// Only main lands in the images, so the unit tests can run on the same newer JDK as the
+// integration tests. JUnit 6 needs 17+, which the java 11 toolchain above can't resolve.
+def testJava = JavaLanguageVersion.of(integrationTestJavaVersion as Integer)
+
+tasks.named('compileTestJava') {
+    javaCompiler = javaToolchains.compilerFor { languageVersion = testJava }
+}
+
+tasks.named('test') {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = testJava }
+}
+
 
 dependencies {
     // compile against solr6 libraries
