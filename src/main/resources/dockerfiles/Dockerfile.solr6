@@ -40,7 +40,6 @@ RUN apt-get update && \
 	useradd solr -u 990 -g 990 -d ${SOLR_INSTALL_HOME} -s /bin/bash && \
 	sed -i "s/rootLogger=WARN, file, CONSOLE/rootLogger=WARN, CONSOLE/g" ${SOLR_INSTALL_HOME}/logs/log4j.properties && \
     sed -i "s/rootLogger=INFO, file, CONSOLE/rootLogger=ERROR, CONSOLE/" "$SOLR_INSTALL_HOME/logs/log4j.properties" && \
-	touch ${SOLR_INSTALL_HOME}/startup.sh && chmod +x ${SOLR_INSTALL_HOME}/startup.sh && \
 	mkdir -p ${SOLR_INSTALL_HOME}/temp && \
 	chown -hR solr ${SOLR_INSTALL_HOME} \
 # gosu
@@ -52,13 +51,11 @@ RUN apt-get update && \
     && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
     && chmod +x /usr/local/bin/gosu \
     && gosu nobody true \
-    && apt-get purge -y --auto-remove wget \
+    && apt-get purge -y --auto-remove wget
 
-# healthcheck
-    && touch ${SOLR_INSTALL_HOME}/healthcheck.sh \
-    && chmod +x ${SOLR_INSTALL_HOME}/healthcheck.sh
-
-COPY 	91-healthcheck.sh 92-init-solr.sh /docker-entrypoint.d/
+COPY 	91-init-solr-env.sh 92-init-solr.sh /docker-entrypoint.d/
+COPY 	solr-env.sh healthcheck.sh startup.sh ${SOLR_INSTALL_HOME}/
+RUN 	chmod +x ${SOLR_INSTALL_HOME}/healthcheck.sh ${SOLR_INSTALL_HOME}/startup.sh
 
 # add the keystore
 ADD keystore ${SOLR_INSTALL_HOME}/solrhome/keystore
