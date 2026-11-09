@@ -2,6 +2,8 @@ import com.avast.gradle.dockercompose.tasks.ComposeDown
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile.From
 import eu.xenit.solr.gradle.DockerImageNaming
 
+import java.util.zip.ZipFile
+
 subprojects {
     apply plugin: 'eu.xenit.docker'
     apply plugin: 'eu.xenit.docker-compose'
@@ -10,7 +12,6 @@ subprojects {
         telemetry
         loggings
         actuators
-        backup
     }
 
     ext {
@@ -86,10 +87,21 @@ subprojects {
         // actuators
         smartCopy files(configurations.actuators.files), "/opt/alfresco-search-services/solrhome/lib/"
         // backup
-        smartCopy files(configurations.backup.files), "/opt/alfresco-search-services/solrhome/lib/"
         smartCopy("${project.projectDir}/../local/93-restore-from-backup.sh", "/docker-entrypoint.d/")
         smartCopy("${project.projectDir}/../local/solr.xml", "/opt/alfresco-search-services/solrhome/solr.xml")
         smartCopy configurations.backupJar, "/opt/alfresco-search-services/solrhome/lib/"
+
+        // smartCopy has staged every jar under <destDir>/copyFile by now. Two solr-backup versions in the
+        // image would let Solr load either one depending on classpath order (DOCKER-470).
+        doLast {
+            def backupClass = 'eu/xenit/solr/backup/s3/S3BackupRepository.class'
+            def providers = fileTree(destDir.get().dir('copyFile').asFile) { include '**/*.jar' }.findAll { jar ->
+                new ZipFile(jar).withCloseable { it.getEntry(backupClass) != null }
+            }
+            if (providers.size() != 1) {
+                throw new GradleException("Expected exactly one staged jar providing ${backupClass}, found ${providers.size()}: ${providers*.name}")
+            }
+        }
 
         if (project.solrSourceSetOverride != null) {
             doFirst {
