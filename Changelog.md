@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Security
+* [DSNYMANAGE-142] Distrust the emSign roots and Sectigo's AAA Certificate Services in the Solr 6 OS and Java trust stores.
+
 ### Added
 * [NYS2AWS-172] manually fixed rollback bug in Solr6 2.0.9.1 community edition [#116]
 * [NYS2AWS-156] added support for customizing the `log4j.properties` file based upon `LOG_`-prefixed environmental variables. [#113]

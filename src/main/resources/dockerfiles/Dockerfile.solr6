@@ -53,6 +53,36 @@ RUN apt-get update && \
     && gosu nobody true \
     && apt-get purge -y --auto-remove wget
 
+# DSNYMANAGE-142: distrust emSign and the AAA root that cross-signed the compromised intermediates.
+# Deselect the certificates so regenerating the system CA bundle keeps them out.
+RUN set -eu; \
+    sed -Ei 's#^(mozilla/(emSign_[^/]*|Comodo_AAA_Services_root|AAA_Certificate_Services)\.crt)$#!\1#' /etc/ca-certificates.conf; \
+    update-ca-certificates --fresh >/dev/null; \
+    bundle="$(openssl crl2pkcs7 -nocrl -certfile /etc/ssl/certs/ca-certificates.crt)"; \
+    subjects="$(printf '%s\n' "$bundle" | openssl pkcs7 -print_certs -noout)"; \
+    if printf '%s\n' "$subjects" | grep -qiE '^subject=.*(emSign|eMudhra|AAA Certificate Services)'; then \
+        echo 'A distrusted root is still in the OS trust store.' >&2; \
+        exit 1; \
+    fi
+
+# The base image ships a separate Java trust store.
+RUN set -eu; \
+    export LC_ALL=C; \
+    distrusted='emsign|emudhra|aaa certificate services'; \
+    cacerts="$(keytool -list -v -cacerts -storepass changeit)"; \
+    aliases="$(printf '%s\n' "$cacerts" | awk -v pattern="$distrusted" \
+        '/^Alias name: / { alias = substr($0, 13) } /^Owner: / && tolower($0) ~ pattern { print alias }')"; \
+    if [ -n "$aliases" ]; then \
+        printf '%s\n' "$aliases" | while IFS= read -r alias; do \
+            keytool -delete -cacerts -storepass changeit -alias "$alias"; \
+        done; \
+    fi; \
+    cacerts="$(keytool -list -v -cacerts -storepass changeit)"; \
+    if printf '%s\n' "$cacerts" | grep -qiE "^Owner: .*($distrusted)"; then \
+        echo 'A distrusted root is still in the Java trust store.' >&2; \
+        exit 1; \
+    fi
+
 COPY 	91-init-solr-env.sh 92-init-solr.sh /docker-entrypoint.d/
 COPY 	solr-env.sh healthcheck.sh startup.sh ${SOLR_INSTALL_HOME}/
 RUN 	chmod +x ${SOLR_INSTALL_HOME}/healthcheck.sh ${SOLR_INSTALL_HOME}/startup.sh
